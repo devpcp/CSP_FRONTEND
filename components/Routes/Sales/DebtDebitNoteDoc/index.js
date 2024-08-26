@@ -598,7 +598,7 @@ const DebtorDoc = ({ docTypeId }) => {
                 }
             } else {
                 form.setFieldsValue({
-                    customer_type: "person",
+                    customer_type: "business",
                     doc_type_id: docTypeId,
                     tax_type_id: "8c73e506-31b5-44c7-a21b-3819bb712321",
                     user_list: [],
@@ -1261,7 +1261,6 @@ const DebtorDoc = ({ docTypeId }) => {
             }
 
             form.setFieldsValue({
-                // price_discount_bill: !!price_discount_bill ? price_discount_bill.toFixed(2) : null,
                 price_sub_total,
                 // price_discount_total,
                 // price_amount_total,
@@ -1343,6 +1342,8 @@ const DebtorDoc = ({ docTypeId }) => {
         />
     );
     /*end invoices button*/
+
+    const MatchRound = (value) => (Math.round(+value * 100) / 100).toFixed(2)
 
     return (
         <>

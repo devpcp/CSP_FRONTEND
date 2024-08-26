@@ -189,16 +189,6 @@ const ComponentsRoutesDocumentDebtLists = ({ onFinish, calculateResult, mode }) 
                                             }}
                                         >
                                             <AddNewCodeAndName callBack={callBackNewCodeAndName} index={index} />
-                                            {/* <Input
-                                      placeholder="Please enter item"
-                                      ref={inputRefCode}
-                                      value={newCode}
-                                      onChange={onChangeNewCode}
-                                      onKeyDown={(e) => e.stopPropagation()}
-                                    />
-                                    <Button type="text" icon={<PlusOutlined />} onClick={(value)=>addItemCode(value ,index)}>
-                                        เพิ่มรหัสใหม่
-                                    </Button> */}
                                         </Space>
                                     </>
                                 )}
@@ -255,16 +245,6 @@ const ComponentsRoutesDocumentDebtLists = ({ onFinish, calculateResult, mode }) 
                                             }}
                                         >
                                             <AddNewCodeAndName callBack={callBackNewCodeAndName} index={index} />
-                                            {/* <Input
-                                      placeholder="Please enter item"
-                                      ref={inputRefName}
-                                      value={newName}
-                                      onChange={onChangeNewName}
-                                      onKeyDown={(e) => e.stopPropagation()}
-                                    />
-                                    <Button type="text" icon={<PlusOutlined />} onClick={addItemName}>
-                                        เพิ่มรหัสใหม่
-                                    </Button> */}
                                         </Space>
                                     </>
                                 )}
@@ -360,22 +340,6 @@ const ComponentsRoutesDocumentDebtLists = ({ onFinish, calculateResult, mode }) 
             )
             // render: (text, record) => <div style={{ textAlign: "end" }}>{RoundingNumber(Number(record.price_grand_total)) ?? "-"}</div>,
         },
-        // {
-        //     title: () => GetIntlMessages("ยอดชำระ"),
-        //     dataIndex: '',
-        //     key: '',
-        //     width: "10%",
-        //     align: "center",
-        //     render: (text, record, index) => (
-        //         <>
-        //             <Form.Item rules={[RegexMultiPattern(), RegexMultiPattern("4", GetIntlMessages("ตัวเลขเท่านั้น"))]} key={`debt-price-paid-total-${index}`} style={{ margin: 0 }} name={["shopCustomerDebtLists", index, "debt_price_paid_total"]}>
-        //                 <InputNumber disabled={mode === "view"} stringMode style={{ width: "100%" }} formatter={(value) => !!value && value.length > 0 ? `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',') : ""}
-        //                     parser={(value) => value.replace(/\$\s?|(,*)/g, '')} onBlur={() => calculateResult()} />
-        //             </Form.Item>
-        //         </>
-        //     )
-        //     // render: (text, record) => <div style={{ textAlign: "end" }}>{RoundingNumber(Number(record.price_grand_total)) ?? "-"}</div>,
-        // },
         {
             title: () => GetIntlMessages("จัดการ"),
             dataIndex: '',
@@ -460,21 +424,6 @@ const ComponentsRoutesDocumentDebtLists = ({ onFinish, calculateResult, mode }) 
                         break;
                 }
             }
-            // const { shop_stock_id, shop_stock_list } = record
-            // if (!!shop_stock_list && isArray(shop_stock_list) && shop_stock_list.length > 0) {
-            //     const find = shop_stock_list.find(where => where.id === shop_stock_id)
-            //     if (isPlainObject(find)) {
-            //         switch (type) {
-            //             case "master_path_code_id":
-            //                 return find.ShopProduct.Product[type]
-            //             case "product_name":
-            //                 return find.ShopProduct.Product[type][locale.locale]
-
-            //             default:
-            //                 break;
-            //         }
-            //     }
-            // }
         } catch (error) {
             // console.log('error displayData :>> ', error);
         }
@@ -812,6 +761,8 @@ const ComponentsRoutesDocumentDebtLists = ({ onFinish, calculateResult, mode }) 
             // console.log('error :>> ', error);
         }
     }
+
+    const MatchRound = (value) => (Math.round(+value * 100) / 100).toFixed(2)
 
     return (
         <>

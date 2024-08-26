@@ -811,6 +811,8 @@ const ComponentsRoutesDocumentDebtLists = ({ onFinish, calculateResult, mode }) 
         }
     }
 
+    const MatchRound = (value) => (Math.round(+value * 100) / 100).toFixed(2)
+    
     return (
         <>
             <Row justify={"end"} hidden={mode === "view"}>

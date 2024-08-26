@@ -482,6 +482,8 @@ const ComponentsRoutesModalAddDocumentDebtLists = ({ textButton, style, docTypeI
                     return RoundingNumber(record.price_grand_total)
                 case 'CCN':
                     return mode === 'add' ? RoundingNumber(Number(-record.price_grand_total)) : RoundingNumber(Number(-record.price_grand_total))
+                case 'NCN':
+                    return mode === 'add' ? RoundingNumber(Number(-record.price_grand_total)) : RoundingNumber(Number(record.price_grand_total))
                 default:
                     return RoundingNumber(Number(get(record, `ShopServiceOrderDoc.${type}`, 0))) ?? RoundingNumber(Number(record[type])) ?? "-"
 
@@ -651,21 +653,24 @@ const ComponentsRoutesModalAddDocumentDebtLists = ({ textButton, style, docTypeI
     const handleAddDebtDoc = (value) => {
         try {
             console.log('value :>> ', value);
+
             const { shopCustomerDebtLists, customer_type } = form.getFieldValue();
             const isObj = isPlainObject(shopCustomerDebtLists?.find(where => where.id === value.id));
-
+            if (value.code_id_prefix === 'NCN') {
+                value.doc_type_code_id = 'NCN'
+            }
             let arr, debt_price_paid_total = 0,
                 newValue = {
                     ...value,
-                    doc_date: value.doc_type_code_id === "CCN" || value.doc_type_code_id === "CDN" ? value.doc_date : value.ShopTaxInvoiceDocs !== null ? moment(value.ShopTaxInvoiceDocs[0].inv_doc_date) : value.ShopTemporaryDeliveryOrderDocs[0].doc_date,
+                    doc_date: value.doc_type_code_id === "CCN" || value.doc_type_code_id === "CDN" || value.doc_type_code_id === "NCN" ? value.doc_date : value.ShopTaxInvoiceDocs !== null && value.ShopTaxInvoiceDocs.length !== 0 ? moment(value.ShopTaxInvoiceDocs[0].inv_doc_date) : value.ShopTemporaryDeliveryOrderDocs[0].doc_date,
                     debt_due_date: moment(value.doc_date).add(Number(value[customer_type === "person" ? "ShopPersonalCustomer" : "ShopBusinessCustomer"]?.["other_details"]?.credit_term) ?? 0, 'd') ?? null
                 };
-            if (value.doc_type_code_id === 'CCN') {
+            if (value.doc_type_code_id === 'CCN' || value.doc_type_code_id === 'NCN') {
                 newValue = { ...newValue, debt_price_paid_total: -Number(value.price_grand_total), debt_price_amount_left: -Number(value.price_grand_total), debt_price_amount: -Number(value.price_grand_total) }
             } else if (value.doc_type_code_id === 'CDN') {
                 newValue = { ...newValue, debt_price_paid_total: Number(value.price_grand_total), debt_price_amount_left: Number(value.price_grand_total), debt_price_amount: Number(value.price_grand_total) }
             }
-            console.log("aa")
+            // console.log("aa")
 
             if (isObj) {
                 Swal.fire('ท่านเลือกเอกสารนี้ไปแล้ว !!', '', 'warning')
@@ -677,7 +682,7 @@ const ComponentsRoutesModalAddDocumentDebtLists = ({ textButton, style, docTypeI
                     arr = [newValue]
                 }
             }
-            console.log("arr", arr)
+            // console.log("arr", arr)
             debt_price_paid_total = arr.reduce((prevValue, currentValue) => prevValue + Number(currentValue?.debt_price_amount_left ?? 0), 0)
             form.setFieldsValue({ shopCustomerDebtLists: arr, debt_price_paid_total })
         } catch (error) {

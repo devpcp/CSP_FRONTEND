@@ -465,7 +465,7 @@ const ComponentsRoutesModalAddDocumentDebtLists = ({ textButton, style, docTypeI
                                     {/* <Input/> */}
                                     <InputNumber stringMode style={{ width: "100%" }} formatter={(value) => !!value && value.length > 0 ? `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',') : ""}
                                         parser={(value) => value.replace(/\$\s?|(,*)/g, '')} onBlur={() => calculateResult()}
-                                        disabled={record.doc_type_code_id === 'CCN' || record.doc_type_code_id === 'CDN'}
+                                        disabled={record.doc_type_code_id === 'CCN' || record.doc_type_code_id === 'CDN' || record.doc_type_code_id === 'NCN'}
                                     />
                                 </Form.Item>
                                 : null
@@ -537,7 +537,8 @@ const ComponentsRoutesModalAddDocumentDebtLists = ({ textButton, style, docTypeI
                     return RoundingNumber(record.price_grand_total)
                 case 'CCN':
                     return mode === 'add' ? RoundingNumber(Number(-record.price_grand_total)) : RoundingNumber(Number(record.price_grand_total))
-
+                case 'NCN':
+                    return mode === 'add' ? RoundingNumber(Number(-record.price_grand_total)) : RoundingNumber(Number(record.price_grand_total))
                 default:
                     return RoundingNumber(Number(get(record, `ShopServiceOrderDoc.${type}`, 0))) ?? RoundingNumber(Number(record[type])) ?? "-"
 
@@ -664,7 +665,9 @@ const ComponentsRoutesModalAddDocumentDebtLists = ({ textButton, style, docTypeI
             const { shopCustomerDebtLists, customer_type } = form.getFieldValue();
             const isObj = isPlainObject(shopCustomerDebtLists?.find(where => where.id === value.id));
             const checkSalesDoc = shopCustomerDebtLists?.find(where => where.doc_type_id === '80235edb-53e0-43ee-9b3b-768e3e2e7777' || where.doc_type_id === '7ef3840f-3d7f-43de-89ea-dce215703c16')
-
+            if (value.code_id_prefix === 'NCN') {
+                value.doc_type_code_id = 'NCN'
+            }
             let arr,
                 newValue = {
                     ...value,
@@ -682,11 +685,12 @@ const ComponentsRoutesModalAddDocumentDebtLists = ({ textButton, style, docTypeI
                         ) ?? null,
                 };
 
-            if (value.doc_type_code_id === 'CCN') {
+            if (value.doc_type_code_id === 'CCN' || value.doc_type_code_id === 'NCN') {
                 newValue = { ...newValue, debt_price_paid_total: -Number(value.price_grand_total), debt_price_amount_left: -Number(value.price_grand_total), debt_price_amount: -Number(value.price_grand_total) }
             } else if (value.doc_type_code_id === 'CDN') {
                 newValue = { ...newValue, debt_price_paid_total: Number(value.price_grand_total), debt_price_amount_left: Number(value.price_grand_total), debt_price_amount: Number(value.price_grand_total) }
             }
+
 
             if (isObj) {
                 Swal.fire('ท่านเลือกเอกสารนี้ไปแล้ว !!', '', 'warning')

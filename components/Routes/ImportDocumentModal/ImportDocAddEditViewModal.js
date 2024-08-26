@@ -1639,8 +1639,6 @@ const ImportDocAddEditViewModal = ({ isAllBranch = false, shopArr = null, form, 
 
     const callBackProductPick = async (value, index) => {
         try {
-            console.log("value", value)
-            console.log("index", index)
             // const { product_list } = form.getFieldValue()
             // product_list[index].productId_list = [value]
             // form.setFieldsValue({ product_list })
@@ -1666,6 +1664,14 @@ const ImportDocAddEditViewModal = ({ isAllBranch = false, shopArr = null, form, 
 
     const MatchRound = (value) => (Math.round(+value * 100) / 100).toFixed(2)
 
+    const onChangeDiscountAll = (index, value) => {
+        const { product_list } = form.getFieldValue()
+        let amount = product_list[index].amount_all
+        let discount = MatchRound(value / amount)
+        product_list[index].price_discount = discount
+        form.setFieldsValue({ product_list })
+        calculateTable(index, "price_discount", discount)
+    }
     return (
         <>
             {pageId == "a6c9c754-0239-4abe-ad6b-8cdb6b81dcc0" && mode != "add"
@@ -1854,7 +1860,7 @@ const ImportDocAddEditViewModal = ({ isAllBranch = false, shopArr = null, form, 
                                                                     {...tailformItemLayout}
                                                                     validateTrigger={['onChange', 'onBlur']}
                                                                     name={[field.name, "price_discount_percent"]}
-                                                                    label={GetIntlMessages("ส่วนลดเปอร์เซ็น")}
+                                                                    label={GetIntlMessages("ส่วนลดต่อรายการ (เปอร์เซ็น)")}
                                                                     rules={[{ pattern: /^(?!,$)[\d,.]+$/, message: GetIntlMessages("only-number") }]}
                                                                 >
                                                                     <InputNumber
@@ -1862,7 +1868,7 @@ const ImportDocAddEditViewModal = ({ isAllBranch = false, shopArr = null, form, 
                                                                         min={0}
                                                                         max={100}
                                                                         status
-                                                                        placeholder={"ส่วนลด %"}
+                                                                        placeholder={"ส่วนลดต่อรายการ (เปอร์เซ็น)"}
                                                                         formatter={(value) => addComma(value)}
                                                                         parser={(value) => value.replace(/\$\s?|(,*)/g, '')}
                                                                         onBlur={(value) => isFunction(calculateTable) ? calculateTable(index, "price_discount_percent", value.target.value) : null}
@@ -1887,7 +1893,7 @@ const ImportDocAddEditViewModal = ({ isAllBranch = false, shopArr = null, form, 
                                                                     {...tailformItemLayout}
                                                                     validateTrigger={['onChange', 'onBlur']}
                                                                     name={[field.name, "price_discount"]}
-                                                                    label={GetIntlMessages("ส่วนลดบาท")}
+                                                                    label={GetIntlMessages("ส่วนลดต่อรายการ (บาท)")}
                                                                     rules={[{ pattern: /^(?!,$)[\d,.]+$/, message: GetIntlMessages("only-number") }]}
                                                                 >
                                                                     <InputNumber
@@ -1895,7 +1901,7 @@ const ImportDocAddEditViewModal = ({ isAllBranch = false, shopArr = null, form, 
                                                                         min={0}
                                                                         max={form.getFieldValue().product_list[index].price}
                                                                         status
-                                                                        placeholder={"ส่วนลดบาท"}
+                                                                        placeholder={"ส่วนลดต่อรายการ (บาท)"}
                                                                         formatter={(value) => addComma(value)}
                                                                         parser={(value) => value.replace(/\$\s?|(,*)/g, '')}
                                                                         onBlur={(value) => isFunction(calculateTable) ? calculateTable(index, "price_discount", value.target.value) : null}
@@ -1954,9 +1960,10 @@ const ImportDocAddEditViewModal = ({ isAllBranch = false, shopArr = null, form, 
                                                                     fieldKey={[field.fieldKey, "total_price"]}
                                                                     label={GetIntlMessages("ราคารวม")}
                                                                 >
-                                                                    <InputNumber style={{ width: "100%" }} className='ant-input-number-after-addon-20-percent' stringMode step={"1"} placeholder="0" disabled addonAfter="บาท" readOnly
+                                                                    <InputNumber style={{ width: "100%" }} disabled className='ant-input-number-after-addon-20-percent' stringMode step={"1"} placeholder="0" addonAfter="บาท"
                                                                         formatter={(value) => addComma(value)}
                                                                         parser={(value) => value.replace(/\$\s?|(,*)/g, '')}
+                                                                        onChange={(value) => onChangeUnit(index, value)}
                                                                     />
                                                                 </Form.Item>
 
@@ -1973,7 +1980,7 @@ const ImportDocAddEditViewModal = ({ isAllBranch = false, shopArr = null, form, 
                                                                     name={[field.name, "price_discount_total"]}
                                                                     label={GetIntlMessages(`ลดเงินรวมทั้งสิ้น`)}
                                                                 >
-                                                                    <InputNumber style={{ width: "100%" }} className='ant-input-number-after-addon-20-percent' stringMode step={"1"} placeholder="0" disabled addonAfter="บาท" readOnly
+                                                                    <InputNumber style={{ width: "100%" }} className='ant-input-number-after-addon-20-percent' stringMode step={"1"} placeholder="0" onBlur={(value) => onChangeDiscountAll(index, value.target.value)} addonAfter="บาท"
                                                                         formatter={(value) => addComma(value)}
                                                                         parser={(value) => value.replace(/\$\s?|(,*)/g, '')}
                                                                     />
@@ -2117,9 +2124,8 @@ const ImportDocAddEditViewModal = ({ isAllBranch = false, shopArr = null, form, 
                                     style={{ width: "100%" }}
                                     className='price-align'
                                     stringMode
-                                    placeholder="0"
                                     disabled
-                                    readOnly
+                                    placeholder="0"
                                     formatter={(value) => addComma(value)}
                                     parser={(value) => value.replace(/\$\s?|(,*)/g, '')}
                                 />

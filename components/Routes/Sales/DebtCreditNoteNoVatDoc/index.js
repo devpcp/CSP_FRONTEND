@@ -363,6 +363,20 @@ const DebtorDoc = ({ docTypeId, title = null, callBack, }) => {
                 render: (text, record) => !!text ? <div style={{ textAlign: "end" }}>{RoundingNumber((text)) ?? "-"}</div> : "-",
             },
             {
+                title: () => GetIntlMessages("จำนวนเงินรวมทั้งสิ้น"),
+                dataIndex: 'is_it_used',
+                key: 'is_it_used',
+                width: 150,
+                align: "center",
+                render: (text, record) => {
+                    if (text) {
+                        return <label style={{ color: "green" }}>ใช้แล้ว</label>
+                    } else {
+                        return <label style={{ color: "red" }}>ยังไม่ได้ใช้</label>
+                    }
+                }
+            },
+            {
                 title: () => GetIntlMessages("พิมพ์"),
                 dataIndex: 'details',
                 key: 'details',
@@ -370,7 +384,7 @@ const DebtorDoc = ({ docTypeId, title = null, callBack, }) => {
                 align: "center",
                 render: (text, record) => {
                     return (
-                        <PrintOut textButton={"พิมพ์ใบสั่งซ่อม"} documentId={record?.id} style={{ width: "100%", display: "flex", justifyContent: "center", alignItems: "center", overflow: "hidden" }} morePrintOuts={configButtonPrintOutFromTable} docTypeId={docTypeId}/>
+                        <PrintOut textButton={"พิมพ์ใบสั่งซ่อม"} documentId={record?.id} style={{ width: "100%", display: "flex", justifyContent: "center", alignItems: "center", overflow: "hidden" }} morePrintOuts={configButtonPrintOutFromTable} docTypeId={docTypeId} />
                     )
                 },
             },
@@ -1187,6 +1201,8 @@ const DebtorDoc = ({ docTypeId, title = null, callBack, }) => {
     );
     /*end invoices button*/
 
+    const MatchRound = (value) => (Math.round(+value * 100) / 100).toFixed(2)
+
     return (
         <>
             <div className="head-line-text" hidden={title === null ? true : false}>{title}</div>
@@ -1215,7 +1231,7 @@ const DebtorDoc = ({ docTypeId, title = null, callBack, }) => {
                                             <Button loading={loading} onClick={() => handleOk()} style={{ width: "100%" }} type='primary'>{GetIntlMessages("บันทึก")}</Button>
                                         </Col>
                                         <Col xxl={4} lg={6} md={12} xs={24} hidden={configModal.mode === "add" || form.getFieldValue("status") != 1}>
-                                            <PrintOut textButton={GetIntlMessages("print")} loading={loading} documentId={form.getFieldValue("id")} style={{ width: "100%", display: "flex", justifyContent: "center", alignItems: "center", padding: 10 }} morePrintOuts={configButtonPrintOutFromTable} docTypeId={docTypeId}/>
+                                            <PrintOut textButton={GetIntlMessages("print")} loading={loading} documentId={form.getFieldValue("id")} style={{ width: "100%", display: "flex", justifyContent: "center", alignItems: "center", padding: 10 }} morePrintOuts={configButtonPrintOutFromTable} docTypeId={docTypeId} />
                                         </Col>
                                         {/* <Col xxl={4} lg={6} md={12} xs={24} hidden={configModal.mode !== "edit" || form.getFieldValue("is_draft") === false || form.getFieldValue("status") != 1} >
                                             <Button loading={loading} onClick={() => confirmOrder()} type="text" style={{ width: "100%", borderColor: "black", overflow: "hidden", padding: 0 }}>{GetIntlMessages("ยืนยันใบส่งสินค้าชั่วคราว")}</Button>

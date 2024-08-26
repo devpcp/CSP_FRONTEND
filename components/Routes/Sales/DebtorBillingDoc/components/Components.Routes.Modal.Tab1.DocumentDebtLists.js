@@ -155,8 +155,8 @@ const ComponentsRoutesDocumentDebtLists = ({ onFinish, calculateResult, mode }) 
                     if (!!record?.ShopCustomerDebtDebitNoteDoc) {
                         return get(record, `ShopCustomerDebtDebitNoteDoc.code_id`, record?.code_id)
                     }
-                    if (!!record?.details.meta_data.ShopCustomerDebtCreditNoteDocT2) {
-                        return get(record.details.meta_data, `ShopCustomerDebtCreditNoteDocT2.code_id`, record?.code_id)
+                    if (!!record?.ShopCustomerDebtCreditNoteDocT2) {
+                        return get(record, `ShopCustomerDebtCreditNoteDocT2.code_id`, record?.code_id)
                     }
                 }
             }
@@ -297,9 +297,23 @@ const ComponentsRoutesDocumentDebtLists = ({ onFinish, calculateResult, mode }) 
             if (!!record.doc_type_code_id) {
                 switch (record.doc_type_code_id) {
                     case 'CDN':
-                        return RoundingNumber(Number(record.price_grand_total))
-                    case 'CCN':
                         return RoundingNumber(Number(-record.price_grand_total))
+                    case 'CCN':
+                        switch (type) {
+                            case "debt_price_amount":
+                            case "debt_price_amount_left":
+                                return `${mode !== "add" ? `-${RoundingNumber(-record.price_grand_total)}` : `${RoundingNumber(-record.price_grand_total)}`}`
+                            default:
+                                return RoundingNumber(Number(-record.price_grand_total))
+                        }
+                    case 'NCN':
+                        switch (type) {
+                            case "debt_price_amount":
+                            case "debt_price_amount_left":
+                                return `${mode !== "add" ? `-${RoundingNumber(-record.price_grand_total)}` : `${RoundingNumber(-record.price_grand_total)}`}`
+                            default:
+                                return RoundingNumber(Number(-record.price_grand_total))
+                        }
                     default:
                         return RoundingNumber(Number(get(record, `ShopServiceOrderDoc.${type}`, 0))) ?? RoundingNumber(Number(record[type])) ?? "-"
                 }
@@ -313,7 +327,7 @@ const ComponentsRoutesDocumentDebtLists = ({ onFinish, calculateResult, mode }) 
                 if (!!record?.ShopCustomerDebtDebitNoteDoc) {
                     return RoundingNumber(Number(record.price_grand_total))
                 }
-                if (!!record?.details.meta_data.ShopCustomerDebtCreditNoteDocT2) {
+                if (!!record?.ShopCustomerDebtCreditNoteDocT2) {
                     return RoundingNumber(Number(-record.price_grand_total))
                 }
             }

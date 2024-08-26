@@ -363,6 +363,20 @@ const DebtorDoc = ({ docTypeId, title = null, callBack, }) => {
                 render: (text, record) => !!text ? <div style={{ textAlign: "end" }}>{RoundingNumber((text)) ?? "-"}</div> : "-",
             },
             {
+                title: () => GetIntlMessages("จำนวนเงินรวมทั้งสิ้น"),
+                dataIndex: 'is_it_used',
+                key: 'is_it_used',
+                width: 150,
+                align: "center",
+                render: (text, record) => {
+                    if (text) {
+                        return <label style={{ color: "green" }}>ใช้แล้ว</label>
+                    } else {
+                        return <label style={{ color: "red" }}>ยังไม่ได้ใช้</label>
+                    }
+                }
+            },
+            {
                 title: () => GetIntlMessages("พิมพ์"),
                 dataIndex: 'details',
                 key: 'details',
@@ -1186,6 +1200,8 @@ const DebtorDoc = ({ docTypeId, title = null, callBack, }) => {
         />
     );
     /*end invoices button*/
+
+    const MatchRound = (value) => (Math.round(+value * 100) / 100).toFixed(2)
 
     return (
         <>

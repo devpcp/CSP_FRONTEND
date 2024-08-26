@@ -237,13 +237,14 @@ const FormTemporaryDeliveryOrderDoc = ({ mode, calculateResult, disabledWhenDeli
                     const { debtor_billing_list, customer_id } = form.getFieldValue(), find = debtor_billing_list.find(where => where.id === value);
 
                     if (!!find && isPlainObject(find)) {
-
+                        console.log("find", find)
                         debtor_billing_list = debtor_billing_list.map(e => (delete e.display_value, { ...e }))
                         const { ShopCustomerDebtBillingNoteLists, doc_date, debt_due_date, status, bus_customer_id, per_customer_id, ShopBusinessCustomer, ShopPersonalCustomer, details } = find,
                             customer_type = !!bus_customer_id ? "business" : "person",
                             customer_list = customer_type === "business" ? [ShopBusinessCustomer].map(e => ({ ...e, customer_full_name: `${e.customer_name[locale.locale] ?? "-"}` })) :
                                 [ShopPersonalCustomer].map(e => ({ ...e, customer_full_name: `${e.customer_name.first_name[locale.locale] ?? "-"} ${e.customer_name.last_name[locale.locale] ?? ""}` }));
                         ShopCustomerDebtBillingNoteLists.map((e, i) => {
+                            // console.log("easy",e)
                             if (e.ShopCustomerDebtCreditNoteDoc !== null) {
                                 e.debt_price_amount_left = e.debt_price_amount < 0 ? e.debt_price_amount : -e.debt_price_amount
                                 e.debt_price_paid_total = -e.debt_price_amount
@@ -251,6 +252,11 @@ const FormTemporaryDeliveryOrderDoc = ({ mode, calculateResult, disabledWhenDeli
                             }
                             if (e.ShopCustomerDebtDebitNoteDoc !== null) {
                                 e.doc_type_code_id = "CDN"
+                            }
+                            if (e.ShopCustomerDebtCreditNoteDocT2 !== null) {
+                                e.debt_price_amount_left = e.debt_price_amount < 0 ? e.debt_price_amount : -e.debt_price_amount
+                                e.debt_price_paid_total = -e.debt_price_amount
+                                e.doc_type_code_id = "NCN"
                             }
                             e.debt_price_paid_adjust = 0
                             e.debt_price_paid_total = e.debt_price_amount_left
@@ -287,7 +293,6 @@ const FormTemporaryDeliveryOrderDoc = ({ mode, calculateResult, disabledWhenDeli
                             customer_credit_debt_approval_balance: other_details?.credit_limit === "NaN" || other_details?.credit_limit === null || other_details?.credit_limit === undefined ? 0 : other_details?.credit_limit,
                             customer_credit_debt_payment_period: other_details?.credit_term === "NaN" || other_details?.credit_term === null || other_details?.credit_limit === undefined ? 0 : other_details?.credit_term,
                         }
-                        console.log("find", find)
                         form.setFieldsValue(model)
                     }
                     calculateResult()
@@ -426,7 +431,7 @@ const FormTemporaryDeliveryOrderDoc = ({ mode, calculateResult, disabledWhenDeli
                         name="customer_type"
                         label="ประเภทลูกค้า"
                     >
-                        <Select onChange={(value) => handleChangeCustomerType(value)} style={{ width: "100%" }} showArrow={false}>
+                        <Select disabled={mode === "view"} onChange={(value) => handleChangeCustomerType(value)} style={{ width: "100%" }} showArrow={false}>
                             <Select.Option value="person">บุคคลธรรมดา</Select.Option>
                             <Select.Option value="business">ธุรกิจ</Select.Option>
                         </Select>
@@ -479,42 +484,6 @@ const FormTemporaryDeliveryOrderDoc = ({ mode, calculateResult, disabledWhenDeli
                         <DatePicker style={{ width: "100%" }} format={"DD/MM/YYYY"} disabled={mode === "view"} />
                     </Form.Item>
                 </Col>
-                {/* <Col lg={8} md={12} sm={12} xs={24}>
-                    <Form.Item
-                        name=""
-                        label="ประเภทชำระ"
-                    >
-                        <Input/>
-                    </Form.Item>
-                </Col> */}
-
-                {/* <Form.Item name="customer_phone_list" hidden /> */}
-
-                {/* <Col lg={8} md={12} sm={12} xs={24}>
-                    <Form.Item
-                        name="user_id"
-                        label="ผู้ทำเอกสาร"
-                        rules={[
-                            {
-                                required: true,
-                                message: "กรุณาเลือกผู้ทำเอกสาร"
-                            }
-                        ]}
-                    >
-                        <Select
-                            showSearch
-                            showArrow={false}
-                            filterOption={false}
-                            style={{ width: "100%" }}
-                            disabled={mode === "view" || disabledWhenDeliveryDocActive}
-                            loading={loadingEasySearch}
-                        >
-
-                            {userList.map((e, index) => <Select.Option value={e.id} key={`user-list-${index}`}>{e.name}</Select.Option>)}
-                            
-                        </Select>
-                    </Form.Item>
-                </Col> */}
 
                 <Col lg={8} md={12} sm={12} xs={24} hidden>
                     <Form.Item

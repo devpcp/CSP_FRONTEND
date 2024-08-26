@@ -243,7 +243,7 @@ const DebtorDoc = ({ docTypeId }) => {
         button: {
             create: true,
             name: {
-                add: GetIntlMessages(`สร้าง${`ใบรับชำระลูกหนี้` ?? documentTypesName}`),
+                add: GetIntlMessages(`สร้าง${`` ?? documentTypesName}`),
             },
             download: false,
             import: false,
@@ -650,14 +650,16 @@ const DebtorDoc = ({ docTypeId }) => {
                 }
 
             }
+          
             const model = {
                 ...value,
                 ref_doc: details.ref_doc ?? null,
                 debtor_billing_list,
                 shopCustomerDebtLists: ShopCustomerDebtLists.map(e => {
+                    
                     return {
                         ...e,
-                        doc_type_code_id: e.ShopCustomerDebtCreditNoteDoc?.doc_type_code_id ?? e.ShopCustomerDebtDebitNoteDoc?.doc_type_code_id
+                        doc_type_code_id: e.ShopCustomerDebtCreditNoteDoc !== null ? e.ShopCustomerDebtCreditNoteDoc?.doc_type_code_id : e.ShopCustomerDebtCreditNoteDocT2 !== null ? e.ShopCustomerDebtCreditNoteDocT2?.code_id_prefix : e.ShopCustomerDebtDebitNoteDoc?.doc_type_code_id
                     }
                 }),
                 doc_date: moment(value.doc_date),
@@ -668,7 +670,7 @@ const DebtorDoc = ({ docTypeId }) => {
                 remark: details.remark ?? null,
                 remark_inside: details.remark_inside ?? null,
             }
-
+          
             if (isArray(filterPayment) && filterPayment.length > 0) {
 
                 function getPaymentData(arr, key) {
@@ -731,7 +733,7 @@ const DebtorDoc = ({ docTypeId }) => {
                 }
                 model.filterPayment = filterPayment
             }
-            // console.log("modelmodel", model)
+            console.log("modelmodel", model)
             form.setFieldsValue({ ...model })
             calculateResult();
             setCarPreLoading(false)
@@ -903,7 +905,7 @@ const DebtorDoc = ({ docTypeId }) => {
                 debt_due_date: moment(debt_due_date).format("YYYY-MM-DD"),
                 [customer_type === "person" ? "per_customer_id" : "bus_customer_id"]: customer_id,
                 customer_credit_debt_unpaid_balance: !!customer_credit_debt_unpaid_balance ? MatchRound(customer_credit_debt_unpaid_balance) : '0.00',
-                customer_credit_debt_current_balance: !!customer_credit_debt_current_balance ? MatchRound(customer_credit_debt_current_Fbalance) : '0.00',
+                customer_credit_debt_current_balance: !!customer_credit_debt_current_balance ? MatchRound(customer_credit_debt_current_balance) : '0.00',
                 customer_credit_debt_approval_balance: !!customer_credit_debt_approval_balance ? MatchRound(customer_credit_debt_approval_balance) : '0.00',
                 customer_credit_debt_payment_period,
                 debt_price_paid_total: !!debt_price_paid_total ? MatchRound(debt_price_paid_total) : "0.00",
@@ -944,7 +946,8 @@ const DebtorDoc = ({ docTypeId }) => {
                                 ? "shop_customer_debt_cn_doc_id"
                                 : e.doc_type_code_id === "CDN"
                                     ? "shop_customer_debt_dn_doc_id"
-                                    : e.shop_customer_debt_cn_doc_id_t2 ? "shop_customer_debt_cn_doc_id_t2"
+                                    : e.doc_type_code_id === "NCN" ?
+                                        "shop_customer_debt_cn_doc_id_t2"
                                         : "shop_service_order_doc_id"]: docValue(e, index)
                         };
 
@@ -978,7 +981,7 @@ const DebtorDoc = ({ docTypeId }) => {
                                 result = e?.shop_customer_debt_cn_doc_id
                             } else if (!!e.ShopCustomerDebtDebitNoteDoc) {
                                 result = e?.shop_customer_debt_dn_doc_id
-                            } else if (e.shop_customer_debt_cn_doc_id_t2) {
+                            } else if (e.ShopCustomerDebtCreditNoteDocT2) {
                                 result = e?.shop_customer_debt_cn_doc_id_t2
                             } else {
                                 result = e?.shop_service_order_doc_id
@@ -995,7 +998,7 @@ const DebtorDoc = ({ docTypeId }) => {
                                 result = e?.shop_customer_debt_cn_doc_id
                             } else if (!!e.ShopCustomerDebtDebitNoteDoc) {
                                 result = e?.shop_customer_debt_dn_doc_id
-                            } else if (e.shop_customer_debt_cn_doc_id_t2) {
+                            } else if (e.ShopCustomerDebtCreditNoteDocT2) {
                                 result = e?.shop_customer_debt_cn_doc_id_t2
                             } else {
                                 result = e?.shop_service_order_doc_id
@@ -1010,7 +1013,7 @@ const DebtorDoc = ({ docTypeId }) => {
                                 result = e?.shop_customer_debt_cn_doc_id
                             } else if (!!e.ShopCustomerDebtDebitNoteDoc) {
                                 result = e?.shop_customer_debt_dn_doc_id
-                            } else if (e.shop_customer_debt_cn_doc_id_t2) {
+                            } else if (e.ShopCustomerDebtCreditNoteDocT2) {
                                 result = e?.shop_customer_debt_cn_doc_id_t2
                             } else {
                                 result = e?.shop_service_order_doc_id
@@ -1205,7 +1208,7 @@ const DebtorDoc = ({ docTypeId }) => {
     if (form.getFieldValue("ref_doc") !== "") {
         DebtorBillingPrintButton = { print_out_DebtorBilling: { status: true, name: "ใบวางบิล/ใบแจ้งหนี้", price_use: 1, documentIdPerbutton: form.getFieldValue("ref_doc") } }
     }
-    
+
     const MatchRound = (value) => (Math.round(+value * 100) / 100).toFixed(2)
 
     return (

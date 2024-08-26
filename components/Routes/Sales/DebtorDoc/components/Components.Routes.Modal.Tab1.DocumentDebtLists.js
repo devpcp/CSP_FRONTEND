@@ -151,6 +151,9 @@ const ComponentsRoutesDocumentDebtLists = ({ onFinish, calculateResult, mode }) 
                     if (!!record?.ShopCustomerDebtDebitNoteDoc) {
                         return get(record, `ShopCustomerDebtDebitNoteDoc.code_id`, record?.code_id)
                     }
+                    if (!!record?.ShopCustomerDebtCreditNoteDocT2) {
+                        return get(record, `ShopCustomerDebtCreditNoteDocT2.code_id`, record?.code_id)
+                    }
                 }
             }
         },
@@ -241,13 +244,13 @@ const ComponentsRoutesDocumentDebtLists = ({ onFinish, calculateResult, mode }) 
                 </div>
         },
         {
-            title: () => <Button onClick={copyToDebtPricePaidTotalAll} >{">>"}</Button>,
+            title: () => <Button onClick={copyToDebtPricePaidTotalAll} disabled={mode === "view"}>{">>"}</Button>,
             dataIndex: '',
             key: '',
             width: 50,
             align: "center",
             render: (text, record, index) =>
-                <Button onClick={() => copyToDebtPricePaidTotal(record, index)}>
+                <Button onClick={() => copyToDebtPricePaidTotal(record, index)} disabled={mode === "view"}>
                     {">"}
                 </Button>
         },
@@ -275,7 +278,7 @@ const ComponentsRoutesDocumentDebtLists = ({ onFinish, calculateResult, mode }) 
                         style={{ margin: 0 }}
                         name={["shopCustomerDebtLists", index, "debt_price_paid_adjust"]}>
                         <InputNumber
-                            disabled={mode === "view" || record.doc_type_code_id === 'CCN' || record.doc_type_code_id === 'CDN'}
+                            disabled={mode === "view" || record.doc_type_code_id === 'CCN' || record.doc_type_code_id === 'CDN' || record.doc_type_code_id === 'NCN'}
                             stringMode
                             style={{ width: "100%" }}
                             formatter={(value) => !!value && value.length > 0 ? `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',') : ""}
@@ -298,7 +301,7 @@ const ComponentsRoutesDocumentDebtLists = ({ onFinish, calculateResult, mode }) 
                 <>
                     <Form.Item rules={[RegexMultiPattern(), RegexMultiPattern("2", GetIntlMessages("ตัวเลขเท่านั้น"))]} key={`debt-price-paid-total-${index}`} style={{ margin: 0 }} name={["shopCustomerDebtLists", index, "debt_price_paid_total"]}>
                         <InputNumber
-                            disabled={mode === "view" || record.doc_type_code_id === 'CCN' || record.doc_type_code_id === 'CDN'}
+                            disabled={mode === "view" || record.doc_type_code_id === 'CCN' || record.doc_type_code_id === 'CDN' || record.doc_type_code_id === 'NCN'}
                             stringMode
                             style={{ width: "100%" }}
                             formatter={(value) => !!value && value.length > 0 ? `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',') : ""}
@@ -346,15 +349,42 @@ const ComponentsRoutesDocumentDebtLists = ({ onFinish, calculateResult, mode }) 
 
     const extractDataDocSaleType = (record, type) => {
         try {
+            console.log("record", record)
             if (!!record.doc_type_code_id) {
                 switch (record.doc_type_code_id) {
                     case 'CDN':
                         return RoundingNumber(Number(record.price_grand_total))
                     case 'CCN':
-                        if (!!form.getFieldValue("ref_doc")) {
-                            return RoundingNumber(Number(-record.price_grand_total))
-                        } else {
-                            return RoundingNumber(Number(-record.price_grand_total))
+                        switch (type) {
+                            case "debt_price_amount":
+                            case "debt_price_amount_left":
+                                if (!!form.getFieldValue("ref_doc")) {
+                                    return `${mode !== "add" ? `-${RoundingNumber(-record.price_grand_total)}` : `${RoundingNumber(-record.price_grand_total)}`}`
+                                } else {
+                                    return `${mode !== "add" ? `-${RoundingNumber(-record.price_grand_total)}` : `${RoundingNumber(-record.price_grand_total)}`}`
+                                }
+                            default:
+                                if (!!form.getFieldValue("ref_doc")) {
+                                    return RoundingNumber(Number(-record.price_grand_total))
+                                } else {
+                                    return RoundingNumber(Number(-record.price_grand_total))
+                                }
+                        }
+                    case 'NCN':
+                        switch (type) {
+                            case "debt_price_amount":
+                            case "debt_price_amount_left":
+                                if (!!form.getFieldValue("ref_doc")) {
+                                    return `${mode !== "add" ? `-${RoundingNumber(-record.price_grand_total)}` : `${RoundingNumber(-record.price_grand_total)}`}`
+                                } else {
+                                    return `${mode !== "add" ? `-${RoundingNumber(-record.price_grand_total)}` : `${RoundingNumber(-record.price_grand_total)}`}`
+                                }
+                            default:
+                                if (!!form.getFieldValue("ref_doc")) {
+                                    return RoundingNumber(Number(-record.price_grand_total))
+                                } else {
+                                    return RoundingNumber(Number(-record.price_grand_total))
+                                }
                         }
                     default:
                         return RoundingNumber(Number(get(record, `ShopServiceOrderDoc.${type}`, 0))) ?? RoundingNumber(Number(record[type])) ?? "-"
@@ -369,7 +399,7 @@ const ComponentsRoutesDocumentDebtLists = ({ onFinish, calculateResult, mode }) 
                 if (!!record?.ShopCustomerDebtDebitNoteDoc) {
                     return RoundingNumber(Number(record.price_grand_total))
                 }
-                if (!!record?.shop_customer_debt_cn_doc_id_t2) {
+                if (!!record?.ShopCustomerDebtCreditNoteDocT2) {
                     return RoundingNumber(Number(-record.price_grand_total))
                 }
             }

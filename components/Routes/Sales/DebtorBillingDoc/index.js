@@ -239,7 +239,7 @@ const DebtorBillingDoc = ({ docTypeId }) => {
         button: {
             create: true,
             name: {
-                add: GetIntlMessages(`สร้าง${`ใบวางบิลลูกหนี้` ?? documentTypesName}`),
+                add: GetIntlMessages(`สร้าง${`` ?? documentTypesName}`),
             },
             download: false,
             import: false,
@@ -361,8 +361,8 @@ const DebtorBillingDoc = ({ docTypeId }) => {
             },
             {
                 title: () => GetIntlMessages("จำนวนเงินรวมทั้งสิ้น"),
-                dataIndex: 'price_grand_total',
-                key: 'price_grand_total',
+                dataIndex: 'debt_price_paid_total',
+                key: 'debt_price_paid_total',
                 width: 150,
                 align: "center",
                 render: (text, record) => !!text ? <div style={{ textAlign: "end" }}>{RoundingNumber((text)) ?? "-"}</div> : "-",
@@ -879,28 +879,6 @@ const DebtorBillingDoc = ({ docTypeId }) => {
         }
     }
 
-    const resultSubmit = (res) => {
-        try {
-            if (res.data.status === "success") {
-                Swal.fire({
-                    title: GetIntlMessages("บันทึกใบวางบิลลูกหนี้สำเร็จ !!"),
-                    icon: "success",
-                    timer: 2000
-                })
-                handleCancel()
-
-            } else {
-                Swal.fire({
-                    title: GetIntlMessages("บันทึกไม่สำเร็จ..กรุณาติดต่อเจ้าหน้าที่ !!"),
-                    text: res.data.data,
-                    icon: "error",
-                })
-            }
-        } catch (error) {
-
-        }
-    }
-
     const onFinishFailed = () => {
         try {
 
@@ -929,51 +907,8 @@ const DebtorBillingDoc = ({ docTypeId }) => {
                 debt_price_paid_total = summaryFromTable(shopCustomerDebtLists, "debt_price_paid_total")
             }
 
-            // if (!!list_service_product && isArray(list_service_product) && list_service_product.length > 0) {
-            //     price_discount_total = Number(summaryFromTable(list_service_product, "price_discount", true)) + (Number(price_discount_bill) ?? 0)
-            //     price_sub_total = summaryFromTable(list_service_product, "price_grand_total", false) + (price_discount_total - price_discount_bill)
-            //     price_amount_total = price_sub_total - price_discount_total
-
-            //     const { detail } = taxTypes.find(where => where.id === tax_type_id)
-
-            //     let taxRate = 0
-            //     if (Number(detail.tax_rate_percent) > 9) {
-            //         taxRate = Number(`1${detail.tax_rate_percent}`)
-            //     } else {
-            //         taxRate = Number(`10${detail.tax_rate_percent}`)
-            //     }
-
-            //     switch (tax_type_id) {
-            //         case "8c73e506-31b5-44c7-a21b-3819bb712321":
-            //             // setCheckTaxId(tax_type_id)
-
-            //             if (isPlainObject(detail)) {
-            //                 price_vat = ((price_amount_total * ((Number(detail.tax_rate_percent)) / taxRate)))
-            //                 price_before_vat = price_amount_total - price_vat
-            //                 // net_total = (total_before_vat - tailgate_discount) + vat
-            //                 price_grand_total = price_amount_total
-            //             }
-            //             break;
-
-            //         default:
-            //             // setCheckTaxId("")
-            //             if (isPlainObject(detail)) {
-            //                 price_vat = ((price_amount_total * ((Number(detail.tax_rate_percent)) / 100)))
-            //                 price_grand_total = price_amount_total + price_vat
-            //             }
-            //             break;
-            //     }
-            // }
 
             form.setFieldsValue({
-                // price_discount_bill: !!price_discount_bill ? price_discount_bill.toFixed(2) : null,
-                // price_sub_total,
-                // price_discount_total,
-                // price_amount_total,
-                // price_vat,
-                // price_before_vat,
-                // price_grand_total,
-                // price_discount_before_pay,
                 debt_price_paid_total
             })
         } catch (error) {
@@ -1029,24 +964,6 @@ const DebtorBillingDoc = ({ docTypeId }) => {
         }
     }
 
-    const menu = (
-        <Menu
-            items={[
-                {
-                    key: '1',
-                    label: 'อย่างย่อ',
-                    disabled: taxInvoiceTypeAbbActive,
-                    onClick: handleMenuClick,
-                },
-                {
-                    key: '2',
-                    label: 'เต็มรูป',
-                    onClick: handleMenuClick,
-                    disabled: taxInvoiceTypeInvActive,
-                },
-            ]}
-        />
-    );
     /*end invoices button*/
     const MatchRound = (value) => (Math.round(+value * 100) / 100).toFixed(2)
 

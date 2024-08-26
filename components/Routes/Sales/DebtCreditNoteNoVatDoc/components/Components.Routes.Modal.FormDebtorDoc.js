@@ -170,7 +170,7 @@ const FormTemporaryDeliveryOrderDoc = ({ mode, calculateResult, disabledWhenDeli
                     if (!!value) {
                         const { doc_sales_type } = form.getFieldValue();
 
-                        const { data } = await API.get(`/shopTemporaryDeliveryOrderDoc/all?search=${value}&is_draft=not_draft&status=active&ShopServiceOrderDoc__is_draft=not_draft&page=1&limit=50&sort=doc_date&order=desc&ShopServiceOrderDoc__doc_sales_type=${doc_sales_type}`)
+                        const { data } = await API.get(`/shopTemporaryDeliveryOrderDoc/all?search=${value}&is_draft=not_draft&status=active&ShopServiceOrderDoc__is_draft=not_draft&page=1&limit=25&sort=doc_date&order=desc&ShopServiceOrderDoc__doc_sales_type=${doc_sales_type}`)
 
                         if (data.status === "success") {
 
@@ -268,7 +268,7 @@ const FormTemporaryDeliveryOrderDoc = ({ mode, calculateResult, disabledWhenDeli
                                 ? `/${customer_type === "person"
                                     ? `shopPersonalCustomers`
                                     : `shopBusinessCustomers`
-                                }/all?search=${value}&limit=9999999&page=1&sort=customer_name.th&order=asc&status=active`
+                                }/all?search=${value}&limit=25&page=1&sort=customer_name.th&order=asc&status=active`
                                 : `/${customer_type === "person"
                                     ? `shopPersonalCustomers`
                                     : `shopBusinessCustomers`
@@ -334,6 +334,36 @@ const FormTemporaryDeliveryOrderDoc = ({ mode, calculateResult, disabledWhenDeli
         }
     }
 
+    const onReset = () => {
+        try {
+            form.setFieldsValue({
+                customer_type: "business",
+                user_list: [],
+                user_id: authUser.id,
+                status: "1",
+                doc_date: moment(new Date()),
+                isModalVisible: true,
+                list_service_product: [],
+                vehicles_customers_list: [],
+                customer_list: [],
+                customer_phone_list: [],
+                easy_search_list: [],
+                debtor_billing_list: [],
+                easy_search: null,
+                customer_id: null,
+                customer_credit_debt_unpaid_balance: null,
+                customer_credit_debt_current_balance: null,
+                customer_credit_debt_approval_balance: null,
+                customer_credit_debt_payment_period: null,
+                ref_doc: null
+            })
+        } catch (error) {
+            console.log("onReset error : ", error)
+        }
+    }
+
+    const MatchRound = (value) => (Math.round(+value * 100) / 100).toFixed(2)
+
     return (
         <>
             <Row gutter={[20, 0]}>
@@ -347,7 +377,6 @@ const FormTemporaryDeliveryOrderDoc = ({ mode, calculateResult, disabledWhenDeli
                                 label={GetIntlMessages("ค้นหาเอกสาร")}
                                 labelAlign='left'
                                 colon={false}
-                                wrapperCol={{ xl: { span: 24 }, lg: { span: 16 }, md: { span: 18 }, xs: { span: 24 } }}
                             // extra={GetIntlMessages("พิมพ์อย่างน้อย 1 ตัวเพื่อค้นหา")}
                             >
                                 <Select
@@ -372,7 +401,7 @@ const FormTemporaryDeliveryOrderDoc = ({ mode, calculateResult, disabledWhenDeli
                         </Col>
                         <Col lg={8} md={12} sm={12} xs={24}>
                             <Form.Item name="doc_sales_type" label={"ประเภทการค้นหา"} style={{ width: "100%" }}>
-                                <Select style={{ width: "100%" }}>
+                                <Select style={{ width: "100%" }} disabled={mode === "view"} onChange={() => onReset()}>
                                     <Select.Option key={`doc-sale-type-1`} value={1}>{`ใบสั่งซ่อม`}</Select.Option>
                                     <Select.Option key={`doc-sale-type-2`} value={2}>{`ใบสั่งขาย`}</Select.Option>
                                 </Select>
@@ -439,36 +468,16 @@ const FormTemporaryDeliveryOrderDoc = ({ mode, calculateResult, disabledWhenDeli
                             )}
                         >
                             {getArrValue("customer_list").map(e => <Select.Option value={e.id} key={`customer-id-${e.id}`}>{e.customer_full_name}</Select.Option>)}
-                            {/* {easySearchList.map(e => <Select.Option value={e.id} key={`easy-search-${e.id}`}>{e.value_name}</Select.Option>)} */}
 
                         </Select>
                     </Form.Item>
                 </Col>
 
-                {/* <Col lg={8} md={12} sm={12} xs={24} hidden>
-                    <Form.Item
-                        name="customer_phone"
-                        label="เบอร์โทรศัพท์"
-                        shouldUpdate={(prevValue, currentValue) => prevValue.customer_phone !== currentValue.customer_phone}
-                    >
-                        <Select
-                            showSearch
-                            showArrow={false}
-                            // filterOption={false}
-                            style={{ width: "100%" }}
-                            disabled={mode === "view"}
-                            loading={loadingEasySearch}
-                        >
-                            {!!customerPhoneList ? customerPhoneList.map((e, index) => (<Select.Option value={e} key={`customer-phone-${index}`}>{e}</Select.Option>)) ?? [] : []}
-                        </Select>
-                    </Form.Item>
-                </Col> */}
 
                 <Col lg={8} md={12} sm={12} xs={24}>
                     <Form.Item
                         name="customer_credit_debt_unpaid_balance"
                         label="จำนวนเงินค้างชำระ"
-                    // rules={[RegexMultiPattern("4", GetIntlMessages("ตัวเลขเท่านั้น"))]}
                     >
                         <InputNumber disabled stringMode step={"0.01"} min={0} precision={2} style={{ width: "100%" }} formatter={(value) => !!value && value.length > 0 ? `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',') : ""}
                             parser={(value) => value.replace(/\$\s?|(,*)/g, '')} />
@@ -479,51 +488,29 @@ const FormTemporaryDeliveryOrderDoc = ({ mode, calculateResult, disabledWhenDeli
                 <Col lg={8} md={12} sm={12} xs={24}>
                     <Form.Item
                         name="ref_doc"
-                        // label="เลขที่อ้างอิง"
                         label={
                             <>
                                 {`เลขที่อ้างอิง`}
-                                {/* < Tooltip
-                                    title="ชื่อลูกค้าจะอ้างอิงจากใบวางบิล..ท่านสามารถเปลี่ยนชื่อลูกค้าได้หลังจากเลือกใบวางบิล">
-                                    <InfoCircleTwoTone twoToneColor={"#04afe3"} style={{ padding: "0px 1px 0px 4px " }} />
-                                </Tooltip> */}
                             </>
                         }
-                    // rules={[RegexMultiPattern()]}
                     >
                         <Select
                             showSearch
                             showArrow={false}
-                            // onSearch={(value) => debounceSearchDebtorBilling(value, "search")}
-                            // onSelect={(value) => handleSearchDebtorBilling(value, "search")}
                             filterOption={false}
-                            // notFoundContent={loadingCustomer ? "กำลังค้นหาข้อมูล...กรุณารอสักครู่..." : "ไม่พบข้อมูล..กรุณาพิมพ์เพื่อค้นหา"}
-                            // loading={loadingCustomer}
                             disabled
                         >
                             {
                                 getArrValue("ref_doc_list").map((e, index) => (<Select.Option key={`ref-doc-${index}`} value={e.id}>{e?.code_id}</Select.Option>))
                             }
                         </Select>
-                        {/* <Input disabled={mode === "view"}/> */}
                     </Form.Item>
                 </Col>
 
-
-                {/* <Col lg={8} md={12} sm={12} xs={24}>
-                    <Form.Item
-                        name=""
-                        label="วันที่อ้างอิง"
-                        
-                    >
-                        <DatePicker style={{ width: "100%" }} format={"YYYY-MM-DD"} disabled={mode === "view"} />
-                    </Form.Item>
-                </Col> */}
                 <Col lg={8} md={12} sm={12} xs={24}>
                     <Form.Item
                         name="customer_credit_debt_current_balance"
                         label="วงเงินเครดิตคงเหลือ"
-                    // rules={[RegexMultiPattern("4", GetIntlMessages("ตัวเลขเท่านั้น"))]}
                     >
                         <InputNumber disabled stringMode step={"0.01"} min={0} precision={2} style={{ width: "100%" }} formatter={(value) => !!value && value.length > 0 ? `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',') : ""}
                             parser={(value) => value.replace(/\$\s?|(,*)/g, '')} />
@@ -555,42 +542,6 @@ const FormTemporaryDeliveryOrderDoc = ({ mode, calculateResult, disabledWhenDeli
                         <DatePicker style={{ width: "100%" }} format={"YYYY-MM-DD"} disabled={mode === "view"} />
                     </Form.Item>
                 </Col>
-                {/* <Col lg={8} md={12} sm={12} xs={24}>
-                    <Form.Item
-                        name=""
-                        label="ประเภทชำระ"
-                    >
-                        <Input/>
-                    </Form.Item>
-                </Col> */}
-
-                {/* <Form.Item name="customer_phone_list" hidden /> */}
-
-                {/* <Col lg={8} md={12} sm={12} xs={24}>
-                    <Form.Item
-                        name="user_id"
-                        label="ผู้ทำเอกสาร"
-                        rules={[
-                            {
-                                required: true,
-                                message: "กรุณาเลือกผู้ทำเอกสาร"
-                            }
-                        ]}
-                    >
-                        <Select
-                            showSearch
-                            showArrow={false}
-                            filterOption={false}
-                            style={{ width: "100%" }}
-                            disabled={mode === "view" || disabledWhenDeliveryDocActive}
-                            loading={loadingEasySearch}
-                        >
-
-                            {userList.map((e, index) => <Select.Option value={e.id} key={`user-list-${index}`}>{e.name}</Select.Option>)}
-                            
-                        </Select>
-                    </Form.Item>
-                </Col> */}
 
                 <Col lg={8} md={12} sm={12} xs={24}>
                     <Form.Item
