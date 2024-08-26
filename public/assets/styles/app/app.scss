@@ -1,0 +1,32 @@
+/*
+ *
+ *   GULL - React Bootstrap Admin Template
+ *
+ *
+*/
+
+@import "~perfect-scrollbar/css/perfect-scrollbar.css";
+@import "~react-datetime/css/react-datetime.css";
+@import "~rc-slider/assets/index.css";
+@import "~rc-tooltip/assets/bootstrap.css";
+
+@import "../vendor/react-quill/quill.bubble.css";
+@import "../vendor/react-quill/quill.snow.css";
+@import "../vendor/react-quill/quill.core.css";
+@import "../vendor/react-vis/style.css";
+@import "../vendor/ladda/ladda.min.css";
+
+@import "~react-notifications/lib/notifications.css";
+@import "~react-image-crop/dist/ReactCrop.css";
+@import "~react-datepicker/dist/react-datepicker.css";
+@import "~@fullcalendar/timegrid/main.css";
+@import "~@fullcalendar/daygrid/main.css";
+
+@import "../iconsmind/iconsmind.css";
+@import "variables";
+
+// @import 'themes/lite-blue';
+@import "themes/lite-purple.scss";
+@import "../vendor/bootstrap/bootstrap.scss";
+@import "bootstrap-rtl.scss";
+@import "globals/globals";

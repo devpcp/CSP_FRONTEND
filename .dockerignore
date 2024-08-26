@@ -1,0 +1,6 @@
+Ci
+node_modules
+.gitignore
+yarn.lock
+README.md
+.dockerignore
