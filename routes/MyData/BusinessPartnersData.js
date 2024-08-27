@@ -580,9 +580,19 @@ const BusinessPartnersData = ({ title = null, callBack }) => {
         setIsModalVisible(false);
         setConfigModal({ ...configModal, mode: "add" });
         form.resetFields();
+
+        let search = modelSearch.search
+        if (isFunction(callBack)) {
+          search = res.data.data.partner_name[locale.locale]
+        }
+        let _searchModel = {
+          ...init.modelSearch,
+          search: search,
+        }
+        setModelSearch(_searchModel)
         getDataSearch({
           page: configTable.page,
-          search: modelSearch.search,
+          search: search,
         });
       } else {
         message.error("มีบางอย่างผิดพลาด !!");
@@ -736,7 +746,7 @@ const BusinessPartnersData = ({ title = null, callBack }) => {
   }
 
   const MatchRound = (value) => (Math.round(+value * 100) / 100).toFixed(2)
-  
+
   return (
     <>
       <div id="page-manage">

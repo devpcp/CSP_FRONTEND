@@ -613,9 +613,19 @@ const PersonalCustomersData = ({ title = null, callBack }) => {
         setIsModalVisible(false);
         setConfigModal({ ...configModal, mode: "add" });
         form.resetFields();
+
+        let search = modelSearch.search
+        if (isFunction(callBack)) {
+          search = res.data.data.customer_name.first_name[locale.locale] + " " + res.data.data.customer_name.last_name[locale.locale]
+        }
+        let _searchModel = {
+          ...init.modelSearch,
+          search: search,
+        }
+        setModelSearch(_searchModel)
         getDataSearch({
           page: configTable.page,
-          search: modelSearch.search,
+          search: search,
         });
       } else {
         message.error("มีบางอย่างผิดพลาด !!");

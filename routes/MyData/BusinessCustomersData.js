@@ -607,10 +607,20 @@ const BusinessCustomersData = ({ title = null, callBack }) => {
                 setIsModalVisible(false)
                 setConfigModal({ ...configModal, mode: "add" })
                 form.resetFields()
+
+                let search = modelSearch.search
+                if (isFunction(callBack)) {
+                    search = res.data.data.customer_name[locale.locale]
+                }
+                let _searchModel = {
+                    ...init.modelSearch,
+                    search: search,
+                }
+                setModelSearch(_searchModel)
                 getDataSearch({
                     page: configTable.page,
-                    search: modelSearch.search,
-                })
+                    search: search,
+                });
             } else {
                 message.error('มีบางอย่างผิดพลาด !!');
             }
@@ -922,7 +932,7 @@ const BusinessCustomersData = ({ title = null, callBack }) => {
     const handleCancelSalesHistoryDataModal = () => {
         setShowModalSalesHistoryData(false)
     }
-    
+
     const MatchRound = (value) => (Math.round(+value * 100) / 100).toFixed(2)
 
     return (

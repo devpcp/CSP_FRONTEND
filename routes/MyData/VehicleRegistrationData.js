@@ -703,9 +703,18 @@ const VehicleRegistrationData = ({ title = null, callBack }) => {
 
         setConfigModal({ ...configModal, mode: "add" });
         form.resetFields();
+        let search = modelSearch.search
+        if (isFunction(callBack)) {
+          search = res.data.data.details.registration
+        }
+        let _searchModel = {
+          ...init.modelSearch,
+          search: search,
+        }
+        setModelSearch(_searchModel)
         getDataSearch({
           page: configTable.page,
-          search: modelSearch.search,
+          search: search,
         });
       } else {
         message.error("ขออภัย ข้อมูลทะเบียนรถในจังหวัดนี้มีอยู่แล้ว");

@@ -422,6 +422,30 @@ const ReportSalesOut = ({ title = null, parent_search_id, parent_page }) => {
         },
       },
       {
+        title: () => GetIntlMessages("เลขที่บัญชี"),
+        dataIndex: "ShopServiceOrderDoc",
+        key: "ShopServiceOrderDoc",
+        width: 150,
+        align: "center",
+        render: (text, record) => (
+          <>
+            {get(text, `BankAccount.account_no`, "-")}
+          </>
+        ),
+      },
+      {
+        title: () => GetIntlMessages("ชื่อบัญชี"),
+        dataIndex: "ShopServiceOrderDoc",
+        key: "ShopServiceOrderDoc",
+        width: 150,
+        align: "center",
+        render: (text, record) => (
+          <>
+            {get(text, `BankAccount.account_name.${locale.locale}`, "-")}
+          </>
+        ),
+      },
+      {
         title: () => GetIntlMessages("วันที่รับชำระ"),
         dataIndex: "ShopServiceOrderDoc",
         key: "ShopServiceOrderDoc",

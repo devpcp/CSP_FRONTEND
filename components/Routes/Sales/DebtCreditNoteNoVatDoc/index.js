@@ -61,10 +61,10 @@ const DebtorDoc = ({ docTypeId, title = null, callBack, }) => {
     /*Print Out*/
     const configButtonPrintOutFromTable = {
         repair_order: {
-            status: true, name: "ใบลดหนี้ / Credit Note", price_use: 1
+            status: true, name: "ใบลดหนี้ (ไม่คิดภาษี)", price_use: 1
         },
         withdraw_product: {
-            status: true, name: "ใบลดหนี้ / ใบเสร็จรับเงิน", price_use: 1
+            status: true, name: "ใบลดหนี้ (ไม่คิดภาษี) / ใบเสร็จรับเงิน", price_use: 1
         },
     };
     /*End Print Out*/
