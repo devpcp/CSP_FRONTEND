@@ -9,7 +9,7 @@ import { debounce, get, isArray, isEmpty, isFunction, isPlainObject, isString } 
 import API from '../../../util/Api'
 // import ComponentsSelectModalBusinessPartners from '../../../components/Routes/Modal/Components.Select.Modal.BusinessPartners'
 import SortingData from '../../../components/shares/SortingData'
-import { RoundingNumber, } from '../../../components/shares/ConvertToCurrency'
+import { RoundingNumber, takeOutComma, } from '../../../components/shares/ConvertToCurrency'
 import Swal from "sweetalert2";
 import ProductData from "../../../routes/MyData/ProductsData"
 import BusinessPartnersData from "../../../routes/MyData/BusinessPartnersData"
@@ -1176,7 +1176,7 @@ const ImportDocAddEditViewModal = ({ isAllBranch = false, shopArr = null, form, 
     const handleSearchProduct = async (index, value) => {
         const { product_list } = form.getFieldValue()
         if (product_list && isArray(product_list)) {
-            const { data } = await API.get(`/shopProducts/all?search=${value}&limit=50&page=1&sort=start_date&order=desc&status=active`);
+            const { data } = await API.get(`/shopProducts/all?search=${value}&limit=20&page=1&sort=start_date&order=desc&status=active`);
             // console.log('data :>> ', data);
             const newData = SortingData(data.data.data, `Product.product_name.${locale.locale}`)
             product_list[index].productId_list = data.status == "success" ? newData : []
@@ -1401,12 +1401,13 @@ const ImportDocAddEditViewModal = ({ isAllBranch = false, shopArr = null, form, 
                     product_list[index]["price_discount_for_cal"] = price_discount_for_cal
                     break;
                 default:
+                    console.log("")
                     for (let i = 0; i < product_list.length; i++) {
                         // console.log("product_list[i]", product_list[i])
                         amount = Number(product_list[i]["amount_all"] ?? 0)
                         price_unit = Number(product_list[i]["price"] ?? 0)
                         price_discount_for_cal = Number(product_list[i]["price_discount_for_cal"] ?? 0)
-                        price_discount = product_list[i]["is_discount_by_percent"] === true ? price_discount_for_cal : Number(product_list[i]["price_discount"] ?? 0)
+                        price_discount = product_list[i]["is_discount_by_percent"] === true ? (price_discount_for_cal === 0 ? Number(product_list[i]["price_discount"]) : price_discount_for_cal) : Number(product_list[i]["price_discount"] ?? 0)
 
                         price_grand_total = (price_unit - price_discount) * amount
 
@@ -1431,7 +1432,7 @@ const ImportDocAddEditViewModal = ({ isAllBranch = false, shopArr = null, form, 
                     break;
             }
 
-            console.log("product_list", product_list)
+            console.log("product_listsss", product_list)
             form.setFieldsValue({
                 product_list,
                 [index]: {
@@ -1665,9 +1666,10 @@ const ImportDocAddEditViewModal = ({ isAllBranch = false, shopArr = null, form, 
     const MatchRound = (value) => (Math.round(+value * 100) / 100).toFixed(2)
 
     const onChangeDiscountAll = (index, value) => {
+        let discount_all = takeOutComma(value)
         const { product_list } = form.getFieldValue()
         let amount = product_list[index].amount_all
-        let discount = MatchRound(value / amount)
+        let discount = MatchRound(discount_all / amount)
         product_list[index].price_discount = discount
         form.setFieldsValue({ product_list })
         calculateTable(index, "price_discount", discount)
@@ -1980,7 +1982,9 @@ const ImportDocAddEditViewModal = ({ isAllBranch = false, shopArr = null, form, 
                                                                     name={[field.name, "price_discount_total"]}
                                                                     label={GetIntlMessages(`ลดเงินรวมทั้งสิ้น`)}
                                                                 >
-                                                                    <InputNumber style={{ width: "100%" }} className='ant-input-number-after-addon-20-percent' stringMode step={"1"} placeholder="0" onBlur={(value) => onChangeDiscountAll(index, value.target.value)} addonAfter="บาท"
+                                                                    <InputNumber
+                                                                        disabled={mode == "view" || expireEditTimeDisable == true}
+                                                                        style={{ width: "100%" }} className='ant-input-number-after-addon-20-percent' stringMode step={"1"} placeholder="0" onBlur={(value) => onChangeDiscountAll(index, value.target.value)} addonAfter="บาท"
                                                                         formatter={(value) => addComma(value)}
                                                                         parser={(value) => value.replace(/\$\s?|(,*)/g, '')}
                                                                     />

@@ -851,18 +851,26 @@ const ImportDocuments = ({ view_doc_id, select_shop_ids, title = null, callBack,
         // setCheckTaxType("8c73e506-31b5-44c7-a21b-3819bb712321")
         setConfigModal({ ...configModal, mode: "add" })
         formModal.resetFields()
-        onReset()
+        getDataSearch({
+            search: modelSearch.search ?? "",
+            _status: modelSearch.status,
+            limit: configTable.limit,
+            page: configTable.page,
+            sort: configSort.sort,
+            order: (configSort.order === "descend" ? "desc" : "asc"),
+        })
+        // onReset()
         // formIncomeProduct.resetFields()
     }
 
     const onFinishAddEditViewModal = async (value) => {
         try {
+            let shop_id = authUser?.UsersProfile?.ShopsProfile?.id
             // console.log(`value`, value)
             setLoading(true)
-            const find = shopBusinessPartnersList.find(where => where.id == value.bus_partner_id)
             const { total_discount, total_price_all, total_price_all_after_discount, vat, net_price, purchase_order_number_list, price_before_vat, debt_price_amount_left, product_list_check } = formModal.getFieldValue()
             const _model = {
-                shop_id: find.shop_id,
+                shop_id: shop_id,
                 bus_partner_id: value.bus_partner_id,
                 price_grand_total: replaceData(net_price) ?? "0.00",
                 details: {

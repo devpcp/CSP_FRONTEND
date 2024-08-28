@@ -599,15 +599,10 @@ const ImportDocuments = ({ view_doc_id, select_shop_ids, title = null, }) => {
 
     const onFinishAddEditViewModal = async (value) => {
         try {
-            setLoadingPage(true)
-            // console.log(`value`, value)
-
-            // const find = shopBusinessPartnersList.find(where => where.id == value.bus_partner_id)
+            setLoadingPage(() => true)
 
             const _model = {
-
                 details: {
-                    // purchase_order_number: value.purchase_order_number ?? null,
                     References_import_doc: value.References_import_doc ?? null,
                     References_doc: value.References_doc ?? null,
                     doc_create_date: moment(value.doc_create_date).format("YYYY-MM-DD"),
@@ -671,22 +666,18 @@ const ImportDocuments = ({ view_doc_id, select_shop_ids, title = null, }) => {
 
             const totalCurrentAmount = amountSummary(product_list, "eachCurrentAmountTotal")
             const totalAmount = amountSummary(product_list, "eachAmountTotal")
-            // console.log('_model :>> ', _model);
-            // console.log('log :>> ', log);
             let res
             if (log.length === 0) {
                 if (configModal.mode === "add") {
                     const { shop_id } = authUser?.UsersProfile;
                     _model.shop_id = shop_id;
                     _model.status = 2
-                    // _model.status = checkedDocStatus === true ? 2 : 3
                     _model.ShopInventory_Add = {
                         product_list,
                         import_date: moment(value?.doc_date).format("YYYY-MM-DD")
                     }
 
                     res = await API.post(`/shopInventoryTransaction/add`, _model)
-                    // console.log('_model :>> ', _model);
                 } else if (configModal.mode === "edit") {
                     _model.status = 2
                     _model.ShopInventory_Put = {
@@ -713,14 +704,12 @@ const ImportDocuments = ({ view_doc_id, select_shop_ids, title = null, }) => {
                                 const { shop_id } = authUser?.UsersProfile;
                                 _model.shop_id = shop_id;
                                 _model.status = 2
-                                // _model.status = checkedDocStatus === true ? 2 : 3
                                 _model.ShopInventory_Add = {
                                     product_list,
                                     import_date: moment(value?.doc_date).format("YYYY-MM-DD")
                                 }
 
                                 res = await API.post(`/shopInventoryTransaction/add`, _model)
-                                // console.log('_model :>> ', _model);
                             } else if (configModal.mode === "edit") {
                                 _model.status = 2
                                 _model.ShopInventory_Put = {
@@ -732,16 +721,14 @@ const ImportDocuments = ({ view_doc_id, select_shop_ids, title = null, }) => {
                             await callBackFinish(res)
                         }
                     } catch (error) {
-
+                        console.log('error', error)
                     }
                 })
-
             }
-            setLoadingPage(false)
         } catch (error) {
-            // message.error('มีบางอย่างผิดพลาด !!');
             console.log('error', error)
         }
+        setLoadingPage(() => false)
     }
 
     const onFinishFailedAddEditViewModal = (error) => {
@@ -1115,7 +1102,7 @@ const ImportDocuments = ({ view_doc_id, select_shop_ids, title = null, }) => {
 
     const debounceOnSearch = debounce((index, value) => handleSearchProduct(index, value), 1000)
     const debounceEachProductPrice = debounce((index, value) => addDecimal(index, value), 1000)
-    const debounceEachProductAmount = debounce((index, i, value) => checkEachProductAmount(index, i, value), 1000)
+    const debounceEachProductAmount = debounce((index, i, value) => checkEachProductAmount(index, i, value), 0)
 
     const IncomeProduct = ({ form }) => {
 
@@ -1527,193 +1514,203 @@ const ImportDocuments = ({ view_doc_id, select_shop_ids, title = null, }) => {
         )
     }
 
-    if (loadingPage) {
-        return (
-            <CarPreloader />
-        );
-    } else {
-        return (
+
+    return (
+        <>
             <>
-                <>
-                    <div className="head-line-text" hidden={title === null ? true : false}>{title}</div>
-                    <SearchInput configSearch={configSearch} configModal={configModal} loading={loading} onAdd={onCreate} value={modelSearch} title={title !== null ? false : true} />
-                    <TableList columns={columns} data={listSearchDataTable} loading={loading} configTable={configTable} callbackSearch={getDataSearch} addEditViewModal={addEditViewModal} />
-                    {/* Import Modal */}
-                    <Modal
-                        form={form}
-                        maskClosable={false}
-                        title={`Import`}
-                        visible={isModalImportVisible}
-                        onOk={handleImportOk}
-                        onCancel={handleImportCancel}
-                        footer={[
-                            <Button key="back" onClick={handleImportCancel} loading={loadingUpload}>
-                                ยกเลิก
-                            </Button>,
-                            <Button key="submit" type="primary" loading={loading || loadingUpload} onClick={handleImportOk}>
-                                ตกลง
-                            </Button>,
-                        ]}
-                    >
-                        <Form
-                            form={form}
-                            labelCol={{ span: 7 }}
-                            wrapperCol={{ span: 18 }}
-                            layout="horizontal"
-                            initialValues={{
-                                TransDate: moment(new Date(), 'YYYYMMDD'),
-                                TransTime: moment(new Date()),
-                                RDFileCode: "A"
-                            }}
-                            onFinish={onFinish}
-                            onFinishFailed={onFinishFailed}
-                        >
-                            <Form.Item
-                                name="RDBusinessRegNo"
-                                label="RDBusinessRegNo"
-                                rules={[{ required: true, message: 'กรุณากรอกข้อมูล!' }]}
-                            >
-                                <Input disabled />
-                            </Form.Item>
-
-                            <Form.Item
-                                name="RDFileCode"
-                                label="RDFileCode"
-                                rules={[{ required: true, message: 'กรุณากรอกข้อมูล!' }]}
-                            >
-                                <Input disabled />
-                            </Form.Item>
-
-                            <Form.Item
-                                name="TransDate"
-                                label="TransDate"
-                                rules={[{ required: true, message: 'กรุณากรอกข้อมูล!' }]}
-                            >
-                                <DatePicker format={'YYYYMMDD'} width={"100%"} />
-                            </Form.Item>
-
-                            <Form.Item
-                                name="TransTime"
-                                label="TransTime"
-                                rules={[{ required: true, message: 'กรุณากรอกข้อมูล!' }]}
-                            >
-                                <TimePicker format={'HHmmss'} width={"100%"} />
-                            </Form.Item>
-
-                            <Form.Item label="Import Excel"  >
-                                <Upload
-                                    onChange={handleImportChange}
-                                    action={`${process.env.NEXT_PUBLIC_APIURL}/post`}
-                                    fileList={fileImportList}
-                                    multiple={false}
-                                    accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
-                                >
-                                    <Button icon={<UploadOutlined />}>Upload</Button>
-                                </Upload>
-                            </Form.Item>
-                        </Form>
-                    </Modal>
-                </>
-
-
-                {/* add */}
-                <ModalFullScreen
+                <div className="head-line-text" hidden={title === null ? true : false}>{title}</div>
+                <SearchInput configSearch={configSearch} configModal={configModal} loading={loading} onAdd={onCreate} value={modelSearch} title={title !== null ? false : true} />
+                <TableList columns={columns} data={listSearchDataTable} loading={loading} configTable={configTable} callbackSearch={getDataSearch} addEditViewModal={addEditViewModal} />
+                {/* Import Modal */}
+                <Modal
+                    form={form}
                     maskClosable={false}
-                    title={`${configModal.mode == "view" ? "ดูข้อมูล" : configModal.mode == "edit" ? "แก้ไขข้อมูล" : "เพิ่มข้อมูล"}ใบปรับลดปรับเพิ่มสินค้า`}
-                    visible={isModalVisible}
-                    onOk={handleOkModal}
-                    onCancel={handleCancelModal}
-                    // okButtonProps={{ disabled: configModal.mode == "view" || expireEditTimeDisable == true }}
-                    hideSubmitButton={configModal.mode === "view"}
-                    mode={configModal.mode}
-
+                    title={`Import`}
+                    visible={isModalImportVisible}
+                    onOk={handleImportOk}
+                    onCancel={handleImportCancel}
+                    footer={[
+                        <Button key="back" onClick={handleImportCancel} loading={loadingUpload}>
+                            ยกเลิก
+                        </Button>,
+                        <Button key="submit" type="primary" loading={loading && loadingUpload} onClick={handleImportOk}>
+                            ตกลง
+                        </Button>,
+                    ]}
                 >
-
                     <Form
-                        form={formModal}
+                        form={form}
                         labelCol={{ span: 7 }}
-                        wrapperCol={{ span: 14 }}
+                        wrapperCol={{ span: 18 }}
                         layout="horizontal"
-                        onFinish={onFinishAddEditViewModal}
-                        onFinishFailed={onFinishFailedAddEditViewModal}
+                        initialValues={{
+                            TransDate: moment(new Date(), 'YYYYMMDD'),
+                            TransTime: moment(new Date()),
+                            RDFileCode: "A"
+                        }}
+                        onFinish={onFinish}
+                        onFinishFailed={onFinishFailed}
                     >
-                        <IncomeProduct form={formModal} />
+                        <Form.Item
+                            name="RDBusinessRegNo"
+                            label="RDBusinessRegNo"
+                            rules={[{ required: true, message: 'กรุณากรอกข้อมูล!' }]}
+                        >
+                            <Input disabled />
+                        </Form.Item>
 
-                        <div className="head-line-text pt-3">{GetIntlMessages("คลังสินค้า")}</div>
-                        <div className="detail-before-table">
-                            <Form.Item
-                                labelCol={24}
-                                wrapperCol={24}
-                                // label=""
-                                name="product_list"
-                                style={{ display: 'flex', justifyContent: 'center' }}
+                        <Form.Item
+                            name="RDFileCode"
+                            label="RDFileCode"
+                            rules={[{ required: true, message: 'กรุณากรอกข้อมูล!' }]}
+                        >
+                            <Input disabled />
+                        </Form.Item>
+
+                        <Form.Item
+                            name="TransDate"
+                            label="TransDate"
+                            rules={[{ required: true, message: 'กรุณากรอกข้อมูล!' }]}
+                        >
+                            <DatePicker format={'YYYYMMDD'} width={"100%"} />
+                        </Form.Item>
+
+                        <Form.Item
+                            name="TransTime"
+                            label="TransTime"
+                            rules={[{ required: true, message: 'กรุณากรอกข้อมูล!' }]}
+                        >
+                            <TimePicker format={'HHmmss'} width={"100%"} />
+                        </Form.Item>
+
+                        <Form.Item label="Import Excel"  >
+                            <Upload
+                                onChange={handleImportChange}
+                                action={`${process.env.NEXT_PUBLIC_APIURL}/post`}
+                                fileList={fileImportList}
+                                multiple={false}
+                                accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
                             >
-                                <Form.List name="product_list" >
-                                    {(fields, { add, remove }) => (
-                                        <>
-                                            {fields.map((field, index) => (
-                                                <div
-                                                    required={false}
-                                                    key={field.key}
-                                                >
-                                                    <Fieldset legend={`รายการที่ ${index + 1}`}>
+                                <Button icon={<UploadOutlined />}>Upload</Button>
+                            </Upload>
+                        </Form.Item>
+                    </Form>
+                </Modal>
+            </>
 
-                                                        <Row >
-                                                            <Col lg={{ span: 8, offset: 4 }} md={12} xs={24} style={{ width: "100%" }}>
-                                                                <Form.Item
-                                                                    {...tailformItemLayout}
-                                                                    validateTrigger={['onChange', 'onBlur']}
-                                                                    name={[field.name, "product_id"]}
-                                                                    fieldKey={[field.fieldKey, "product_id"]}
-                                                                    label={GetIntlMessages("รหัสสินค้า")}
+
+            {/* add */}
+            <ModalFullScreen
+                maskClosable={false}
+                title={`${configModal.mode == "view" ? "ดูข้อมูล" : configModal.mode == "edit" ? "แก้ไขข้อมูล" : "เพิ่มข้อมูล"}ใบปรับลดปรับเพิ่มสินค้า`}
+                visible={isModalVisible}
+                onOk={handleOkModal}
+                onCancel={handleCancelModal}
+                // okButtonProps={{ disabled: configModal.mode == "view" || expireEditTimeDisable == true }}
+                hideSubmitButton={configModal.mode === "view"}
+                mode={configModal.mode}
+                CustomsButton={() => {
+                    return (
+                        <div style={{ width: "100%", display: "flex", justifyContent: "end" }}>
+                            <Row gutter={[10, 10]} justify="end" style={{ width: "100%" }}>
+                                <Col xxl={{ span: 4, offset: 8 }} lg={6} md={12} xs={24} >
+                                    <Button loading={loading} style={{ width: "100%" }} onClick={() => handleCancelModal()}>{configModal.mode === "view" ? GetIntlMessages("ปิด") : GetIntlMessages("cancel")}</Button>
+                                </Col>
+                                <Col xxl={4} lg={6} md={12} xs={24} hidden={configModal.mode === "view"} >
+                                    <Button loading={loading || loadingPage} onClick={() => handleOkModal()} style={{ width: "100%" }} type='primary'>{GetIntlMessages("บันทึก")}</Button>
+                                </Col>
+                            </Row>
+                        </div>
+                    )
+                }}
+
+            >
+
+                <Form
+                    form={formModal}
+                    labelCol={{ span: 7 }}
+                    wrapperCol={{ span: 14 }}
+                    layout="horizontal"
+                    onFinish={onFinishAddEditViewModal}
+                    onFinishFailed={onFinishFailedAddEditViewModal}
+                >
+                    <IncomeProduct form={formModal} />
+
+                    <div className="head-line-text pt-3">{GetIntlMessages("คลังสินค้า")}{loadingPage === false ? "FALSE" : "TRUE"}</div>
+                    <div className="detail-before-table">
+                        <Form.Item
+                            labelCol={24}
+                            wrapperCol={24}
+                            // label=""
+                            name="product_list"
+                            style={{ display: 'flex', justifyContent: 'center' }}
+                        >
+                            <Form.List name="product_list" >
+                                {(fields, { add, remove }) => (
+                                    <>
+                                        {fields.map((field, index) => (
+                                            <div
+                                                required={false}
+                                                key={field.key}
+                                            >
+                                                <Fieldset legend={`รายการที่ ${index + 1}`}>
+
+                                                    <Row >
+                                                        <Col lg={{ span: 8, offset: 4 }} md={12} xs={24} style={{ width: "100%" }}>
+                                                            <Form.Item
+                                                                {...tailformItemLayout}
+                                                                validateTrigger={['onChange', 'onBlur']}
+                                                                name={[field.name, "product_id"]}
+                                                                fieldKey={[field.fieldKey, "product_id"]}
+                                                                label={GetIntlMessages("รหัสสินค้า")}
+                                                            >
+                                                                <Select
+                                                                    showSearch
+                                                                    placeholder="เลือกข้อมูล"
+                                                                    optionFilterProp="children"
+                                                                    disabled={configModal.mode == "view" || expireEditTimeDisable == true || !!formModal.getFieldValue()?.References_import_doc}
+                                                                    onChange={(value) => onChangeProductId(index, value)}
+                                                                    onSearch={(value) => debounceOnSearch(index, value)}
+                                                                    filterOption={false}
+                                                                    notFoundContent={null}
                                                                 >
-                                                                    <Select
-                                                                        showSearch
-                                                                        placeholder="เลือกข้อมูล"
-                                                                        optionFilterProp="children"
-                                                                        disabled={configModal.mode == "view" || expireEditTimeDisable == true || !!formModal.getFieldValue()?.References_import_doc}
-                                                                        onChange={(value) => onChangeProductId(index, value)}
-                                                                        onSearch={(value) => debounceOnSearch(index, value)}
-                                                                        filterOption={false}
-                                                                        notFoundContent={null}
-                                                                    >
-                                                                        {getArrValue(index, "productId_list").map((e, i) => <Select.Option value={e?.id} key={i}>{get(e, `Product.master_path_code_id`, "-")}</Select.Option>)}
-                                                                        {/* {getArrValue(index, "productId_list").map((e, i) => <Select.Option value={e.id} key={i}>{get(e, `Product.master_path_code_id`, "-")}</Select.Option>)} */}
-                                                                    </Select>
+                                                                    {getArrValue(index, "productId_list").map((e, i) => <Select.Option value={e?.id} key={i}>{get(e, `Product.master_path_code_id`, "-")}</Select.Option>)}
+                                                                    {/* {getArrValue(index, "productId_list").map((e, i) => <Select.Option value={e.id} key={i}>{get(e, `Product.master_path_code_id`, "-")}</Select.Option>)} */}
+                                                                </Select>
 
-                                                                </Form.Item>
-                                                            </Col>
+                                                            </Form.Item>
+                                                        </Col>
 
-                                                            <Col lg={8} md={12} xs={24} style={{ width: "100%" }}>
-                                                                <Form.Item
-                                                                    {...tailformItemLayout}
-                                                                    validateTrigger={['onChange', 'onBlur']}
-                                                                    name={[field.name, "product_id"]}
-                                                                    fieldKey={[field.fieldKey, "product_id"]}
-                                                                    label={GetIntlMessages("product-name")}
+                                                        <Col lg={8} md={12} xs={24} style={{ width: "100%" }}>
+                                                            <Form.Item
+                                                                {...tailformItemLayout}
+                                                                validateTrigger={['onChange', 'onBlur']}
+                                                                name={[field.name, "product_id"]}
+                                                                fieldKey={[field.fieldKey, "product_id"]}
+                                                                label={GetIntlMessages("product-name")}
 
+                                                            >
+                                                                <Select
+                                                                    showSearch
+                                                                    placeholder="เลือกข้อมูล"
+                                                                    optionFilterProp="children"
+                                                                    disabled={configModal.mode == "view" || expireEditTimeDisable == true || !!formModal.getFieldValue()?.References_import_doc}
+                                                                    onChange={(value) => onChangeProductId(index, value)}
+                                                                    onSearch={(value) => debounceOnSearch(index, value)}
+                                                                    // onSearch={(value) => handleSearchProduct(index, value)}
+                                                                    filterOption={false}
+                                                                    notFoundContent={null}
+                                                                // filterOption={(input, option) =>
+                                                                //     option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                                                                // }
                                                                 >
-                                                                    <Select
-                                                                        showSearch
-                                                                        placeholder="เลือกข้อมูล"
-                                                                        optionFilterProp="children"
-                                                                        disabled={configModal.mode == "view" || expireEditTimeDisable == true || !!formModal.getFieldValue()?.References_import_doc}
-                                                                        onChange={(value) => onChangeProductId(index, value)}
-                                                                        onSearch={(value) => debounceOnSearch(index, value)}
-                                                                        // onSearch={(value) => handleSearchProduct(index, value)}
-                                                                        filterOption={false}
-                                                                        notFoundContent={null}
-                                                                    // filterOption={(input, option) =>
-                                                                    //     option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
-                                                                    // }
-                                                                    >
 
-                                                                        {getArrValue(index, "productId_list").map((e, i) => <Select.Option value={e?.id} key={i}>{get(e, `Product.product_name.${[locale.locale]}`, "-")}</Select.Option>)}
-                                                                    </Select>
-                                                                </Form.Item>
-                                                            </Col>
+                                                                    {getArrValue(index, "productId_list").map((e, i) => <Select.Option value={e?.id} key={i}>{get(e, `Product.product_name.${[locale.locale]}`, "-")}</Select.Option>)}
+                                                                </Select>
+                                                            </Form.Item>
+                                                        </Col>
 
-                                                            {/* <Col span={8} style={{ width: "100%" }}>
+                                                        {/* <Col span={8} style={{ width: "100%" }}>
                                                             <Form.Item
                                                                 {...tailformItemLayout}
                                                                 validateTrigger={['onChange', 'onBlur']}
@@ -1724,89 +1721,89 @@ const ImportDocuments = ({ view_doc_id, select_shop_ids, title = null, }) => {
                                                                 <Input type="number" placeholder="1000" onChange={(value) => calculateNetPrice(index, value)} disabled={configModal.mode == "view" || expireEditTimeDisable == true} />
                                                             </Form.Item>
                                                         </Col> */}
-                                                            <Col span={8} style={{ width: "100%" }} hidden>
+                                                        <Col span={8} style={{ width: "100%" }} hidden>
 
-                                                                <Form.Item
-                                                                    {...tailformItemLayout}
-                                                                    validateTrigger={['onChange', 'onBlur']}
-                                                                    name={[field.name, "price"]}
-                                                                    fieldKey={[field.fieldKey, "price"]}
-                                                                    label={GetIntlMessages("ราคา/หน่วย")}
-                                                                    rules={[RegexMultiPattern("4", GetIntlMessages("only-number"))]}
-                                                                >
-                                                                    <InputNumber stringMode min={0} precision={2} onBlur={(value) => addDecimal(index, value.target.value)} placeholder="1000" disabled={configModal.mode == "view" || expireEditTimeDisable == true} addonAfter="บาท" />
+                                                            <Form.Item
+                                                                {...tailformItemLayout}
+                                                                validateTrigger={['onChange', 'onBlur']}
+                                                                name={[field.name, "price"]}
+                                                                fieldKey={[field.fieldKey, "price"]}
+                                                                label={GetIntlMessages("ราคา/หน่วย")}
+                                                                rules={[RegexMultiPattern("4", GetIntlMessages("only-number"))]}
+                                                            >
+                                                                <InputNumber stringMode min={0} precision={2} onBlur={(value) => addDecimal(index, value.target.value)} placeholder="1000" disabled={configModal.mode == "view" || expireEditTimeDisable == true} addonAfter="บาท" />
 
+                                                            </Form.Item>
+                                                        </Col>
+                                                        <Col span={24} style={{ width: "100%" }}>
+                                                            <FormWarehouse name={[field.name, "warehouse_detail"]} index={index} onChangeWarehouse={onChangeWarehouse} />
+                                                        </Col>
+                                                        {fields.length > 1 && configModal.mode !== "view" && expireEditTimeDisable !== true && !formModal.getFieldValue()?.References_import_doc ?
+                                                            <Col span={24} style={{ display: "flex", justifyContent: "end", paddingTop: "10px" }}>
+                                                                <Form.Item >
+                                                                    <Button
+                                                                        style={{ display: "flex", alignItems: "center", }}
+                                                                        type="dashed"
+                                                                        onClick={() => onDeleteProductList(remove, field, index)}
+                                                                        block
+                                                                        icon={<MinusCircleOutlined />}
+                                                                    >
+                                                                        {GetIntlMessages(`ลบรายการที่ ${index + 1}`)}
+                                                                    </Button>
                                                                 </Form.Item>
                                                             </Col>
-                                                            <Col span={24} style={{ width: "100%" }}>
-                                                                <FormWarehouse name={[field.name, "warehouse_detail"]} index={index} onChangeWarehouse={onChangeWarehouse} />
-                                                            </Col>
-                                                            {fields.length > 1 && configModal.mode !== "view" && expireEditTimeDisable !== true && !formModal.getFieldValue()?.References_import_doc ?
-                                                                <Col span={24} style={{ display: "flex", justifyContent: "end", paddingTop: "10px" }}>
-                                                                    <Form.Item >
-                                                                        <Button
-                                                                            style={{ display: "flex", alignItems: "center", }}
-                                                                            type="dashed"
-                                                                            onClick={() => onDeleteProductList(remove, field, index)}
-                                                                            block
-                                                                            icon={<MinusCircleOutlined />}
-                                                                        >
-                                                                            {GetIntlMessages(`ลบรายการที่ ${index + 1}`)}
-                                                                        </Button>
-                                                                    </Form.Item>
-                                                                </Col>
-                                                                : null
-                                                            }
-                                                        </Row>
-                                                    </Fieldset>
-                                                </div>
-                                            ))}
-                                            <Form.Item>
-                                                {configModal.mode !== "view" && expireEditTimeDisable !== true && !formModal.getFieldValue()?.References_import_doc ?
-                                                    <Col span={24} style={{ display: "flex", justifyContent: "end", }}>
-                                                        <Form.Item >
-                                                            <Button
-                                                                style={{ display: "flex", alignItems: "center", }}
-                                                                type="dashed"
-                                                                onClick={() => addNewProductList(add)}
-                                                                // onClick={() => add(addWarehouse)}
-                                                                block
-                                                                icon={<PlusOutlined />}
-                                                            >
-                                                                {GetIntlMessages("เพิ่มรายการสินค้า")}
-                                                                {/* {GetIntlMessages("add-data")} */}
-                                                            </Button>
-                                                        </Form.Item>
-                                                    </Col> : null
-                                                }
-                                            </Form.Item>
-                                        </>
-                                    )}
-                                </Form.List>
-                            </Form.Item>
-                        </div>
+                                                            : null
+                                                        }
+                                                    </Row>
+                                                </Fieldset>
+                                            </div>
+                                        ))}
+                                        <Form.Item>
+                                            {configModal.mode !== "view" && expireEditTimeDisable !== true && !formModal.getFieldValue()?.References_import_doc ?
+                                                <Col span={24} style={{ display: "flex", justifyContent: "end", }}>
+                                                    <Form.Item >
+                                                        <Button
+                                                            style={{ display: "flex", alignItems: "center", }}
+                                                            type="dashed"
+                                                            onClick={() => addNewProductList(add)}
+                                                            // onClick={() => add(addWarehouse)}
+                                                            block
+                                                            icon={<PlusOutlined />}
+                                                        >
+                                                            {GetIntlMessages("เพิ่มรายการสินค้า")}
+                                                            {/* {GetIntlMessages("add-data")} */}
+                                                        </Button>
+                                                    </Form.Item>
+                                                </Col> : null
+                                            }
+                                        </Form.Item>
+                                    </>
+                                )}
+                            </Form.List>
+                        </Form.Item>
+                    </div>
 
-                        <Fieldset legend={GetIntlMessages("สรุปรายการ")}>
-                            <Row>
-                                <Col span={8}>
-                                    <Form.Item
-                                        name="note"
-                                        label="หมายเหตุ"
-                                    >
-                                        <Input.TextArea disabled={configModal.mode == "view" || expireEditTimeDisable} rows={9} />
-                                    </Form.Item>
-                                </Col>
-                                <Col span={10} />
-                                <Col span={6}>
-                                </Col>
-                            </Row>
+                    <Fieldset legend={GetIntlMessages("สรุปรายการ")}>
+                        <Row>
+                            <Col span={8}>
+                                <Form.Item
+                                    name="note"
+                                    label="หมายเหตุ"
+                                >
+                                    <Input.TextArea disabled={configModal.mode == "view" || expireEditTimeDisable} rows={9} />
+                                </Form.Item>
+                            </Col>
+                            <Col span={10} />
+                            <Col span={6}>
+                            </Col>
+                        </Row>
 
-                        </Fieldset>
-                    </Form>
-                </ModalFullScreen>
+                    </Fieldset>
+                </Form>
+            </ModalFullScreen >
 
 
-                <style global>{`
+            <style global>{`
                     .ant-select-show-search.ant-select:not(.ant-select-customize-input)
                     .ant-select-selector {
                         height: auto;
@@ -1856,9 +1853,9 @@ const ImportDocuments = ({ view_doc_id, select_shop_ids, title = null, }) => {
                     }
                         
                 `}</style>
-            </>
-        )
-    }
+        </>
+    )
+
 }
 
 export default ImportDocuments
