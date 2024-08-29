@@ -646,6 +646,7 @@ const ComponentsRoutesProductReturnDocLists = ({ onFinish, calculateResult, mode
         setExVatPrice(0);
     }
 
+    const MatchRound = (value) => (Math.round(+value * 100) / 100).toFixed(2)
 
     return (
         <>

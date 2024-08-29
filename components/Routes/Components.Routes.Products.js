@@ -47,7 +47,7 @@ const ComponentsRoutesProducts = ({ status }) => {
                 key: 'master_path_code_id',
                 width: 150,
                 align: "center",
-                render: (text, record) => <div style={{textAlign : "start"}}>{text ?? "-"}</div>,
+                render: (text, record) => <div style={{ textAlign: "start" }}>{text ?? "-"}</div>,
                 sorter: (a, b, c) => { },
                 sortOrder: configSort.sort == "master_path_code_id" ? configSort.order : true,
                 onHeaderCell: (obj) => {
@@ -71,7 +71,7 @@ const ComponentsRoutesProducts = ({ status }) => {
                 key: 'custom_path_code_id',
                 width: 150,
                 align: "center",
-                render: (text, record) => <div style={{textAlign : "start"}}>{text ?? "-"}</div>,
+                render: (text, record) => <div style={{ textAlign: "start" }}>{text ?? "-"}</div>,
             },
             {
                 title: 'ชื่อสินค้า',
@@ -160,7 +160,7 @@ const ComponentsRoutesProducts = ({ status }) => {
                 key: 'other_details',
                 width: 200,
                 // render: (text, record) => get(text , `cci_code` , "-"),
-                render: (text, record) => text["cci_code"] && text["cci_code"].length > 0 ? text["cci_code"] ?? "-": "-",
+                render: (text, record) => text["cci_code"] && text["cci_code"].length > 0 ? text["cci_code"] ?? "-" : "-",
             },
             {
                 title: 'CCID Code',
@@ -174,7 +174,7 @@ const ComponentsRoutesProducts = ({ status }) => {
                 dataIndex: 'other_details',
                 key: 'other_details',
                 width: 200,
-                render: (text, record) => text["cad_code"] && text["cad_code"].length > 0 ? text["cad_code"]  ?? "-": "-",
+                render: (text, record) => text["cad_code"] && text["cad_code"].length > 0 ? text["cad_code"] ?? "-" : "-",
             },
             {
                 title: 'Sourcing Manufacturing',
@@ -188,14 +188,14 @@ const ComponentsRoutesProducts = ({ status }) => {
                 dataIndex: 'other_details',
                 key: 'other_details',
                 width: 200,
-                render: (text, record) => text["position_front_and_rear"] && text["position_front_and_rear"].length > 0  ? text["position_front_and_rear"] ?? "-" : "-",
+                render: (text, record) => text["position_front_and_rear"] && text["position_front_and_rear"].length > 0 ? text["position_front_and_rear"] ?? "-" : "-",
             },
             {
                 title: 'TL/TT Index',
                 dataIndex: 'other_details',
                 key: 'other_details',
                 width: 200,
-                render: (text, record) => text["tl_and_tt_index"] && text["tl_and_tt_index"] .length > 0  ? text["tl_and_tt_index"] ?? "-" : "-",
+                render: (text, record) => text["tl_and_tt_index"] && text["tl_and_tt_index"].length > 0 ? text["tl_and_tt_index"] ?? "-" : "-",
             },
             {
                 title: 'Based Price',
@@ -226,7 +226,7 @@ const ComponentsRoutesProducts = ({ status }) => {
                 dataIndex: 'other_details',
                 key: 'other_details',
                 width: 200,
-                render: (text, record) =>  displayPrice(text, "suggested_online_price"),
+                render: (text, record) => displayPrice(text, "suggested_online_price"),
                 // render: (text, record) => text["suggested_online_price"] && text["suggested_online_price"].length > 0 ? text["suggested_online_price"] ?? "-" : "-",
             },
 
@@ -255,7 +255,7 @@ const ComponentsRoutesProducts = ({ status }) => {
                 key: 'other_details',
                 width: 150,
                 align: "center",
-                render: (text, record) => checkOtherShopPrice(text , "prohand_price"),
+                render: (text, record) => checkOtherShopPrice(text, "prohand_price"),
             },
             {
                 title: 'ราคา EzyFit',
@@ -263,7 +263,7 @@ const ComponentsRoutesProducts = ({ status }) => {
                 key: 'other_details',
                 width: 150,
                 align: "center",
-                render: (text, record) => checkOtherShopPrice(text , "ezyFit_price"),
+                render: (text, record) => checkOtherShopPrice(text, "ezyFit_price"),
             },
             {
                 title: 'ราคา wyz',
@@ -271,7 +271,7 @@ const ComponentsRoutesProducts = ({ status }) => {
                 key: 'other_details',
                 width: 150,
                 align: "center",
-                render: (text, record) => checkOtherShopPrice(text , "wyz_price"),
+                render: (text, record) => checkOtherShopPrice(text, "wyz_price"),
             },
             {
                 title: 'ราคา auto one',
@@ -279,7 +279,7 @@ const ComponentsRoutesProducts = ({ status }) => {
                 key: 'other_details',
                 width: 150,
                 align: "center",
-                render: (text, record) => checkOtherShopPrice(text , "auto_one_price"),
+                render: (text, record) => checkOtherShopPrice(text, "auto_one_price"),
             },
             {
                 title: 'ราคา YCC',
@@ -287,7 +287,7 @@ const ComponentsRoutesProducts = ({ status }) => {
                 key: 'other_details',
                 width: 150,
                 align: "center",
-                render: (text, record) => checkOtherShopPrice(text , "ycc_price"),
+                render: (text, record) => checkOtherShopPrice(text, "ycc_price"),
             },
             {
                 title: 'ราคาทั่วไป',
@@ -295,7 +295,7 @@ const ComponentsRoutesProducts = ({ status }) => {
                 key: 'other_details',
                 width: 150,
                 align: "center",
-                render: (text, record) => displayPrice(text , "normal_price")
+                render: (text, record) => displayPrice(text, "normal_price")
                 // render: (text, record) => _.isPlainObject(text) && text["normal_price"] && text["normal_price"].length > 0 ? text["normal_price"] ?? "-": "-"
             },
             {
@@ -304,7 +304,7 @@ const ComponentsRoutesProducts = ({ status }) => {
                 key: 'other_details',
                 width: 150,
                 align: "center",
-                render: (text, record) => displayPrice(text , "benchmark_price")
+                render: (text, record) => displayPrice(text, "benchmark_price")
                 // render: (text, record) => _.isPlainObject(text) && text["benchmark_price"] && text["benchmark_price"].length > 0 ? text["benchmark_price"] ?? "-": "-"
             },
             {
@@ -313,7 +313,7 @@ const ComponentsRoutesProducts = ({ status }) => {
                 key: 'other_details',
                 width: 150,
                 align: "center",
-                render: (text, record) => displayPrice(text , "include_vat_price")
+                render: (text, record) => displayPrice(text, "include_vat_price")
                 // render: (text, record) => _.isPlainObject(text) && text["include_vat_price"] && text["include_vat_price"].length > 0 ? text["include_vat_price"] ?? "-": "-"
             },
             {
@@ -321,8 +321,8 @@ const ComponentsRoutesProducts = ({ status }) => {
                 dataIndex: 'other_details',
                 key: 'other_details',
                 width: 150,
-                align: "center",           
-                render: (text, record) => displayPrice(text , "exclude_vat_price")
+                align: "center",
+                render: (text, record) => displayPrice(text, "exclude_vat_price")
                 // render: (text, record) => _.isPlainObject(text) && text["exclude_vat_price"] && text["exclude_vat_price"].length > 0 ? text["exclude_vat_price"] ?? "-": "-"
             },
             {
@@ -338,33 +338,33 @@ const ComponentsRoutesProducts = ({ status }) => {
         setColumns(_column)
     }
 
-    const checkOtherShopPrice =(value , type)=>{
-        if(isPlainObject(value)){
-            if(value.other_shops && isArray(value.other_shops) && value.other_shops.length > 0){
-                if(value.other_shops[value.other_shops.length - 1][type] && value.other_shops[value.other_shops.length - 1][type].length > 0){
-                    return <div style={{textAlign : "end"}}>{Number(value.other_shops[value.other_shops.length - 1][type]).toLocaleString(undefined, {minimumFractionDigits : 2 , maximumFractionDigits : 2})}</div>
-                }else{
+    const checkOtherShopPrice = (value, type) => {
+        if (isPlainObject(value)) {
+            if (value.other_shops && isArray(value.other_shops) && value.other_shops.length > 0) {
+                if (value.other_shops[value.other_shops.length - 1][type] && value.other_shops[value.other_shops.length - 1][type].length > 0) {
+                    return <div style={{ textAlign: "end" }}>{Number(value.other_shops[value.other_shops.length - 1][type]).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+                } else {
                     return "-"
                 }
-            }else{
+            } else {
                 return "-"
             }
-        }else{
+        } else {
             return "-"
         }
     }
 
-    const displayPrice=(value,type,priceType)=>{
+    const displayPrice = (value, type, priceType) => {
         try {
             let numberValue
-            if(value && priceType){
-                numberValue = Number(get(value , `${type}.${priceType}`, "-"))
-                return <div style={{textAlign : "end"}}>{numberValue != 0 ? numberValue.toLocaleString(undefined, {minimumFractionDigits : 2 , maximumFractionDigits : 2}) : "-"}</div>
-            }else if(value && !priceType){
-                numberValue = Number(get(value , `${type}`, "-"))
+            if (value && priceType) {
+                numberValue = Number(get(value, `${type}.${priceType}`, "-"))
+                return <div style={{ textAlign: "end" }}>{numberValue != 0 ? numberValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "-"}</div>
+            } else if (value && !priceType) {
+                numberValue = Number(get(value, `${type}`, "-"))
                 console.log('numberValue', numberValue)
-                return <div style={{textAlign : "end"}}>{numberValue != 0 && !isNaN(numberValue) ? numberValue.toLocaleString(undefined, {minimumFractionDigits : 2 , maximumFractionDigits : 2}) : "-"}</div> 
-            }else {
+                return <div style={{ textAlign: "end" }}>{numberValue != 0 && !isNaN(numberValue) ? numberValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "-"}</div>
+            } else {
                 return "-"
             }
         } catch (error) {
@@ -465,13 +465,13 @@ const ComponentsRoutesProducts = ({ status }) => {
                         _model.exclude_vat_price = _model.other_details["exclude_vat_price"]
                         _model.vehicle_types = _model.other_details["vehicle_types"]
 
-                        if(_model.other_details["oe_tire"] && isPlainObject(_model.other_details["oe_tire"])) setCheckedOeTire(_model.other_details["oe_tire"]["status"] ?? false)
-                        if(_model.other_details["runflat_tire"] && isPlainObject(_model.other_details["runflat_tire"])) setCheckedRunFlatTire(_model.other_details["runflat_tire"]["status"] ?? false)
-                        if(_model.other_details["others_tire_detail"] && isPlainObject(_model.other_details["others_tire_detail"])) setCheckedOtherTrieDetail(_model.other_details["others_tire_detail"]["status"] ?? false)
-                        
-                        if(_model.other_details["oe_tire"] && isPlainObject(_model.other_details["oe_tire"])) _model.remark_oe_tire = _model.other_details["oe_tire"]["remark_oe_tire"] ?? {}
-                        if(_model.other_details["runflat_tire"] && isPlainObject(_model.other_details["runflat_tire"])) _model.remark_runflat_tire = _model.other_details["runflat_tire"]["remark_runflat_tire"] ?? {}
-                        if(_model.other_details["others_tire_detail"] && isPlainObject(_model.other_details["others_tire_detail"])) _model.remark_others_tire_detail = _model.other_details["others_tire_detail"]["remark_others_tire_detail"] ?? {}
+                        if (_model.other_details["oe_tire"] && isPlainObject(_model.other_details["oe_tire"])) setCheckedOeTire(_model.other_details["oe_tire"]["status"] ?? false)
+                        if (_model.other_details["runflat_tire"] && isPlainObject(_model.other_details["runflat_tire"])) setCheckedRunFlatTire(_model.other_details["runflat_tire"]["status"] ?? false)
+                        if (_model.other_details["others_tire_detail"] && isPlainObject(_model.other_details["others_tire_detail"])) setCheckedOtherTrieDetail(_model.other_details["others_tire_detail"]["status"] ?? false)
+
+                        if (_model.other_details["oe_tire"] && isPlainObject(_model.other_details["oe_tire"])) _model.remark_oe_tire = _model.other_details["oe_tire"]["remark_oe_tire"] ?? {}
+                        if (_model.other_details["runflat_tire"] && isPlainObject(_model.other_details["runflat_tire"])) _model.remark_runflat_tire = _model.other_details["runflat_tire"]["remark_runflat_tire"] ?? {}
+                        if (_model.other_details["others_tire_detail"] && isPlainObject(_model.other_details["others_tire_detail"])) _model.remark_others_tire_detail = _model.other_details["others_tire_detail"]["remark_others_tire_detail"] ?? {}
 
                         /* central_price*/
                         if (_model.other_details.central_price && isPlainObject(_model.other_details.central_price)) {
@@ -486,8 +486,8 @@ const ComponentsRoutesProducts = ({ status }) => {
                                 _model.credit_45_price_retail = _model.other_details.central_price.credit_45_price.retail,
                                 _model.credit_45_price_wholesale = _model.other_details.central_price.credit_45_price.wholesale
 
-                                _model.purchase_unit = _model.other_details["purchase_unit"];
-                                _model.sales_unit = _model.other_details["sales_unit"];
+                            _model.purchase_unit = _model.other_details["purchase_unit"];
+                            _model.sales_unit = _model.other_details["sales_unit"];
                         }
 
                         /* other_shops */
@@ -617,7 +617,7 @@ const ComponentsRoutesProducts = ({ status }) => {
     const [checkedOkAndCancle, setCheckedOkAndCancle] = useState(null);
     const [form] = Form.useForm();
 
-    const switchTireStatus =(value,type)=>{
+    const switchTireStatus = (value, type) => {
 
         switch (type) {
             case "oe_tire":
@@ -629,7 +629,7 @@ const ComponentsRoutesProducts = ({ status }) => {
             case "others_tire_detail":
                 setCheckedOtherTrieDetail(value)
                 break;
-        
+
             default:
                 setCheckedOeTire(false)
                 setCheckedRunFlatTire(false)
@@ -638,9 +638,9 @@ const ComponentsRoutesProducts = ({ status }) => {
         }
     }
     const checkedTireStatus = {
-        oe_tire_status_checked : checkedOeTire,
-        runflat_tire_checked : checkedRunFlatTire,
-        others_tire_detail_checked : checkedOtherTireDetail,
+        oe_tire_status_checked: checkedOeTire,
+        runflat_tire_checked: checkedRunFlatTire,
+        others_tire_detail_checked: checkedOtherTireDetail,
     }
 
     const handleOk = (modeKey) => {
@@ -649,7 +649,7 @@ const ComponentsRoutesProducts = ({ status }) => {
         setCheckedOkAndCancle(1)
     }
 
-    const handleCancel = () => {    
+    const handleCancel = () => {
         setCheckedOkAndCancle(0)
         form.resetFields()
         setIsModalVisible(false)
@@ -712,18 +712,18 @@ const ComponentsRoutesProducts = ({ status }) => {
                     after_channel_discount: value.after_channel_discount ? value.after_channel_discount : isPlainObject(initOtherDetails) ? initOtherDetails.after_channel_discount : null,
                     suggasted_re_sell_price: value.suggasted_re_sell_price ? value.suggasted_re_sell_price : isPlainObject(initOtherDetails) ? initOtherDetails.suggasted_re_sell_price : null,
                     suggested_online_price: value.suggested_online_price ? value.suggested_online_price : isPlainObject(initOtherDetails) ? initOtherDetails.suggested_online_price : null,
-                    vehicle_types : value.vehicle_types,
-                    oe_tire : {
-                        status : checkedOeTire,
-                        remark_oe_tire : value.remark_oe_tire
+                    vehicle_types: value.vehicle_types,
+                    oe_tire: {
+                        status: checkedOeTire,
+                        remark_oe_tire: value.remark_oe_tire
                     },
-                    runflat_tire : {
-                        status : checkedRunFlatTire,
-                        remark_runflat_tire : value.remark_runflat_tire
+                    runflat_tire: {
+                        status: checkedRunFlatTire,
+                        remark_runflat_tire: value.remark_runflat_tire
                     },
-                    others_tire_detail : {
-                        status : checkedOtherTireDetail,
-                        remark_others_tire_detail : value.remark_others_tire_detail
+                    others_tire_detail: {
+                        status: checkedOtherTireDetail,
+                        remark_others_tire_detail: value.remark_others_tire_detail
                     },
 
                     central_price: {
@@ -805,7 +805,7 @@ const ComponentsRoutesProducts = ({ status }) => {
                 })
                 addEditViewModal("edit", res.data.data.id)
             }
-
+            setLoading(false)
         } catch (error) {
             message.error('มีบางอย่างผิดพลาด !!');
         }
@@ -1026,7 +1026,7 @@ const ComponentsRoutesProducts = ({ status }) => {
                         onFinish={onFinish}
                         onFinishFailed={onFinishFailed}
                     >
-                        <ProductModal form={form} mode={configModal.mode} checkedOkAndCancle={checkedOkAndCancle} status={`productMaster`} checkedIsuse={checkedIsuse} getCheckOkAndCancle={getCheckOkAndCancle} switchTireStatus={switchTireStatus} checkedTireStatus={checkedTireStatus}/>
+                        <ProductModal form={form} mode={configModal.mode} checkedOkAndCancle={checkedOkAndCancle} status={`productMaster`} checkedIsuse={checkedIsuse} getCheckOkAndCancle={getCheckOkAndCancle} switchTireStatus={switchTireStatus} checkedTireStatus={checkedTireStatus} />
                     </Form>
                 </ModalFullScreen>
 

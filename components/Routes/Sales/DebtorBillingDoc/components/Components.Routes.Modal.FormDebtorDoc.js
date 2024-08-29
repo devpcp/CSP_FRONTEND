@@ -119,7 +119,7 @@ const FormTemporaryDeliveryOrderDoc = ({ mode, calculateResult, disabledWhenDeli
                 case "search":
                     if (!!value) {
                         const { customer_type } = form.getFieldValue()
-                        const { data } = await API.get(`/${customer_type === "person" ? `shopPersonalCustomers` : `shopBusinessCustomers`}/all?search=${value}&limit=9999999&page=1&sort=customer_name.th&order=asc&status=active`);
+                        const { data } = await API.get(`/${customer_type === "person" ? `shopPersonalCustomers` : `shopBusinessCustomers`}/all?search=${value}&limit=25&page=1&sort=customer_name.th&order=asc&status=active`);
                         // console.log('data :>> ', data);
                         if (data.status === "success") {
                             const newData = data.data.data.map(e => {
