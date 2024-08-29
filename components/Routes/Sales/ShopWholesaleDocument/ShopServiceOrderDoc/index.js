@@ -1043,9 +1043,9 @@ const RepairOrder = ({ docTypeId, view_doc_id, select_shop_ids, title = null, })
                     price_discount_all_2: details["price_discount_2"] * amount,
                     price_discount_all_3: details["price_discount_3"] * amount,
 
-                    price_discount_all_percent: (((price_discount * amount) / (price_unit * amount)) * 100),
-                    price_discount_all_percent_2: (((details["price_discount_2"] * amount) / (price_unit * amount)) * 100),
-                    price_discount_all_percent_3: (((details["price_discount_3"] * amount) / (price_unit * amount)) * 100),
+                    price_discount_all_percent: MatchRound(((price_discount * amount) / (price_unit * amount)) * 100),
+                    price_discount_all_percent_2: MatchRound(((details["price_discount_2"] * amount) / (price_unit * amount)) * 100),
+                    price_discount_all_percent_3: MatchRound(((details["price_discount_3"] * amount) / (price_unit * amount)) * 100),
                 }
                 /*เช็คว่าสร้างใบใบส่งของ หรือ ใบกำกับภาษี และยัง active อยู่หรือไม่*/
                 const DeliveryOrderDocsStatus = value?.ShopTemporaryDeliveryOrderDocs.some(where => where.status === 1) ?? false, taxInvoiceDocsStatus = value?.ShopTaxInvoiceDocs.some(where => where.status === 1) ?? false;

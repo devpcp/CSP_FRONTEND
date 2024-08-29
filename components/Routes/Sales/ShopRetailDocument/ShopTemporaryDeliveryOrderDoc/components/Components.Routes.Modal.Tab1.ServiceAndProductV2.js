@@ -956,9 +956,9 @@ const ComponentsRoutesModalTab1ServiceAndProductV2 = ({ onFinish, calculateResul
                 }
             })
             calculateTable()
-            calculateResult()
+            // calculateResult()
         } catch (error) {
-            // console.log('error callbackSelectProduct:>> ', error);
+            console.log('error callbackSelectProduct:>> ', error);
         }
     }
 
@@ -2376,13 +2376,6 @@ const ComponentsRoutesModalTab1ServiceAndProductV2 = ({ onFinish, calculateResul
                     }
                     break;
             }
-
-            list_service_product[index]["price_discount_all"] = MatchRound(price_discount_all)
-            list_service_product[index]["price_discount_all_percent"] = MatchRound(price_discount_all_percent)
-            list_service_product[index]["price_discount_all_2"] = MatchRound(price_discount_all_2)
-            list_service_product[index]["price_discount_all_percent_2"] = MatchRound(price_discount_all_percent_2)
-            list_service_product[index]["price_discount_all_3"] = MatchRound(price_discount_all_3)
-            list_service_product[index]["price_discount_all_percent_3"] = MatchRound(price_discount_all_percent_3)
 
             if (isArray(list_service_product) && list_service_product.length === 0) price_discount_bill = null
             form.setFieldsValue({

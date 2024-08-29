@@ -1013,9 +1013,9 @@ const ShopTemporaryDeliveryOrderDocWholeSale = ({ docTypeId, title = null, callB
                     price_discount_all_2: details["price_discount_2"] * amount,
                     price_discount_all_3: details["price_discount_3"] * amount,
 
-                    price_discount_all_percent: (((price_discount * amount) / (price_unit * amount)) * 100),
-                    price_discount_all_percent_2: (((details["price_discount_2"] * amount) / (price_unit * amount)) * 100),
-                    price_discount_all_percent_3: (((details["price_discount_3"] * amount) / (price_unit * amount)) * 100),
+                    price_discount_all_percent: MatchRound(((price_discount * amount) / (price_unit * amount)) * 100),
+                    price_discount_all_percent_2: MatchRound(((details["price_discount_2"] * amount) / (price_unit * amount)) * 100),
+                    price_discount_all_percent_3: MatchRound(((details["price_discount_3"] * amount) / (price_unit * amount)) * 100),
                 }
 
                 list_service_product[i] = { ...modelListServiceProduct }
