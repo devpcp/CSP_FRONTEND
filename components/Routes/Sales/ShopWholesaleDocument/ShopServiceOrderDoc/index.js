@@ -476,35 +476,35 @@ const RepairOrder = ({ docTypeId, view_doc_id, select_shop_ids, title = null, })
                     )
                 },
             },
+            // {
+            //     title: () => GetIntlMessages(`เลขที่${configPage("table-status-2")}`),
+            //     dataIndex: 'details',
+            //     key: 'details',
+            //     width: 180,
+            //     align: "center",
+            //     render: (text, record) => {
+            //         return (
+            //             <Badge.Ribbon text="Hippies" color="green">
+            //                 <Card title="Pushes open the window" size="small">
+            //                     and raises the spyglass.
+            //                 </Card>
+            //             </Badge.Ribbon>
+            //             // <div style={{ color: "red" }}>
+            //             //     {get(text, `ShopDocumentCode.TRN.code_id` ?? "-", "-")}
+            //             // </div>
+            //         )
+            //     },
+            // },
+            // {
+            //     title: () => GetIntlMessages(`เลขที่${configPage("table-status-3")}`),
+            //     dataIndex: 'details',
+            //     key: 'details',
+            //     width: 180,
+            //     align: "center",
+            //     render: (text, record) => get(text, `ShopDocumentCode.INV.code_id` ?? "-", "-")
+            // },
             {
-                title: () => GetIntlMessages(`เลขที่${configPage("table-status-2")}`),
-                dataIndex: 'details',
-                key: 'details',
-                width: 180,
-                align: "center",
-                render: (text, record) => {
-                    return (
-                        <Badge.Ribbon text="Hippies" color="green">
-                            <Card title="Pushes open the window" size="small">
-                                and raises the spyglass.
-                            </Card>
-                        </Badge.Ribbon>
-                        // <div style={{ color: "red" }}>
-                        //     {get(text, `ShopDocumentCode.TRN.code_id` ?? "-", "-")}
-                        // </div>
-                    )
-                },
-            },
-            {
-                title: () => GetIntlMessages(`เลขที่${configPage("table-status-3")}`),
-                dataIndex: 'details',
-                key: 'details',
-                width: 180,
-                align: "center",
-                render: (text, record) => get(text, `ShopDocumentCode.INV.code_id` ?? "-", "-")
-            },
-            {
-                title: () => GetIntlMessages(docTypeId == "67c45df3-4f84-45a8-8efc-de22fef31978" ? `เลขที่ใบสั่งขาย/ใบจองสินค้า` : "เลขที่ใบสั่งซ่อม"),
+                title: () => GetIntlMessages(`เลขที่ใบสั่งขาย/ใบจองสินค้า`),
                 dataIndex: 'code_id',
                 key: 'code_id',
                 width: 200,
@@ -522,17 +522,48 @@ const RepairOrder = ({ docTypeId, view_doc_id, select_shop_ids, title = null, })
                                 </Col>
                                 <Col>
                                     <span>
-                                        {text ?? ""}
+                                        <Tooltip title={
+                                            <>
+
+                                                {record?.ShopTemporaryDeliveryOrderDocs.length !== 0 ?
+                                                    <>
+                                                        {record?.ShopTemporaryDeliveryOrderDocs[0]?.code_id !== null ?
+                                                            <>
+                                                                <div>เลขที่ใบส่งสินค้า : {record?.ShopTemporaryDeliveryOrderDocs[0]?.code_id}</div>
+                                                                <div>วันที่ : {moment(record?.ShopTemporaryDeliveryOrderDocs[0]?.doc_date).format("DD/MM/YYYY")}</div>
+                                                            </>
+                                                            : ""
+                                                        }
+                                                    </>
+                                                    : ""
+                                                }
+                                                {record?.ShopTaxInvoiceDocs.length !== 0 ?
+                                                    <>
+                                                        {record?.ShopTaxInvoiceDocs[0]?.abb_code_id !== null ?
+                                                            <>
+                                                                <div>อย่างย่อ : {record?.ShopTaxInvoiceDocs[0]?.abb_code_id}</div>
+                                                                <div>วันที่ : {moment(record?.ShopTaxInvoiceDocs[0]?.abb_doc_date).format("DD/MM/YYYY")}</div>
+                                                            </>
+                                                            : ""
+                                                        }
+                                                        {record?.ShopTaxInvoiceDocs[0]?.inv_code_id !== null ?
+                                                            <>
+                                                                <div>ใบกำกับภาษี : {record?.ShopTaxInvoiceDocs[0]?.inv_code_id}</div>
+                                                                <div>วันที่ : {moment(record?.ShopTaxInvoiceDocs[0]?.inv_doc_date).format("DD/MM/YYYY")}</div>
+                                                            </>
+                                                            : ""
+                                                        }
+                                                    </>
+                                                    : ""
+                                                }
+                                            </>
+                                        }>
+                                            <div style={{ textAlign: "center" }}>{text ?? "-"}</div>
+                                        </Tooltip>
                                     </span>
                                 </Col>
                             </Row>
                         </>
-                        // <Badge count={} offset={[20, -5]}>
-
-                        // </Badge>
-                        // <div style={{ textAlign: "start", color: index === 0 ? "red" : "" }}>
-                        //     {text ?? ""}
-                        // </div>
                     )
                 }
             },
@@ -639,26 +670,26 @@ const RepairOrder = ({ docTypeId, view_doc_id, select_shop_ids, title = null, })
             },
 
         )
-        switch (enable_ShopSalesTransaction_legacyStyle) {
-            case true:
-                if (searchStatus === "1") {
-                    delete _column[1]
-                    delete _column[2]
-                } else if (searchStatus === "2") {
-                    delete _column[2]
-                } else if (searchStatus === "3") {
-                    delete _column[1]
-                } else {
-                    delete _column[1]
-                    delete _column[2]
-                }
-                break;
+        // switch (enable_ShopSalesTransaction_legacyStyle) {
+        //     case true:
+        //         if (searchStatus === "1") {
+        //             delete _column[1]
+        //             delete _column[2]
+        //         } else if (searchStatus === "2") {
+        //             delete _column[2]
+        //         } else if (searchStatus === "3") {
+        //             delete _column[1]
+        //         } else {
+        //             delete _column[1]
+        //             delete _column[2]
+        //         }
+        //         break;
 
-            default:
-                delete _column[1]
-                delete _column[2]
-                break;
-        }
+        //     default:
+        //         delete _column[1]
+        //         delete _column[2]
+        //         break;
+        // }
 
         setColumns(_column)
     }

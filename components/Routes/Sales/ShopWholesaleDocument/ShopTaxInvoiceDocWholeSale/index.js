@@ -1,5 +1,5 @@
 import { CarOutlined, FileAddOutlined, UserOutlined, DownOutlined, FileImageOutlined } from '@ant-design/icons'
-import { Button, Col, Form, message, Row, Tabs, Dropdown, Space, Menu } from 'antd'
+import { Button, Col, Form, message, Row, Tabs, Dropdown, Space, Menu, Tooltip } from 'antd'
 import { get, isArray, isEmpty, isPlainObject, result } from 'lodash'
 import moment from 'moment'
 import React, { useEffect, useState } from 'react'
@@ -371,22 +371,22 @@ const ShopTaxInvoiceDocWholeSale = ({ docTypeId }) => {
                     return index + 1
                 },
             },
-            {
-                title: () => GetIntlMessages(`เลขที่${configPage("table-status-2")}`),
-                dataIndex: 'details',
-                key: 'details',
-                width: 180,
-                align: "center",
-                render: (text, record) => get(text, `ShopDocumentCode.TRN.code_id` ?? "-", "-")
-            },
-            {
-                title: () => GetIntlMessages(`เลขที่${configPage("table-status-3")}`),
-                dataIndex: 'details',
-                key: 'details',
-                width: 180,
-                align: "center",
-                render: (text, record) => get(text, `ShopDocumentCode.INV.code_id` ?? "-", "-")
-            },
+            // {
+            //     title: () => GetIntlMessages(`เลขที่${configPage("table-status-2")}`),
+            //     dataIndex: 'details',
+            //     key: 'details',
+            //     width: 180,
+            //     align: "center",
+            //     render: (text, record) => get(text, `ShopDocumentCode.TRN.code_id` ?? "-", "-")
+            // },
+            // {
+            //     title: () => GetIntlMessages(`เลขที่${configPage("table-status-3")}`),
+            //     dataIndex: 'details',
+            //     key: 'details',
+            //     width: 180,
+            //     align: "center",
+            //     render: (text, record) => get(text, `ShopDocumentCode.INV.code_id` ?? "-", "-")
+            // },
             {
                 title: () => GetIntlMessages("เลขที่ใบกำกับภาษี"),
                 children: [
@@ -396,7 +396,20 @@ const ShopTaxInvoiceDocWholeSale = ({ docTypeId }) => {
                         key: 'abb_code_id',
                         width: 150,
                         align: "center",
-                        render: (text, record) => <div style={{ textAlign: "start" }}>{text ?? "-"}</div>
+                        render: (text, record) => {
+                            return (
+                                <Tooltip title={
+                                    <>
+                                        <div>เลขที่ใบสั่งขาย : {record?.ShopServiceOrderDoc?.code_id}</div>
+                                        <div>วันที่ : {moment(record?.ShopServiceOrderDoc?.doc_date).format("DD/MM/YYYY")}</div>
+                                        <div>เลขที่ใบส่งสินค้า : {record?.ShopServiceOrderDoc?.ShopTemporaryDeliveryOrderDocs[0]?.code_id}</div>
+                                        <div>วันที่ : {moment(record?.ShopServiceOrderDoc?.ShopTemporaryDeliveryOrderDocs[0]?.doc_date).format("DD/MM/YYYY")}</div>
+                                    </>
+                                }>
+                                    <div style={{ textAlign: "center" }}>{text ?? "-"}</div>
+                                </Tooltip>
+                            )
+                        }
                     },
                     {
                         title: () => GetIntlMessages("วันที่เอกสาร"),
@@ -406,7 +419,6 @@ const ShopTaxInvoiceDocWholeSale = ({ docTypeId }) => {
                         align: "center",
                         render: (text, record) => text ? moment(text).format("DD/MM/YYYY") : "-"
                     },
-
                 ]
             },
             {
@@ -418,7 +430,20 @@ const ShopTaxInvoiceDocWholeSale = ({ docTypeId }) => {
                         key: 'inv_code_id',
                         width: 150,
                         align: "center",
-                        render: (text, record) => <div style={{ textAlign: "start" }}>{text ?? "-"}</div>
+                        render: (text, record) => {
+                            return (
+                                <Tooltip title={
+                                    <>
+                                        <div>เลขที่ใบสั่งขาย : {record?.ShopServiceOrderDoc?.code_id}</div>
+                                        <div>วันที่ : {moment(record?.ShopServiceOrderDoc?.doc_date).format("DD/MM/YYYY")}</div>
+                                        <div>เลขที่ใบส่งสินค้า : {record?.ShopServiceOrderDoc?.ShopTemporaryDeliveryOrderDocs[0]?.code_id}</div>
+                                        <div>วันที่ : {moment(record?.ShopServiceOrderDoc?.ShopTemporaryDeliveryOrderDocs[0]?.doc_date).format("DD/MM/YYYY")}</div>
+                                    </>
+                                }>
+                                    <div style={{ textAlign: "center" }}>{text ?? "-"}</div>
+                                </Tooltip>
+                            )
+                        }
                     },
                     {
                         title: () => GetIntlMessages("วันที่เอกสาร"),
@@ -539,29 +564,7 @@ const ShopTaxInvoiceDocWholeSale = ({ docTypeId }) => {
                     }
                 },
             },
-
         )
-        switch (enable_ShopSalesTransaction_legacyStyle) {
-            case true:
-                if (searchStatus === "1") {
-                    delete _column[1]
-                    delete _column[2]
-                } else if (searchStatus === "2") {
-                    delete _column[2]
-                } else if (searchStatus === "3") {
-                    delete _column[1]
-                } else {
-                    delete _column[1]
-                    delete _column[2]
-                }
-                break;
-
-            default:
-                delete _column[1]
-                delete _column[2]
-                break;
-        }
-
         setColumns(_column)
     }
 

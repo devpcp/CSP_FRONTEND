@@ -380,22 +380,22 @@ const ShopTemporaryDeliveryOrderDocWholeSale = ({ docTypeId, title = null, callB
                     return index + 1
                 },
             },
-            {
-                title: () => GetIntlMessages(`เลขที่${configPage("table-status-2")}`),
-                dataIndex: 'details',
-                key: 'details',
-                width: 180,
-                align: "center",
-                render: (text, record) => get(text, `ShopDocumentCode.TRN.code_id` ?? "-", "-")
-            },
-            {
-                title: () => GetIntlMessages(`เลขที่${configPage("table-status-3")}`),
-                dataIndex: 'details',
-                key: 'details',
-                width: 180,
-                align: "center",
-                render: (text, record) => get(text, `ShopDocumentCode.INV.code_id` ?? "-", "-")
-            },
+            // {
+            //     title: () => GetIntlMessages(`เลขที่${configPage("table-status-2")}`),
+            //     dataIndex: 'details',
+            //     key: 'details',
+            //     width: 180,
+            //     align: "center",
+            //     render: (text, record) => get(text, `ShopDocumentCode.TRN.code_id` ?? "-", "-")
+            // },
+            // {
+            //     title: () => GetIntlMessages(`เลขที่${configPage("table-status-3")}`),
+            //     dataIndex: 'details',
+            //     key: 'details',
+            //     width: 180,
+            //     align: "center",
+            //     render: (text, record) => get(text, `ShopDocumentCode.INV.code_id` ?? "-", "-")
+            // },
             {
                 title: () => GetIntlMessages("ใบส่งสินค้า/ใบแจ้งหนี้"),
                 dataIndex: 'code_id',
@@ -406,13 +406,67 @@ const ShopTemporaryDeliveryOrderDocWholeSale = ({ docTypeId, title = null, callB
                     if (isFunction(callBack)) {
                         return (
                             <Link href="#" onClick={() => callBack(record)}>
-                                {text}
+                                <Tooltip title={
+                                    <>
+                                        <div>เลขที่ใบสั่งขาย : {record?.ShopServiceOrderDoc?.code_id}</div>
+                                        <div>วันที่ : {moment(record?.ShopServiceOrderDoc?.doc_date).format("DD/MM/YYYY")}</div>
+                                        {record?.ShopServiceOrderDoc?.ShopTaxInvoiceDocs.length !== 0 ?
+                                            <>
+                                                {record?.ShopServiceOrderDoc?.ShopTaxInvoiceDocs[0]?.abb_code_id !== null ?
+                                                    <>
+                                                        <div>อย่างย่อ : {record?.ShopServiceOrderDoc?.ShopTaxInvoiceDocs[0]?.abb_code_id}</div>
+                                                        <div>วันที่ : {moment(record?.ShopServiceOrderDoc?.ShopTaxInvoiceDocs[0]?.abb_doc_date).format("DD/MM/YYYY")}</div>
+                                                    </>
+                                                    : ""
+                                                }
+
+                                                {record?.ShopServiceOrderDoc?.ShopTaxInvoiceDocs[0]?.inv_code_id !== null ?
+                                                    <>
+                                                        <div>ใบกำกับภาษี : {record?.ShopServiceOrderDoc?.ShopTaxInvoiceDocs[0]?.inv_code_id}</div>
+                                                        <div>วันที่ : {moment(record?.ShopServiceOrderDoc?.ShopTaxInvoiceDocs[0]?.inv_doc_date).format("DD/MM/YYYY")}</div>
+                                                    </>
+                                                    : ""
+                                                }
+                                            </>
+                                            : ""
+                                        }
+                                    </>
+                                }>
+                                    <div style={{ textAlign: "center" }}>{text ?? "-"}</div>
+                                </Tooltip>
                             </Link>
                         )
                     } else {
                         return (
                             <div style={{ textAlign: "start" }}>
-                                <Text>{text}</Text>
+                                <Tooltip title={
+                                    <>
+                                        <div>เลขที่ใบสั่งขาย : {record?.ShopServiceOrderDoc?.code_id}</div>
+                                        <div>วันที่ : {moment(record?.ShopServiceOrderDoc?.doc_date).format("DD/MM/YYYY")}</div>
+                                        {record?.ShopServiceOrderDoc?.ShopTaxInvoiceDocs.length !== 0 ?
+                                            <>
+                                                {record?.ShopServiceOrderDoc?.ShopTaxInvoiceDocs[0]?.abb_code_id !== null ?
+                                                    <>
+                                                        <div>อย่างย่อ : {record?.ShopServiceOrderDoc?.ShopTaxInvoiceDocs[0]?.abb_code_id}</div>
+                                                        <div>วันที่ : {moment(record?.ShopServiceOrderDoc?.ShopTaxInvoiceDocs[0]?.abb_doc_date).format("DD/MM/YYYY")}</div>
+                                                    </>
+                                                    : ""
+                                                }
+
+                                                {record?.ShopServiceOrderDoc?.ShopTaxInvoiceDocs[0]?.inv_code_id !== null ?
+                                                    <>
+                                                        <div>ใบกำกับภาษี : {record?.ShopServiceOrderDoc?.ShopTaxInvoiceDocs[0]?.inv_code_id}</div>
+                                                        <div>วันที่ : {moment(record?.ShopServiceOrderDoc?.ShopTaxInvoiceDocs[0]?.inv_doc_date).format("DD/MM/YYYY")}</div>
+                                                    </>
+                                                    : ""
+                                                }
+                                            </>
+                                            : ""
+                                        }
+                                    </>
+                                }>
+                                    <div style={{ textAlign: "center" }}><Text>{text}</Text></div>
+                                </Tooltip>
                             </div>
                         )
                     }
@@ -598,26 +652,26 @@ const ShopTemporaryDeliveryOrderDocWholeSale = ({ docTypeId, title = null, callB
                 ),
             },
         )
-        switch (enable_ShopSalesTransaction_legacyStyle) {
-            case true:
-                if (searchStatus === "1") {
-                    delete _column[1]
-                    delete _column[2]
-                } else if (searchStatus === "2") {
-                    delete _column[2]
-                } else if (searchStatus === "3") {
-                    delete _column[1]
-                } else {
-                    delete _column[1]
-                    delete _column[2]
-                }
-                break;
+        // switch (enable_ShopSalesTransaction_legacyStyle) {
+        //     case true:
+        //         if (searchStatus === "1") {
+        //             delete _column[1]
+        //             delete _column[2]
+        //         } else if (searchStatus === "2") {
+        //             delete _column[2]
+        //         } else if (searchStatus === "3") {
+        //             delete _column[1]
+        //         } else {
+        //             delete _column[1]
+        //             delete _column[2]
+        //         }
+        //         break;
 
-            default:
-                delete _column[1]
-                delete _column[2]
-                break;
-        }
+        //     default:
+        //         delete _column[1]
+        //         delete _column[2]
+        //         break;
+        // }
 
         _column.map((x) => { x.use === undefined ? x.use = true : null })
         setColumns(_column.filter(x => x.use === true));
