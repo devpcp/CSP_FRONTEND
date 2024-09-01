@@ -40,7 +40,7 @@ const ComponentsRoutesModalFormPurchaseDoc = ({ mode, configModal, docTypeId, on
                         if (data.status === "success") {
                             // setBussinessPartnerList(() => data.data.data)
                             business_partners_list = data.data.data ?? []
-                            
+
                         }
                     }
 
@@ -70,7 +70,7 @@ const ComponentsRoutesModalFormPurchaseDoc = ({ mode, configModal, docTypeId, on
             > */}
             <Row gutter={[20]}>
                 <Col lg={8} md={12} sm={12} xs={24} hidden>
-                    <Form.Item name="business_partners_list"/>
+                    <Form.Item name="business_partners_list" />
                 </Col>
                 <Col lg={8} md={12} sm={12} xs={24}>
                     <Form.Item
@@ -82,7 +82,7 @@ const ComponentsRoutesModalFormPurchaseDoc = ({ mode, configModal, docTypeId, on
                         <Select showSearch allowClear disabled={mode === "view"}
                             onSearch={(value) => debounceOnSearch(value, "search")}
                             filterOption={(input, option) => option.children.toLowerCase().includes(input.toLowerCase())}
-                            // filterOption={false}
+                        // filterOption={false}
                         >
                             {getArrListValue("business_partners_list").map((e, i) => <Select.Option value={e.id} key={`bussiness-partner-code-${i}-${e.id}`}>{get(e, `code_id`, "-")}</Select.Option>)}
                             {/* {
@@ -190,7 +190,7 @@ const ComponentsRoutesModalFormPurchaseDoc = ({ mode, configModal, docTypeId, on
                         name="doc_date"
                         label={GetIntlMessages("วันที่อ้างอิง")}
                     >
-                        <DatePicker style={{ width: "100%" }} disabled={mode === "view"} />
+                        <DatePicker style={{ width: "100%" }} disabled={mode === "view"} format={"DD/MM/YYYY"} />
                     </Form.Item>
                 </Col>
             </Row>

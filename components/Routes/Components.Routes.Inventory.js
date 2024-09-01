@@ -166,7 +166,7 @@ const CustomersIndex = ({ status, pageId, title = null, callBack, listIndex, sel
         },
     };
 
-    const setColumnsTable = () => {
+    const setColumnsTable = (data) => {
         const _column = [
             {
                 title: 'ลำดับ',
@@ -271,7 +271,7 @@ const CustomersIndex = ({ status, pageId, title = null, callBack, listIndex, sel
                 key: 'ShopProduct',
                 width: 110,
                 align: "right",
-                render: (text, record) => (get(text, 'price.suggasted_re_sell_price.retail', "-") == 0) ? "-" : get(text, 'price.suggasted_re_sell_price.retail', "-")?.toLocaleString() ?? "-"
+                render: (text, record) => (get(text, 'price.suggasted_re_sell_price.retail', "-") == 0) ? "-" : (+get(text, 'price.suggasted_re_sell_price.retail', "-"))?.toLocaleString() ?? "-"
             },
             {
                 title: 'ราคาขายส่ง/หน่วย',
@@ -279,7 +279,7 @@ const CustomersIndex = ({ status, pageId, title = null, callBack, listIndex, sel
                 key: 'ShopProduct',
                 width: 110,
                 align: "right",
-                render: (text, record) => (get(text, 'price.suggasted_re_sell_price.wholesale', "-") == 0) ? "-" : get(text, 'price.suggasted_re_sell_price.wholesale', "-")?.toLocaleString() ?? "-"
+                render: (text, record) => (get(text, 'price.suggasted_re_sell_price.wholesale', "-") == 0) ? "-" : (+get(text, 'price.suggasted_re_sell_price.wholesale', "-"))?.toLocaleString() ?? "-"
             },
             {
                 title: 'จำนวนสินค้าคงเหลือ (QTY)',
@@ -312,6 +312,59 @@ const CustomersIndex = ({ status, pageId, title = null, callBack, listIndex, sel
             },
 
         ];
+
+        let columnPriceArray = {
+            title: 'ร่องราคา',
+            align: "center",
+            use: true,
+            children: []
+        }
+        let price_arr = []
+        data?.map((e) => {
+            // console.log("eee", e)
+            if (e.ShopProduct.price_arr) {
+                e.ShopProduct.price_arr.map((el) => {
+                    // console.log("elel", el)
+                    let findIndex = price_arr.findIndex(x => x.price_name === el.price_name)
+                    // console.log("elefindIndexl", findIndex)
+                    if (findIndex === -1) {
+                        price_arr.push({ price_name: el.price_name, price_value: el.price_value })
+                    }
+                })
+            }
+            // price_arr.push(
+            //     {
+            //         length: e.ShopProduct.price_arr ? e.ShopProduct.price_arr.length : 0,
+            //         data: e.ShopProduct.price_arr,
+            //     }
+            // )
+        })
+        // console.log("price_arr", price_arr)
+        price_arr.map((e) => {
+            columnPriceArray.children.push({
+                title: e.price_name,
+                dataIndex: 'ShopProduct',
+                key: 'ShopProduct',
+                width: 100,
+                render: (text, record) => {
+                    let check = text.price_arr ? text?.price_arr.filter(x => x.price_name === e.price_name) : []
+                    console.log("check", check)
+                    if (text.price_arr) {
+                        if (check.length > 0) {
+                            return (+check[0].price_value).toLocaleString()
+                        } else {
+                            return 0
+                        }
+                    } else {
+                        return 0
+                    }
+
+                }
+            })
+        })
+
+        _column.push(columnPriceArray)
+
 
         _column.map((x) => { x.use === undefined ? x.use = true : null })
         setColumns(_column.filter(x => x.use === true));
@@ -417,7 +470,7 @@ const CustomersIndex = ({ status, pageId, title = null, callBack, listIndex, sel
             if (res.data.status === "success") {
                 const { currentCount, currentPage, pages, totalCount, data } = res.data.data;
                 // console.log(`data`, data)
-
+                setColumnsTable(data)
                 // const newData = data.filter(where => where.balance != 0)
                 const newData = data
                 setListSearchDataTable(newData)
@@ -1517,7 +1570,7 @@ const CustomersIndex = ({ status, pageId, title = null, callBack, listIndex, sel
     }
 
     const MatchRound = (value) => (Math.round(+value * 100) / 100).toFixed(2)
-    
+
     return (
         <>
             <>

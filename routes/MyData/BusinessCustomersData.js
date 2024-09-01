@@ -24,6 +24,8 @@ import moment from 'moment'
 import TextArea from 'antd/lib/input/TextArea';
 import TagsData from "../../routes/Setting/TagsData"
 import ReportSalesOut from "./Reports/ReportSalesOut"
+import { ImageMulti } from '../../components/shares/FormUpload/ImageMulti'
+import { UploadImageCustomPathMultiple, DeleteImageCustomPathMultiple } from '../../components/shares/FormUpload/API'
 
 const { Text, Link } = Typography;
 
@@ -38,6 +40,7 @@ const BusinessCustomersData = ({ title = null, callBack }) => {
     const [columns, setColumns] = useState([])
     const { permission_obj } = useSelector(({ permission }) => permission);
     const { locale } = useSelector(({ settings }) => settings);
+    const { authUser } = useSelector(({ auth }) => auth);
     const [formLocale, setFormLocale] = useState(locale.icon)
     const [shipToSameAddress, setShipToSameAddress] = useState(false);
     const [isIdEditData, setIsIdEditData] = useState({});
@@ -50,6 +53,8 @@ const BusinessCustomersData = ({ title = null, callBack }) => {
     const [lineData, setLineData] = useState(null);
     const [showModalTagsData, setShowModalTagsData] = useState(false);
     const [showModalSalesHistoryData, setShowModalSalesHistoryData] = useState(false);
+
+
 
     /**
     * ค่าเริ่มต้นของ
@@ -462,6 +467,9 @@ const BusinessCustomersData = ({ title = null, callBack }) => {
                     setCheckedIsForeign(_model.is_foreign)
                     _model.latitude = isPlainObject(_model.other_details) ? _model.other_details["latitude"] ?? null : null
                     _model.longitude = isPlainObject(_model.other_details) ? _model.other_details["longitude"] ?? null : null
+                    _model.upload_shop_picture_list = isPlainObject(_model.other_details) ? _model.other_details?.upload_shop_picture_list ?? [] : []
+                    _model.upload_shop_document_list = isPlainObject(_model.other_details) ? _model.other_details?.upload_shop_document_list ?? [] : []
+                    _model.upload_remove_list = []
 
                     if (isPlainObject(_model.other_details)) {
                         switch (_model.other_details["branch"]) {
@@ -483,14 +491,17 @@ const BusinessCustomersData = ({ title = null, callBack }) => {
                         _model.mobile_no = Object.entries(_model.mobile_no).map((e) => ({ mobile_no: e[1] }));
                         // await setMobileNo([..._model.mobile_no])
                     }
-                    // console.log("setModel", _model)
+                    console.log("setModel", _model)
                     form.setFieldsValue(_model)
                 }
 
             } else {
                 form.setFieldsValue({
                     is_foreign: false,
-                    branch: "office"
+                    branch: "office",
+                    upload_shop_picture_list: [],
+                    upload_shop_document_list: [],
+                    upload_remove_list: []
                 })
             }
             form.setFieldsValue({ mode })
@@ -527,6 +538,69 @@ const BusinessCustomersData = ({ title = null, callBack }) => {
     const onFinish = async (value) => {
         try {
             // console.log(`value`, value)
+            let shopId = authUser?.UsersProfile?.shop_id
+            let directory = "shopBusinessCustomer"
+            let upload_shop_picture_list = [], upload_shop_document_list = []
+            if (value.upload_shop_picture_list) {
+                if (value?.upload_shop_picture_list?.fileList?.length > 0) {
+                    await Promise.all(value.upload_shop_picture_list.fileList.map(async (e, index) => {
+                        await UploadImageCustomPathMultiple(e, { shopId: shopId, idEdit: idEdit, directory: directory, subject: "shop_picture" }).then(({ data }) => {
+                            if (data.status === "success") {
+                                try {
+                                    upload_shop_picture_list.push(
+                                        {
+                                            uid: index,
+                                            name: e.name,
+                                            status: 'done',
+                                            url: process.env.NEXT_PUBLIC_DIRECTORY + data.data.path,
+                                            path: data.data.path
+                                        }
+                                    )
+                                    e.url = process.env.NEXT_PUBLIC_DIRECTORY + data.data.path
+                                    e.path = data.data.path
+                                } catch (error) {
+                                    console.log("error: ", error)
+                                }
+                            } else if (data.status === "failed") {
+                                e.path = e.url.split(process.env.NEXT_PUBLIC_DIRECTORY)[1]
+                                // message.error(`รูปที่ ${index + 1} : ${data.data}`)
+                            }
+                        })
+                    })
+                    )
+                }
+            }
+
+            if (value.upload_shop_document_list) {
+                if (value?.upload_shop_document_list?.fileList?.length > 0) {
+                    await Promise.all(value.upload_shop_document_list.fileList.map(async (e, index) => {
+                        await UploadImageCustomPathMultiple(e, { shopId: shopId, idEdit: idEdit, directory: directory, subject: "shop_document" }).then(({ data }) => {
+                            if (data.status === "success") {
+                                try {
+                                    upload_shop_document_list.push(
+                                        {
+                                            uid: index,
+                                            name: e.name,
+                                            status: 'done',
+                                            url: process.env.NEXT_PUBLIC_DIRECTORY + data.data.path,
+                                            path: data.data.path
+                                        }
+                                    )
+                                    e.url = process.env.NEXT_PUBLIC_DIRECTORY + data.data.path
+                                    e.path = data.data.path
+                                } catch (error) {
+                                    console.log("error: ", error)
+                                }
+                            } else if (data.status === "failed") {
+                                e.path = e.url.split(process.env.NEXT_PUBLIC_DIRECTORY)[1]
+                                // message.error(`รูปที่ ${index + 1} : ${data.data}`)
+                            }
+                        })
+                    })
+                    )
+                }
+            }
+
 
             const _model = {
                 tax_id: value.tax_id,
@@ -574,6 +648,8 @@ const BusinessCustomersData = ({ title = null, callBack }) => {
                     note: value.note ?? null,
                     latitude: value.latitude ?? null,
                     longitude: value.longitude ?? null,
+                    upload_shop_picture_list: await value.upload_shop_picture_list.fileList === undefined ? await value.upload_shop_picture_list : value.upload_shop_picture_list.fileList,
+                    upload_shop_document_list: await value.upload_shop_document_list.fileList === undefined ? await value.upload_shop_document_list : value.upload_shop_document_list.fileList,
                 }
             }
 
@@ -1623,8 +1699,34 @@ const BusinessCustomersData = ({ title = null, callBack }) => {
                                             </Col>
                                         </Row>,
                                 },
+                                {
+                                    label: (<span><TableOutlined style={{ fontSize: 18 }} /> รูปภาพ</span>),
+                                    key: '4',
+                                    children:
+                                        <Row gutter={[20]}>
+                                            <Col lg={12} md={12} xs={24}>
+                                                <Fieldset legend={(<span style={{ paddingLeft: 10, paddingRight: 10, fontSize: "1.5rem" }}>รูปร้าน</span>)}>
+                                                    <ImageMulti name="upload_shop_picture_list" listType={`picture`} isfile isMultiple={true} value={form.getFieldValue().upload_shop_picture_list} form={form} isShowRemoveIcon={configModal.mode !== "view"} disabled={configModal.mode === "view"} lengthUpload={5} mode={configModal.mode} />
+                                                </Fieldset>
+                                            </Col>
+                                            <Col lg={12} md={12} xs={24}>
+                                                <Fieldset legend={(<span style={{ paddingLeft: 10, paddingRight: 10, fontSize: "1.5rem" }}>รูปเอกสาร</span>)}>
+                                                    <ImageMulti name="upload_shop_document_list" listType={`picture`} isfile isMultiple={true} value={form.getFieldValue().upload_shop_document_list} form={form} isShowRemoveIcon={configModal.mode !== "view"} disabled={configModal.mode === "view"} lengthUpload={5} mode={configModal.mode} />
+                                                </Fieldset>
+                                            </Col>
+                                        </Row >
+                                }
                             ]}
                         />
+                        <Form.Item name="upload_shop_picture_list" hidden>
+
+                        </Form.Item>
+                        <Form.Item name="upload_shop_document_list" hidden>
+
+                        </Form.Item>
+                        <Form.Item name="upload_remove_list" hidden>
+
+                        </Form.Item>
                     </Form>
                 </ModalFullScreen>
 
@@ -1759,6 +1861,9 @@ const BusinessCustomersData = ({ title = null, callBack }) => {
                 .fieldset-business-customer{
                     padding: 8px;
                 }
+                .ant-btn-icon-only.ant-btn-sm {
+                    padding: 0 !important;
+                  }
             `}</style>
         </>
     )
