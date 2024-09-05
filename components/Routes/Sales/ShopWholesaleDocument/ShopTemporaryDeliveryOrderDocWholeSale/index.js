@@ -1463,7 +1463,9 @@ const ShopTemporaryDeliveryOrderDocWholeSale = ({ docTypeId, title = null, callB
 
             const model = {
                 shop_id: authUser?.UsersProfile?.shop_id,
-                [values.customer_type === 'person' ? "per_customer_id" : "bus_customer_id"]: values.customer_id,
+                // [values.customer_type === 'person' ? "per_customer_id" : "bus_customer_id"]: values.customer_id,
+                per_customer_id: values.customer_type === 'person' ? values.customer_id : null,
+                bus_customer_id: values.customer_type === 'business' ? values.customer_id : null,
                 doc_type_id: values.doc_type_id,
                 doc_date: moment(values.doc_date).format("YYYY-MM-DD"),
                 vehicle_customer_id: values.vehicle_customer_id ?? null,
