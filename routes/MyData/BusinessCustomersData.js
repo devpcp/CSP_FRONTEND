@@ -539,11 +539,14 @@ const BusinessCustomersData = ({ title = null, callBack }) => {
         try {
 
             const { target } = value
-            target.map((e) => {
-                e.target_data.map((el) => {
-                    el.year = e.year
+            if (target) {
+                target.map((e) => {
+                    e.target_data.map((el) => {
+                        el.year = e.year
+                    })
                 })
-            })
+            }
+
 
             let shopId = authUser?.UsersProfile?.shop_id
             let directory = "shopBusinessCustomer"
