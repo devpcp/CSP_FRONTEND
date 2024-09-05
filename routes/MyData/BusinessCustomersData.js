@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
-import { Button, message, Input, Modal, Radio, Row, Col, Select, Form, Switch, Upload, Table, Space, InputNumber, DatePicker, Image, Divider, Typography, Tabs } from 'antd';
-import { PlusOutlined, MinusCircleOutlined, UploadOutlined, CarOutlined, TeamOutlined, SearchOutlined, TagsOutlined, FileTextOutlined, TableOutlined } from '@ant-design/icons';
+import { Button, message, Input, Modal, Radio, Row, Col, Select, Form, Switch, Upload, Table, Space, InputNumber, DatePicker, Image, Divider, Typography, Tabs, Tooltip, Card } from 'antd';
+import { PlusOutlined, MinusCircleOutlined, UploadOutlined, CarOutlined, TeamOutlined, SearchOutlined, TagsOutlined, FileTextOutlined, TableOutlined, InfoCircleTwoTone, CloseOutlined } from '@ant-design/icons';
 import API from '../../util/Api'
 import { useSelector } from 'react-redux';
 import SearchInput from '../../components/shares/SearchInput'
@@ -537,7 +537,14 @@ const BusinessCustomersData = ({ title = null, callBack }) => {
 
     const onFinish = async (value) => {
         try {
-            // console.log(`value`, value)
+
+            const { target } = value
+            target.map((e) => {
+                e.target_data.map((el) => {
+                    el.year = e.year
+                })
+            })
+
             let shopId = authUser?.UsersProfile?.shop_id
             let directory = "shopBusinessCustomer"
             let upload_shop_picture_list = [], upload_shop_document_list = []
@@ -601,6 +608,24 @@ const BusinessCustomersData = ({ title = null, callBack }) => {
                 }
             }
 
+            if (value.upload_remove_list) {
+                if (value?.upload_remove_list?.length > 0) {
+                    await Promise.all(value.upload_remove_list.map(async (e, index) => {
+                        await DeleteImageCustomPathMultiple(e.path).then(({ data }) => {
+                            if (data.status === "success") {
+                                try {
+
+                                } catch (error) {
+                                    console.log("error: ", error)
+                                }
+                            } else if (data.status === "failed") {
+                            }
+                        })
+                    })
+                    )
+                }
+            }
+
 
             const _model = {
                 tax_id: value.tax_id,
@@ -614,6 +639,7 @@ const BusinessCustomersData = ({ title = null, callBack }) => {
                 district_id: value.district_id ?? null,
                 province_id: value.province_id ?? null,
                 tags: value.tags ?? undefined,
+                target: target,
                 other_details: {
                     contact_name: value.contact_name ?? null,
                     contact_number: value.contact_number ?? null,
@@ -667,7 +693,7 @@ const BusinessCustomersData = ({ title = null, callBack }) => {
 
             if (value.tel_no) value.tel_no.forEach((e, i) => _model.tel_no[`tel_no_${i + 1}`] = e.tel_no);
             else value.tel_no = []
-            // console.log('_model', _model)
+            console.log('_model', _model)
 
             let res
             if (configModal.mode === "add") {
@@ -699,6 +725,7 @@ const BusinessCustomersData = ({ title = null, callBack }) => {
                 });
             } else {
                 message.error('มีบางอย่างผิดพลาด !!');
+                console.log('error :>> ', error);
             }
 
         } catch (error) {
@@ -1010,6 +1037,13 @@ const BusinessCustomersData = ({ title = null, callBack }) => {
     }
 
     const MatchRound = (value) => (Math.round(+value * 100) / 100).toFixed(2)
+
+    const addComma = (x) => {
+        var parts = x.toString().split(".");
+        parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        return parts.join(".");
+    }
+
 
     return (
         <>
@@ -1700,8 +1734,176 @@ const BusinessCustomersData = ({ title = null, callBack }) => {
                                         </Row>,
                                 },
                                 {
-                                    label: (<span><TableOutlined style={{ fontSize: 18 }} /> รูปภาพ</span>),
+                                    label: (<span><TableOutlined style={{ fontSize: 18 }} /> เป้าการซื้อ</span>),
                                     key: '4',
+                                    children:
+                                        <Row>
+                                            <Col span={24}>
+                                                <Fieldset legend={`ข้อมูลระบบ`} className={"fieldset-business-customer"}>
+                                                    <Form.List name="target">
+                                                        {(fields, { add, remove }) => {
+
+                                                            return (
+                                                                <div
+                                                                    style={{
+                                                                        display: 'flex',
+                                                                        rowGap: 16,
+                                                                        flexDirection: 'column',
+                                                                    }}
+                                                                >
+                                                                    {fields.map((field) => (
+
+                                                                        <Row key={field.key} style={{ display: 'flex', marginBottom: 8, alignContent: "center" }} align="baseline">
+                                                                            <Col xs={24} md={8} xl={8} >
+                                                                                <Form.Item label="ลำดับ" name={[field.name, 'order']} rules={[{ required: true, message: 'กรุณากรอกข้อมูล' }]}>
+                                                                                    <Input />
+                                                                                </Form.Item>
+                                                                            </Col>
+                                                                            <Col xs={24} md={8} xl={8}>
+                                                                                <Form.Item label="ชื่อ" name={[field.name, 'name']} rules={[{ required: true, message: 'กรุณากรอกข้อมูล' }]}>
+                                                                                    <Input />
+                                                                                </Form.Item>
+                                                                            </Col>
+                                                                            <Col xs={24} md={6} xl={6} >
+                                                                                <Form.Item label="ปี" name={[field.name, 'year']} rules={[{ required: true, message: 'กรุณากรอกข้อมูล' }, { min: 4, message: 'กรุณากรอกข้อมูลให้ถูกต้อง' }, { max: 4, message: 'กรุณากรอกข้อมูลให้ถูกต้อง' }]}>
+                                                                                    <Input maxLength={4} placeholder={moment(Date.now()).format("YYYY")} />
+                                                                                </Form.Item>
+                                                                            </Col>
+                                                                            <Col span={2} style={{ textAlign: "end" }}>
+                                                                                <Button onClick={() => remove(field.name)} type='danger'>ลบรายการ</Button>
+                                                                            </Col>
+
+                                                                            <Col span={24}>
+                                                                                <Form.Item label="ข้อมูล">
+                                                                                    <Form.List name={[field.name, 'target_data']}>
+                                                                                        {(subFields, subOpt) => (
+                                                                                            <div
+                                                                                                style={{
+                                                                                                    display: 'flex',
+                                                                                                    flexDirection: 'column',
+                                                                                                    rowGap: 16,
+                                                                                                }}
+                                                                                            >
+                                                                                                {subFields.map((subField) => (
+                                                                                                    <Space key={subField.key}>
+                                                                                                        <Form.Item noStyle name={[subField.name, 'month_id']}>
+                                                                                                            <Input placeholder="ลำดับ" disabled />
+                                                                                                        </Form.Item>
+                                                                                                        <Form.Item noStyle name={[subField.name, `month_name`]}>
+                                                                                                            <Input placeholder="เดือน" disabled />
+                                                                                                        </Form.Item>
+                                                                                                        <Form.Item noStyle name={[subField.name, 'month_target']}>
+                                                                                                            <InputNumber
+                                                                                                                placeholder="เป้า"
+                                                                                                                min={0}
+                                                                                                                stringMode
+                                                                                                                style={{ width: "100%" }}
+                                                                                                                precision={2}
+                                                                                                                formatter={(value) => !!value && value.length > 0 ? `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',') : ""}
+                                                                                                                parser={(value) => value.replace(/\$\s?|(,*)/g, '')}
+                                                                                                            />
+                                                                                                        </Form.Item>
+                                                                                                        {/* <CloseOutlined
+                                                                                                            onClick={() => {
+                                                                                                                subOpt.remove(subField.name);
+                                                                                                            }}
+                                                                                                        /> */}
+                                                                                                    </Space>
+                                                                                                ))}
+                                                                                                {/* <Button type="dashed" onClick={() => subOpt.add()} block>
+                                                                                                    + Add Sub Item
+                                                                                                </Button> */}
+                                                                                            </div>
+                                                                                        )}
+                                                                                    </Form.List>
+                                                                                </Form.Item>
+                                                                            </Col>
+                                                                        </Row>
+                                                                    ))}
+
+                                                                    <Button
+                                                                        hidden={fields.length > 0}
+                                                                        type="dashed"
+                                                                        onClick={() => add(
+                                                                            {
+                                                                                order: fields.length + 1,
+                                                                                target_data: [
+                                                                                    {
+                                                                                        month_id: 1,
+                                                                                        month_name: "มกราคม",
+                                                                                        month_target: 0,
+                                                                                    },
+                                                                                    {
+                                                                                        month_id: 2,
+                                                                                        month_name: "กุมภาพันธ์",
+                                                                                        month_target: 0,
+                                                                                    },
+                                                                                    {
+                                                                                        month_id: 3,
+                                                                                        month_name: "มีนาคม",
+                                                                                        month_target: 0,
+                                                                                    },
+                                                                                    {
+                                                                                        month_id: 4,
+                                                                                        month_name: "เมษายน",
+                                                                                        month_target: 0,
+                                                                                    },
+                                                                                    {
+                                                                                        month_id: 5,
+                                                                                        month_name: "พฤษภาคม",
+                                                                                        month_target: 0,
+                                                                                    },
+                                                                                    {
+                                                                                        month_id: 6,
+                                                                                        month_name: "มิถุนายน",
+                                                                                        month_target: 0,
+                                                                                    },
+                                                                                    {
+                                                                                        month_id: 7,
+                                                                                        month_name: "กรกฎาคม",
+                                                                                        month_target: 0,
+                                                                                    },
+                                                                                    {
+                                                                                        month_id: 8,
+                                                                                        month_name: "สิงหาคม",
+                                                                                        month_target: 0,
+                                                                                    },
+                                                                                    {
+                                                                                        month_id: 9,
+                                                                                        month_name: "กันยายน",
+                                                                                        month_target: 0,
+                                                                                    },
+                                                                                    {
+                                                                                        month_id: 10,
+                                                                                        month_name: "ตุลาคม",
+                                                                                        month_target: 0,
+                                                                                    },
+                                                                                    {
+                                                                                        month_id: 11,
+                                                                                        month_name: "พฤศจิกายน",
+                                                                                        month_target: 0,
+                                                                                    },
+                                                                                    {
+                                                                                        month_id: 12,
+                                                                                        month_name: "ธันวาคม",
+                                                                                        month_target: 0,
+                                                                                    },
+                                                                                ]
+                                                                            }
+                                                                        )} block>
+                                                                        + เพิ่มรายการ
+                                                                    </Button>
+                                                                </div>
+                                                            )
+                                                        }}
+                                                    </Form.List>
+                                                </Fieldset>
+                                            </Col>
+                                        </Row >
+                                },
+                                {
+                                    label: (<span><TableOutlined style={{ fontSize: 18 }} /> รูปภาพ</span>),
+                                    key: '5',
                                     children:
                                         <Row gutter={[20]}>
                                             <Col lg={12} md={12} xs={24}>

@@ -539,8 +539,8 @@ const BusinessPartnersData = ({ title = null, callBack }) => {
         other_details: {
           contact_name: value.contact_name ?? null,
           contact_number: value.contact_number ?? null,
-          credit_term: value.credit_term ?? null,
-          credit_limit: MatchRound(+value.credit_limit) ?? null,
+          credit_term: value.credit_term ?? 0,
+          credit_limit: value.credit_limit !== null ? MatchRound(+value.credit_limit) : 0,
           tax_type_id: value.tax_type_id ?? null,
           branch: value.branch ?? null,
           branch_code: value.branch_code ?? null,
