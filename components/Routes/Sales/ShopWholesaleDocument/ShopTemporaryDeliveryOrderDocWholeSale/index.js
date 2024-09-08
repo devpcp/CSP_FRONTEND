@@ -402,6 +402,7 @@ const ShopTemporaryDeliveryOrderDocWholeSale = ({ docTypeId, title = null, callB
                 key: 'code_id',
                 width: 150,
                 align: "center",
+                sorter: true,
                 render: (text, record) => {
                     if (isFunction(callBack)) {
                         return (

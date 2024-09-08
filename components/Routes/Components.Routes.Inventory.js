@@ -182,9 +182,10 @@ const CustomersIndex = ({ status, pageId, title = null, callBack, listIndex, sel
             {
                 title: 'รหัส',
                 dataIndex: 'ShopProduct',
-                key: 'ShopProduct',
+                key: 'master_path_code_id',
                 width: 150,
                 align: "center",
+                sorter: true,
                 render: (text, record) => {
                     console.log("isFunctioncallBack", isFunction(callBack))
                     if (isFunction(callBack)) {
@@ -206,7 +207,6 @@ const CustomersIndex = ({ status, pageId, title = null, callBack, listIndex, sel
                         )
                     }
                 },
-                // render: (text, record) => text ? text.master_path_code_id : "-",
             },
             {
                 title: 'ชื่อสินค้า',
@@ -292,7 +292,6 @@ const CustomersIndex = ({ status, pageId, title = null, callBack, listIndex, sel
                     let over_qty_point = record?.ShopProduct?.details?.over_qty_point
                     return (
                         <>
-                            {/* <span>{text ? Number(text).toLocaleString() : "0"} {true ? <Button type="link" ><EditOutlined onClick={() => editBalance(record)} style={{ fontSize: 23, color: 'blue' }} /></Button> : null} </span> */}
                             <Tooltip title={reOrderPointColor(reorder_point, over_qty_point, +text) === "red" ? <div style={{ textAlign: "center" }}>จำนวนสินค้าต่ำกว่าจุดสั่งซื้อ <br></br>จุดสั่งซื้อคือ {reorder_point} </div> : reOrderPointColor(reorder_point, over_qty_point, +text) === "orange" ? <div style={{ textAlign: "center" }}>จำนวนสินค้าสูงเกินกว่าเพดานสินค้า <br></br>เพดานสินค้าซื้อคือ {over_qty_point} </div> : ""}>
                                 <span
                                     style={{
@@ -304,13 +303,10 @@ const CustomersIndex = ({ status, pageId, title = null, callBack, listIndex, sel
                                     {text ? Number(text).toLocaleString() : "0"}
                                 </span>
                             </Tooltip>
-
-                            {/* {console.log('record', record)} */}
                         </>
                     )
                 },
             },
-
         ];
 
         let columnPriceArray = {
@@ -321,25 +317,15 @@ const CustomersIndex = ({ status, pageId, title = null, callBack, listIndex, sel
         }
         let price_arr = []
         data?.map((e) => {
-            // console.log("eee", e)
             if (e.ShopProduct.price_arr) {
                 e.ShopProduct.price_arr.map((el) => {
-                    // console.log("elel", el)
                     let findIndex = price_arr.findIndex(x => x.price_name === el.price_name)
-                    // console.log("elefindIndexl", findIndex)
                     if (findIndex === -1) {
                         price_arr.push({ price_name: el.price_name, price_value: el.price_value })
                     }
                 })
             }
-            // price_arr.push(
-            //     {
-            //         length: e.ShopProduct.price_arr ? e.ShopProduct.price_arr.length : 0,
-            //         data: e.ShopProduct.price_arr,
-            //     }
-            // )
         })
-        // console.log("price_arr", price_arr)
         price_arr.map((e) => {
             columnPriceArray.children.push({
                 title: e.price_name,

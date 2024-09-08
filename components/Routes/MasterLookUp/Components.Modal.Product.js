@@ -1760,8 +1760,8 @@ const ComponentsModalProduct = ({ form, mode, checkedOkAndCancle, status, checke
                                             allowClear
                                             placeholder="เลือกข้อมูล"
                                             optionFilterProp="children"
-                                            disabled={status === "productShop" ? (mode != "add" || form.getFieldValue().productId) : mode === "view"}
-                                            // disabled={status == "productMaster" ? mode == "view" : disabledSomChaiShop ? !disabledSomChaiShop : mode !== "add" || onDisabledProductIdChange}
+                                            // disabled={status === "productShop" ? mode === "view" : false}
+                                            disabled={true}
                                             filterOption={(inputValue, option) => {
                                                 if (_.isPlainObject(option)) {
                                                     if (option.children) {
@@ -1771,7 +1771,7 @@ const ComponentsModalProduct = ({ form, mode, checkedOkAndCancle, status, checke
                                             }}
 
                                         >
-                                            {isArray(productPurchaseUnitTypes) && productPurchaseUnitTypes.length > 0 ? productPurchaseUnitTypes.map((e, index) => (
+                                            {isArray(productPurchaseUnitTypes) && productPurchaseUnitTypes.length > 0 ? productPurchaseUnitTypes.filter(x => x.type_group_id === form.getFieldValue().product_type_group_id).map((e, index) => (
                                                 <Select.Option value={e.id} key={index}>
                                                     {getNameSelect(e, "type_name")}
                                                 </Select.Option>
@@ -1788,8 +1788,8 @@ const ComponentsModalProduct = ({ form, mode, checkedOkAndCancle, status, checke
                                             allowClear
                                             placeholder="เลือกข้อมูล"
                                             optionFilterProp="children"
-                                            disabled={status === "productShop" ? (mode != "add" || form.getFieldValue().productId) : mode === "view"}
-                                            // disabled={status == "productMaster" ? mode == "view" : disabledSomChaiShop ? !disabledSomChaiShop : mode !== "add" || onDisabledProductIdChange}
+                                            // disabled={status === "productShop" ? mode === "view" : false}
+                                            disabled={true}
                                             filterOption={(inputValue, option) => {
                                                 if (_.isPlainObject(option)) {
                                                     if (option.children) {
@@ -1799,7 +1799,7 @@ const ComponentsModalProduct = ({ form, mode, checkedOkAndCancle, status, checke
                                             }}
 
                                         >
-                                            {isArray(productPurchaseUnitTypes) && productPurchaseUnitTypes.length > 0 ? productPurchaseUnitTypes.map((e, index) => (
+                                            {isArray(productPurchaseUnitTypes) && productPurchaseUnitTypes.length > 0 ? productPurchaseUnitTypes.filter(x => x.type_group_id === form.getFieldValue().product_type_group_id).map((e, index) => (
                                                 <Select.Option value={e.id} key={index}>
                                                     {getNameSelect(e, "type_name")}
                                                 </Select.Option>
@@ -1863,16 +1863,6 @@ const ComponentsModalProduct = ({ form, mode, checkedOkAndCancle, status, checke
                                         <Input disabled />
                                     </Form.Item>
                                 </Col>
-                                {/* <Col xs={24} xl={12}>
-                                    <Form.Item label="บริการครั้งถัดไป" name="next_service" rules={[{ required: false, message: GetIntlMessages("please-fill-out") }]}>
-                                        <Input disabled={mode == "view"} />
-                                    </Form.Item>
-                                </Col>
-                                <Col xs={24} xl={12}>
-                                    <Form.Item label="บริการครั้งถัดไปย่อย" name="sub_next_service" rules={[{ required: false, message: GetIntlMessages("please-fill-out") }]}>
-                                        <Input disabled={mode == "view"} />
-                                    </Form.Item>
-                                </Col> */}
                                 <Col xs={24} xl={12}>
                                     <Form.Item label="สถานที่ผลิต" name="made_in" rules={[{ required: false, message: GetIntlMessages("please-fill-out") }]}>
                                         <Input disabled={mode == "view"} />
@@ -1920,7 +1910,7 @@ const ComponentsModalProduct = ({ form, mode, checkedOkAndCancle, status, checke
                                 </Col>
                                 <Col xs={24} xl={12}>
                                     <Form.Item label="ลิ้งค์อ้างอิง" name="ref_url" rules={[{ required: false, message: GetIntlMessages("please-fill-out") }]}>
-                                        <Input disabled={mode == "view"} />
+                                        <Input disabled={mode == "view"} placeholder='https://example.com' />
                                     </Form.Item>
                                 </Col>
                                 <Col xs={24} xl={12}>
@@ -1934,6 +1924,106 @@ const ComponentsModalProduct = ({ form, mode, checkedOkAndCancle, status, checke
                                         >
                                         </TextArea>
                                     </Form.Item>
+                                </Col>
+                            </Row>
+                        </Fieldset>
+                        <Fieldset legend={`ข้อมูลหน่วยวัด`}>
+                            <Row>
+                                <Col xs={24} md={24} xl={24}>
+                                    <Form.List name="uom_arr" disabled={status === "productShop" ? mode === "view" : false} >
+                                        {(fields, { add, remove }) => (
+                                            <Row>
+                                                {fields.map(({ key, name, ...restField }) => (
+                                                    <Col key={key} span={24}>
+                                                        <Row>
+                                                            <Col span={8} style={{ paddingLeft: "4px" }}>
+                                                                <Form.Item
+                                                                    {...restField}
+                                                                    label="หน่วยวัด"
+                                                                    name={[name, 'unit_measurement']}
+                                                                // rules={[{ required: true, message: 'กรุณากรอกข้อมูล' }]}
+                                                                >
+                                                                    <Select
+                                                                        showSearch
+                                                                        allowClear
+                                                                        placeholder="เลือกข้อมูล"
+                                                                        optionFilterProp="children"
+                                                                        disabled={mode === "view"}
+                                                                        filterOption={(inputValue, option) => {
+                                                                            if (_.isPlainObject(option)) {
+                                                                                if (option.children) {
+                                                                                    return option.children.toString().toLowerCase().indexOf(inputValue.toLowerCase()) >= 0
+                                                                                }
+                                                                            }
+                                                                        }}
+
+                                                                    >
+                                                                        {isArray(productPurchaseUnitTypes) && productPurchaseUnitTypes.length > 0 ? productPurchaseUnitTypes.filter(x => x.type_group_id === form.getFieldValue().product_type_group_id).map((e, index) => (
+                                                                            <Select.Option value={e.id} key={index}>
+                                                                                {getNameSelect(e, "type_name")}
+                                                                            </Select.Option>
+                                                                        ))
+                                                                            : null
+                                                                        }
+                                                                    </Select>
+                                                                </Form.Item>
+                                                            </Col>
+                                                            <Col span={6} style={{ paddingLeft: "4px" }}>
+                                                                <Form.Item
+                                                                    {...restField}
+                                                                    label="เท่ากับ"
+                                                                    name={[name, 'convert_value']}
+                                                                >
+                                                                    <Input disabled={mode == "view"} />
+                                                                </Form.Item>
+                                                            </Col>
+                                                            <Col span={8} style={{ paddingLeft: "4px" }}>
+                                                                <Form.Item
+                                                                    {...restField}
+                                                                    label="หน่วยแปลง"
+                                                                    name={[name, 'unit_convert']}
+                                                                >
+                                                                    <Select
+                                                                        showSearch
+                                                                        allowClear
+                                                                        placeholder="เลือกข้อมูล"
+                                                                        optionFilterProp="children"
+                                                                        disabled={mode === "view"}
+                                                                        // disabled={status == "productMaster" ? mode == "view" : disabledSomChaiShop ? !disabledSomChaiShop : mode !== "add" || onDisabledProductIdChange}
+                                                                        filterOption={(inputValue, option) => {
+                                                                            if (_.isPlainObject(option)) {
+                                                                                if (option.children) {
+                                                                                    return option.children.toString().toLowerCase().indexOf(inputValue.toLowerCase()) >= 0
+                                                                                }
+                                                                            }
+                                                                        }}
+
+                                                                    >
+
+                                                                        {isArray(productPurchaseUnitTypes) && productPurchaseUnitTypes.length > 0 ? productPurchaseUnitTypes.filter(x => x.type_group_id === form.getFieldValue().product_type_group_id).map((e, index) => (
+                                                                            <Select.Option value={e.id} key={index}>
+                                                                                {getNameSelect(e, "type_name")}
+                                                                            </Select.Option>
+                                                                        ))
+                                                                            : null
+                                                                        }
+                                                                    </Select>
+                                                                </Form.Item>
+                                                            </Col>
+                                                            <Col span={2} style={{ textAlign: "end" }}>
+                                                                <Button type='danger' onClick={() => remove(name)}>ลบ</Button>
+                                                            </Col>
+                                                        </Row>
+                                                    </Col>
+                                                ))}
+                                                <Col span={24}>
+                                                    <Button type="dashed" onClick={() => add()} block icon={<PlusOutlined />} style={{ width: "100%" }}>
+                                                        เพิ่มข้อมูล
+                                                    </Button>
+                                                </Col>
+                                            </Row>
+                                        )}
+                                    </Form.List>
                                 </Col>
                             </Row>
                         </Fieldset>

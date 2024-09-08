@@ -53,6 +53,7 @@ const GateWay = () => {
           });
           break;
       }
+      console.log("shop_name", shop_name)
       var querystring = require('querystring');
       await apiLine
         .post(
@@ -160,6 +161,9 @@ const GateWay = () => {
                       }
                       if (redirect_uri === "TranferStatus") {
                         router.push(`/LineOA/TranferStatus`, undefined, { shallow: true })
+                      }
+                      if (redirect_uri === "InventoryBalanceSTT") {
+                        router.push(`/LineOA/InventoryBalanceSTT`, undefined, { shallow: true })
                       }
                     }
                   }

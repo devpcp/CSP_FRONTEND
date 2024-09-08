@@ -403,6 +403,7 @@ const TemporaryDeliveryOrderDoc = ({ docTypeId }) => {
                         key: 'abb_code_id',
                         width: 150,
                         align: "center",
+                        // sorter: true,
                         render: (text, record) => {
                             return (
                                 <Tooltip title={
@@ -438,6 +439,7 @@ const TemporaryDeliveryOrderDoc = ({ docTypeId }) => {
                         key: 'inv_code_id',
                         width: 150,
                         align: "center",
+                        // sorter: true,
                         render: (text, record) => {
                             return (
                                 <Tooltip title={

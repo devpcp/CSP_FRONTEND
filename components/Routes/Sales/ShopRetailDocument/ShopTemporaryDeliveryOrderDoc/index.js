@@ -402,6 +402,7 @@ const TemporaryDeliveryOrderDoc = ({ docTypeId, title = null, callBack, }) => {
                 key: 'code_id',
                 width: 150,
                 align: "center",
+                sorter: true,
                 render: (text, record) => {
                     if (isFunction(callBack)) {
                         return (

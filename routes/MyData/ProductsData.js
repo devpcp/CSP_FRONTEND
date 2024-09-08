@@ -290,6 +290,7 @@ const ComponentsRoutesProducts = ({ title = null, callBack, listIndex }) => {
   }) => {
     try {
       if (page === 1) setLoading(true);
+      console.log("_status_status_status", _status)
       // const res = await API.get(`/product/all?limit=${limit}&page=${page}&sort=${sort}&order=${order}&status=${_status}&search=${search}`)
       const res = await API.get(
         `shopProducts/all?limit=${limit}&page=${page}&sort=start_date&order=${order}&status=${_status}&search=${search}${type_group_id ? `&type_group_id=${type_group_id}` : ""
@@ -519,7 +520,7 @@ const ComponentsRoutesProducts = ({ title = null, callBack, listIndex }) => {
             // form.setFieldsValue(formValue)
           }
 
-          // /* other_details */
+          //other_details detail ใน Product *ส่วนกลาง
           if (_.isPlainObject(_model.Product.other_details)) {
             formValue.cci_code = _model.Product.other_details["cci_code"];
             formValue.ccid_code = _model.Product.other_details["ccid_code"];
@@ -618,12 +619,11 @@ const ComponentsRoutesProducts = ({ title = null, callBack, listIndex }) => {
               setCheckSkuDisable(false);
             }
 
-            formValue.tags = _model.tags.map((e) => (e.id)) ?? [];
-            formValue.purchase_unit = _model.Product.other_details["purchase_unit"];
-            formValue.sales_unit = _model.Product.other_details["sales_unit"];
+
+
             // form.setFieldsValue(formValue)
           }
-
+          //detail ใน shopProduct *เฉพาะในร้าน
           if (_.isPlainObject(_model.details)) {
             formValue.made_in = _model.details["made_in"];
             formValue.note = _model.details["note"];
@@ -637,6 +637,9 @@ const ComponentsRoutesProducts = ({ title = null, callBack, listIndex }) => {
             formValue.standard_margin_wholesale_bath = _model.details["standard_margin_wholesale_bath"];
             formValue.warehouse_id = _model.details["warehouse_id"];
             formValue.shelf_code = _model.details["shelf_code"];
+            formValue.purchase_unit = _model.details["purchase_unit"];
+            formValue.sales_unit = _model.details["sales_unit"];
+            formValue.uom_arr = _model.details["uom_arr"];
           }
           formValue.latest_ini_cost = _model ? _model.latest_ini_cost : null
           formValue.latest_ini_cost_vat = _model ? _model.latest_ini_cost_vat : null
@@ -644,12 +647,13 @@ const ComponentsRoutesProducts = ({ title = null, callBack, listIndex }) => {
           formValue.latest_ini_doc_date = _model ? _model.latest_ini_doc_date ? moment(_model.latest_ini_doc_date).format("DD/MM/YYYY") : null : null
           formValue.product_total_value_no_vat = _model ? _model.product_total_value_no_vat : null
           formValue.product_total_value_vat = _model ? _model.product_total_value_vat : null
+          formValue.tags = _model.tags.map((e) => (e.id)) ?? [];
 
 
           // /* isuse */
           // _model.isuse = _model.isuse == 1 ? true : false
           // setCheckedIsuse(_model.isuse)
-          console.log("formValue", formValue)
+          // console.log("formValue", formValue)
           form.setFieldsValue({ ...formValue });
           // form.setFieldsValue({ ..._model, ...formValue, start_date: valueOfStartDate, end_date: valueOfEndDate })
           // form.setFieldsValue({ ..._model, product_name: { th: _model.Product.product_name["th"] ? _model.Product.product_name["th"] : null, en: _model.Product.product_name["en"] ? _model.Product.product_name["en"] : null } })
@@ -879,11 +883,6 @@ const ComponentsRoutesProducts = ({ title = null, callBack, listIndex }) => {
           benchmark_price: initOtherDetails?.benchmark_price ?? null, // Benchmark
           include_vat_price: initOtherDetails?.include_vat_price ?? null, // Cost inc vat
           exclude_vat_price: initOtherDetails?.exclude_vat_price ?? null, // Cost Exc Vat
-
-          purchase_unit: value.purchase_unit ?? null, // Default หน่วยซื้อ
-          sales_unit: value.sales_unit ?? null, // Default หน่วยขาย
-
-          // product_cost: value.product_cost
         },
         details: {
 
@@ -898,6 +897,9 @@ const ComponentsRoutesProducts = ({ title = null, callBack, listIndex }) => {
           made_in: value.made_in ?? null, // ประเทศที่ผลิต
           note: value.note ?? null,// หมายเหตุ
           ref_url: value.ref_url ?? null,// ลิ้งค์อ้างอิง
+          purchase_unit: value.purchase_unit ?? null, // Default หน่วยซื้อ
+          sales_unit: value.sales_unit ?? null, // Default หน่วยขาย
+          uom_arr: value.uom_arr ?? [],
         }
       };
 
@@ -1185,7 +1187,7 @@ const ComponentsRoutesProducts = ({ title = null, callBack, listIndex }) => {
   /** กดปุ่มค้นหา */
   const onFinishSearch = async (value) => {
     try {
-      // console.log("val", value)
+      console.log("val", value)
       const {
         type_group_id,
         product_type_id,
@@ -1197,52 +1199,80 @@ const ComponentsRoutesProducts = ({ title = null, callBack, listIndex }) => {
       setOldProductTypeId(() => product_type_id);
       setOldBrandId(() => product_brand_id);
       setOldProductModelId(() => product_model_id);
-      if (type_group_id !== oldTypeGroupId)
-        (product_type_id = null),
-          (product_brand_id = null),
-          (product_model_id = null);
+
+      // if (value.product_brand_id !== oldBrandId) {
+      //   console.log("p")
+      //   const { data } = await API.get(`/shopProducts/filter/categories?${value.type_group_id ? `product_group_id=${value.type_group_id}` : ""}${value.product_type_id ? `&product_type_id=${value.product_type_id}` : ""}${value.product_brand_id ? `&product_brand_id=${value.product_brand_id}` : ""}${value.product_model_id ? `&product_model_id=${value.product_model_id}` : ""}`)
+      //   product_model_id = null
+      //   setFilterProductModelTypes(data.productModelLists)
+      // }
+      // console.log("product_model_id", value.product_model_id)
+      // if (value.product_model_id !== oldProductModel) {
+      //   if (product_brand_id !== null) {
+      //     console.log("A", filterProductModelTypes)
+      //     console.log("filterProductModelTypes", filterProductModelTypes.find(x => x.id === value.product_model_id))
+      //     product_brand_id = null
+      //     product_brand_id = filterProductModelTypes.find(x => x.id === value.product_model_id).product_brand_id
+      //     // const { data } = await API.get(`/shopProducts/filter/categories?${type_group_id ? `product_group_id=${type_group_id}` : ""}${product_type_id ? `&product_type_id=${product_type_id}` : ""}${product_brand_id ? `&product_brand_id=${product_brand_id}` : ""}${product_model_id ? `&product_model_id=${product_model_id}` : ""}`)
+      //     // setFilterProductModelTypes(data.productModelLists)
+      //   } else {
+      //     console.log("B", filterProductModelTypes)
+      //     product_brand_id = filterProductModelTypes.find(x => x.id === product_model_id).product_brand_id
+      //   }
+      // } else {
+      //   console.log("C", filterProductModelTypes)
+      //   product_brand_id = filterProductModelTypes.find(x => x.id === product_model_id).product_brand_id
+      // }
+      // console.log("ProductTypeGroupAllList", ProductTypeGroupAllList)
+      // console.log("filterProductTypes", filterProductTypes)
+      // console.log("filterProductBrands", filterProductBrands)
+      // console.log("filterProductModelTypes", filterProductModelTypes)
+      // if (type_group_id !== oldTypeGroupId)
+      //   (product_type_id = null),
+      //     (product_brand_id = null),
+      //     (product_model_id = null);
       // const { data } = await API.get(`/shopProducts/filter/categories?${type_group_id ? `product_group_id=${type_group_id}` : ""}${product_type_id ? `&product_type_id=${product_type_id}` : ""}${product_brand_id ? `&product_brand_id=${product_brand_id}` : ""}${product_model_id ? `&product_model_id=${product_model_id}` : ""}`)
 
-      if (
-        type_group_id !== oldTypeGroupId ||
-        product_type_id !== oldProductTypeId ||
-        product_brand_id !== oldBrandId ||
-        product_model_id !== oldProductModel
-      ) {
-        const { data } = await API.get(
-          `/shopProducts/filter/categories?${type_group_id ? `product_group_id=${type_group_id}` : ""
-          }${product_type_id ? `&product_type_id=${product_type_id}` : ""}${product_brand_id ? `&product_brand_id=${product_brand_id}` : ""
-          }${product_model_id ? `&product_model_id=${product_model_id}` : ""}`
-        );
-        if (isPlainObject(data) && !isEmpty(data)) {
-          const {
-            productGroupLists,
-            productTypeLists,
-            productBrandLists,
-            productModelLists,
-          } = data;
-          if (productGroupLists?.length === 1)
-            type_group_id = productGroupLists?.[0]?.id ?? null;
-          if (productTypeLists?.length === 1)
-            product_type_id = productTypeLists?.[0]?.id ?? null;
-          if (productBrandLists?.length === 1)
-            product_brand_id = productBrandLists?.[0]?.id ?? null;
-          if (productModelLists?.length === 1)
-            product_model_id = productModelLists?.[0]?.id ?? null;
+      // if (
+      //   type_group_id !== oldTypeGroupId ||
+      //   product_type_id !== oldProductTypeId ||
+      //   product_brand_id !== oldBrandId ||
+      //   product_model_id !== oldProductModel
+      // ) {
+      //   const { data } = await API.get(
+      //     `/shopProducts/filter/categories?${type_group_id ? `product_group_id=${type_group_id}` : ""
+      //     }${product_type_id ? `&product_type_id=${product_type_id}` : ""}${product_brand_id ? `&product_brand_id=${product_brand_id}` : ""
+      //     }${product_model_id ? `&product_model_id=${product_model_id}` : ""}`
+      //   );
+      //   if (isPlainObject(data) && !isEmpty(data)) {
+      //     const {
+      //       productGroupLists,
+      //       productTypeLists,
+      //       productBrandLists,
+      //       productModelLists,
+      //     } = data;
+      //     if (productGroupLists?.length === 1)
+      //       type_group_id = productGroupLists?.[0]?.id ?? null;
+      //     if (productTypeLists?.length === 1)
+      //       product_type_id = productTypeLists?.[0]?.id ?? null;
+      //     if (productBrandLists?.length === 1)
+      //       product_brand_id = productBrandLists?.[0]?.id ?? null;
+      //     if (productModelLists?.length === 1)
+      //       product_model_id = productModelLists?.[0]?.id ?? null;
 
-          setFilterProductTypes(() => productTypeLists);
-          setFilterProductBrands(() => productBrandLists);
-          setFilterProductModelTypes(() => productModelLists);
-        } else {
-          onReset();
-          Swal.fire("มีบางอย่างผิดพลาดกรุณาติดต่อเจ้าหน้าที่ !!", "", "error");
-        }
-      }
+      //     setFilterProductTypes(() => productTypeLists);
+      //     setFilterProductBrands(() => productBrandLists);
+      //     setFilterProductModelTypes(() => productModelLists);
+      //   } else {
+      //     onReset();
+      //     Swal.fire("มีบางอย่างผิดพลาดกรุณาติดต่อเจ้าหน้าที่ !!", "", "error");
+      //   }
+      // }
 
       const searchModel = {
         ...modelSearch,
         search: value.search,
-        status: value.status == "undefined" ? modelSearch.status : "active",
+        status: value.status !== "undefined" ? value.status : "active",
         filter_balance: value.filter_balance,
         type_group_id,
         product_type_id,
@@ -1250,7 +1280,7 @@ const ComponentsRoutesProducts = ({ title = null, callBack, listIndex }) => {
         product_model_id,
         tags_id
       };
-      setModelSearch((previousValue) => searchModel);
+      setModelSearch(searchModel);
 
       getDataSearch({
         search: value.search,
@@ -1260,10 +1290,12 @@ const ComponentsRoutesProducts = ({ title = null, callBack, listIndex }) => {
         product_type_id,
         product_brand_id,
         product_model_id,
-        tags_id
+        tags_id,
       });
 
-    } catch (error) { }
+    } catch (error) {
+      console.log("error", error)
+    }
     // console.log('value onFinishSearch form page', value)
   };
 

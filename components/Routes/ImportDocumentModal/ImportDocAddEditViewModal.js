@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import Fieldset from '../../shares/Fieldset';
 import FormSelectDot from "../Dot/Components.Select.Dot";
 import GetIntlMessages from '../../../util/GetIntlMessages';
-import { Form, Input, Select, Row, Col, Divider, Button, Space, DatePicker, InputNumber, Modal, Tooltip } from 'antd';
+import { Form, Input, Select, Row, Col, Divider, Button, Space, DatePicker, InputNumber, Modal, Tooltip, Tag, Table } from 'antd';
 import { PlusOutlined, MinusCircleOutlined, TableOutlined, ShoppingCartOutlined, CalculatorOutlined, InfoCircleTwoTone } from '@ant-design/icons';
 import { useSelector } from 'react-redux';
 import { debounce, get, isArray, isEmpty, isFunction, isPlainObject, isString } from 'lodash';
@@ -13,6 +13,8 @@ import { RoundingNumber, takeOutComma, } from '../../../components/shares/Conver
 import Swal from "sweetalert2";
 import ProductData from "../../../routes/MyData/ProductsData"
 import BusinessPartnersData from "../../../routes/MyData/BusinessPartnersData"
+import FormWarehouse from "./FormWarehouse"
+import FormImportDocument from "./FormImportDocument"
 
 const tailformItemLayout = {
     labelCol: { span: 24 },
@@ -23,896 +25,6 @@ const twoDigits = { minimumFractionDigits: 2, maximumFractionDigits: 2 }
 const purchaseUnitTypeTire = "103790b2-e9ab-411b-91cf-a22dbf624cbc" // -> เส้น
 const purchaseUnitTypeService = "af416ec2-c8f0-4c20-90a4-29487fecb315" // -> รายการ
 const purchaseUnitTypeBattery = "a7192601-316d-438e-a69e-f978d8445ae7" // -> ลูก // product_type battery ->5d82fef5-8267-4aea-a968-92a994071621 
-
-const IncomeProduct = ({ form, mode, expireEditTimeDisable, dataList, calculateResult, getShopBusinessPartners, loadingSearch, setLoadingSearch, getArrListValue, setLoading, getShopBusinessPartnersDataListAll }) => {
-    const { locale, mainColor } = useSelector(({ settings }) => settings);
-    const { taxTypeAllList, userList, shopBusinessPartnersList } = dataList
-    const [shopBusinessPartners, setShopBusinessPartners] = useState([])
-    const [isBusinessPartnersDataModalVisible, setIsBusinessPartnersDataModalVisible] = useState(false);
-
-
-    useEffect(() => {
-        setShopBusinessPartners(() => shopBusinessPartnersList)
-    }, [shopBusinessPartnersList])
-
-    const callBackDataBusinessPartner = (data) => {
-
-        if (data && isArray(data)) {
-            setShopBusinessPartners(data)
-            if (isFunction(getShopBusinessPartners)) getShopBusinessPartners(data)
-        }
-    }
-    /* Debounce Search */
-    const debounceSearchPurchaseOrder = debounce((value, type) => searchPurchaseOrder(value, type), 800)
-    const searchPurchaseOrder = async (value, type) => {
-        try {
-            if (isFunction(setLoading)) setLoading(() => true)
-            setLoadingSearch(() => true)
-            const { purchase_order_number_list } = form.getFieldValue()
-            switch (type) {
-                case "search":
-                    if (!!value) {
-                        const { data } = await API.get(`/shopPurchaseOrderDoc/all?search=${value}&status=active&page=1&limit=10&sort=doc_date&order=desc`);
-                        if (data.status === "success") {
-                            // setBussinessPartnerList(() => data.data.data)
-                            purchase_order_number_list = data.data.data ?? []
-
-                        }
-                    }
-
-                    break;
-                default:
-                    break;
-            }
-
-            form.setFieldsValue({ purchase_order_number_list })
-            setLoadingSearch(() => false)
-            if (isFunction(setLoading)) setLoading(() => false)
-        } catch (error) {
-            if (isFunction(setLoading)) setLoading(() => false)
-            // console.log('error :>> ', error);
-        }
-    }
-    /* End Debounce Search */
-
-    /* Debounce Select and Clear */
-    const debouncePurchaseOrder = debounce((value, type) => selectClearPurchaseOrder(value, type), 0)
-    const selectClearPurchaseOrder = async (value, type) => {
-        try {
-            if (isFunction(setLoading)) setLoading(() => true)
-            setLoadingSearch(() => true)
-            const { purchase_order_number, purchase_order_number_list } = form.getFieldValue()
-            switch (type) {
-                case "select":
-                    if (!!value) {
-                        if (isArray(purchase_order_number_list) && purchase_order_number_list.length > 0) {
-                            const _findPurcahseOrderDoc = purchase_order_number_list.find(where => where.id === purchase_order_number)
-                            if (isPlainObject(_findPurcahseOrderDoc) && !isEmpty(_findPurcahseOrderDoc)) {
-                                setFormPurchaseOrderValue(_findPurcahseOrderDoc)
-                            }
-
-                        }
-                    }
-                    break;
-
-                case "clear":
-                    const defaultValue = {
-                        product_id: null,
-                        amount_all: null,
-                        price: null,
-                        total_price: null,
-                        discount_percentage_1: null,
-                        discount_percentage_2: null,
-                        discount_3: null,
-                        discount_3_type: "bath",
-                        price_discount_total: null,
-                        warehouse_detail: [],
-                        productId_list: []
-                    }
-                    form.setFieldsValue({
-                        product_list: [defaultValue],
-                        bus_partner_id: null,
-
-                        tailgate_discount: null,
-                        vat: null,
-                        vat_text: null,
-                        net_price: null,
-                        net_price_text: null,
-                        total_price_all: null,
-                        total_price_all_text: null,
-                        total_price_all_after_discount: null,
-                        total_price_all_after_discount_text: null,
-                        total_after_discount: null,
-                        total_discount_text: null,
-                        total_discount: null,
-                    });
-                    break;
-
-                default:
-                    break;
-            }
-
-            form.setFieldsValue({ purchase_order_number_list })
-            setLoadingSearch(() => false)
-            if (isFunction(setLoading)) setLoading(() => false)
-        } catch (error) {
-            if (isFunction(setLoading)) setLoading(() => false)
-            // console.log('error :>> ', error);
-        }
-    }
-
-    const setFormPurchaseOrderValue = (value) => {
-        try {
-            // console.log('value :>> ', value);
-            const { business_partner_id, ShopPurchaseOrderLists, price_discount_bill, details } = value
-            let product_list = []
-            if (isArray(ShopPurchaseOrderLists) && ShopPurchaseOrderLists.length > 0) {
-                product_list = ShopPurchaseOrderLists.map((e, index) => {
-                    const { details, product_id, purchase_unit_id, amount, price_unit, price_discount, price_discount_percent, price_grand_total, seq_number } = e
-                    return {
-                        product_id,
-                        productId_list: details.list_shop_stock,
-                        ProductTypeGroupId: details.list_shop_stock[0]?.Product?.ProductType?.type_group_id ?? null,
-                        unit_list: details.purchase_unit_list,
-                        unit: purchase_unit_id,
-                        amount_all: amount,
-                        price: Number(price_unit),
-                        price_text: RoundingNumber(price_unit),
-                        discount_3: Number(price_discount),
-                        discount_3_text: RoundingNumber(price_discount),
-                        discount_3_type: "bath",
-                        total_price: Number(price_unit) * Number(amount),
-                        total_price_text: RoundingNumber(Number(price_unit) * Number(amount)),
-                        price_discount_total: Number(amount) * Number(price_discount),
-                        price_discount_total: RoundingNumber(Number(amount) * Number(price_discount)),
-                        seq_number: seq_number.toString(),
-                        changed_product_name: details?.changed_product_name ?? null
-                    }
-                })
-                product_list = SortingData(product_list, `seq_number`)
-                form.setFieldsValue({ bus_partner_id: business_partner_id, product_list, tailgate_discount: RoundingNumber(price_discount_bill), note: details?.remark ?? null })
-            }
-            calculateResult()
-        } catch (error) {
-
-        }
-    }
-
-
-    const callBackPickBusinessPartners = async (data) => {
-        try {
-
-            console.log("data", data)
-            let businessPartnerData = await getShopBusinessPartnersDataListAll()
-            setShopBusinessPartners(businessPartnerData)
-            let _model = {
-                bus_partner_id: data.id
-            }
-            await form.setFieldsValue(_model)
-            handleCancelBusinessPartnersDataModal()
-        } catch (error) {
-            console.log("callBackPickBusinessPartners", error)
-        }
-    }
-
-    const handleOpenBusinessPartnersDataModal = () => {
-        try {
-            setIsBusinessPartnersDataModalVisible(true)
-        } catch (error) {
-
-        }
-    }
-    const handleCancelBusinessPartnersDataModal = () => {
-        try {
-            setIsBusinessPartnersDataModalVisible(false)
-        } catch (error) {
-
-        }
-    }
-
-
-    /*End Debounce Select and Clear */
-    return (
-        <>
-
-            {/* <div className="head-line-text" >{GetIntlMessages("ใบนำเข้า")} </div> */}
-            <div className="detail-before-table">
-
-                <Row gutter={[10]} style={{ marginTop: "10px" }}>
-                    <Col xs={24} lg={8} xxl={8} style={{ width: "100%" }}>
-                        <Form.Item
-                            {...tailformItemLayout}
-                            // validateTrigger={['onChange', 'onBlur']}
-                            name="bus_partner_id"
-                            label={GetIntlMessages("รหัสผู้จำหน่าย")}
-                            rules={[
-                                {
-                                    required: true,
-                                    message: "กรุณากรอกข้อมูล",
-                                },
-                            ]}
-                        >
-                            <Select
-                                showSearch
-                                placeholder="เลือกข้อมูล"
-                                disabled={mode == "view" || expireEditTimeDisable == true || !!form.getFieldValue().purchase_order_number}
-                                optionFilterProp="children"
-                            // onChange={onChangeIdPartner}
-                            // dropdownRender={menu =>
-                            // (
-                            //     <>
-                            //         {menu}
-                            //         {mode != "view" && expireEditTimeDisable !== true ? <Divider style={{ margin: '8px 0' }} /> : null}
-                            //         {mode != "view" && expireEditTimeDisable !== true ?
-                            //             <Space align="center" style={{ padding: '0 8px 4px' }}>
-                            //                 <ComponentsSelectModalBusinessPartners mode={mode} form={form} callBackDataBusinessPartner={callBackDataBusinessPartner} />
-                            //             </Space>
-                            //             : null}
-                            //     </>
-                            // )}
-                            >
-                                {shopBusinessPartners.map((e, index) => (
-                                    <Select.Option value={e.id} key={index}>
-                                        {e.code_id}
-                                    </Select.Option>
-                                ))}
-
-                            </Select>
-
-                        </Form.Item>
-                    </Col>
-
-                    <Col xs={24} lg={8} xxl={8} style={{ width: "100%" }}>
-                        <Row>
-                            <Col lg={20} md={20} sm={18} xs={18}>
-                                <Form.Item
-                                    // {...tailformItemLayout}
-                                    validateTrigger={['onChange', 'onBlur']}
-                                    name="bus_partner_id"
-                                    label={GetIntlMessages("ชื่อผู้จำหน่าย")}
-                                >
-                                    <Select
-                                        style={{ width: "98%" }}
-                                        showSearch
-                                        placeholder="เลือกข้อมูล"
-                                        disabled={mode == "view" || expireEditTimeDisable == true || !!form.getFieldValue().purchase_order_number}
-                                        optionFilterProp="children"
-                                    // dropdownRender={menu =>
-                                    // (
-                                    //     <>
-                                    //         {menu}
-                                    //         {mode != "view" && expireEditTimeDisable !== true ? <Divider style={{ margin: '8px 0' }} /> : null}
-                                    //         {mode != "view" && expireEditTimeDisable !== true ?
-                                    //             <Space align="center" style={{ padding: '0 8px 4px' }}>
-                                    //                 <ComponentsSelectModalBusinessPartners mode={mode} form={form} callBackDataBusinessPartner={callBackDataBusinessPartner} />
-                                    //             </Space>
-                                    //             : null}
-                                    //     </>
-                                    // )}
-
-                                    // onChange={onChangeNamePartner}
-                                    >
-                                        {shopBusinessPartners.map((e, index) => (
-                                            <Select.Option value={e.id} key={index}>
-                                                {e.partner_name[locale.locale]}
-                                            </Select.Option>
-                                        ))}
-                                    </Select>
-
-                                </Form.Item>
-                            </Col>
-
-                            <Col lg={4} md={4} sm={6} xs={6} style={{ paddingTop: "30.8px", justifyContent: "end" }}>
-                                <Form.Item >
-                                    <Button
-                                        type='primary'
-                                        style={{ width: "100%", borderRadius: "10px" }}
-                                        onClick={() => handleOpenBusinessPartnersDataModal()}
-                                    >
-                                        เลือก
-                                    </Button>
-                                </Form.Item>
-                            </Col>
-                        </Row>
-                    </Col>
-
-                    <Col xs={12} lg={4} xxl={4} style={{ width: "100%" }}>
-                        <Form.Item
-                            {...tailformItemLayout}
-                            validateTrigger={['onChange', 'onBlur']}
-                            name="bus_partner_id"
-                            label={GetIntlMessages("เลขประจำตัวผู้เสียภาษี")}
-                        >
-                            <Select
-                                placeholder="เลือกข้อมูล"
-                                // disabled={mode == "view"}
-                                optionFilterProp="children"
-                                disabled
-                            // onChange={onChangeNamePartner}
-                            >
-                                {shopBusinessPartners.map((e, index) => (
-                                    <Select.Option value={e.id} key={index}>
-                                        {e.tax_id ? e.tax_id : "-"}
-                                    </Select.Option>
-                                ))}
-                            </Select>
-                        </Form.Item>
-                    </Col>
-
-                    <Col xs={12} lg={4} xxl={4} style={{ width: "100%" }}>
-                        <Form.Item
-                            {...tailformItemLayout}
-                            validateTrigger={['onChange', 'onBlur']}
-                            name="bus_partner_id"
-                            label={GetIntlMessages("เบอร์โทรศัพท์")}
-                        >
-                            <Select
-                                placeholder="เลือกข้อมูล"
-                                // disabled={mode == "view"}
-                                optionFilterProp="children"
-                                disabled
-                            // onChange={onChangeNamePartner}
-                            >
-                                {shopBusinessPartners.map((e, index) => (
-                                    <Select.Option value={e.id} key={index}>
-                                        {/* {e.mobile_no ? e.mobile_no.mobile_no_1 : "-"} */}
-                                        {get(e.mobile_no, "mobile_no_1", "-")}
-                                    </Select.Option>
-                                ))}
-                            </Select>
-
-                        </Form.Item>
-                    </Col>
-
-
-                    <Col xs={24} lg={8} xxl={8} style={{ width: "100%" }}>
-                        <Form.Item
-                            {...tailformItemLayout}
-                            validateTrigger={['onChange', 'onBlur']}
-                            name="purchase_order_number"
-                            label={GetIntlMessages("เลขใบสั่งซื้อสินค้า")}
-                        >
-                            {/* <Input placeholder="" disabled={mode == "view" || expireEditTimeDisable == true} /> */}
-                            <Select
-                                showSearch
-                                placeholder="เลือกข้อมูล"
-                                // disabled={mode == "view"}
-                                optionFilterProp="children"
-                                // filterOption={false}
-                                disabled={mode == "view" || expireEditTimeDisable == true}
-                                // onChange={onChangeNamePartner}
-                                onSearch={(value) => debounceSearchPurchaseOrder(value, "search")}
-                                onSelect={(value) => debouncePurchaseOrder(value, "select")}
-                                onClear={(value) => debouncePurchaseOrder(value, "clear")}
-                                help={loadingSearch ? "กำลังโหลดข้อมูล..กรุณารอสักครู่" : null}
-                                notFoundContent={loadingSearch ? <span>"กำลังโหลดข้อมูล..กรุณารอสักครู่"</span> : null}
-                                allowClear
-                            >
-                                {getArrListValue("purchase_order_number_list").map((e, i) => <Select.Option value={e.id} key={`purchase_order_number-${i}-${e.id}`}>{get(e, `code_id`, "-")}</Select.Option>)}
-                            </Select>
-                        </Form.Item>
-                    </Col>
-
-                    <Col xs={24} lg={8} xxl={8} style={{ width: "100%" }} hidden>
-                        <Form.Item
-                            name="purchase_order_number_list"
-                        />
-                    </Col>
-
-
-
-                    <div hidden>
-                        <Col xs={24} lg={8} xxl={8} style={{ width: "100%" }}>
-                            <Form.Item
-                                {...tailformItemLayout}
-                                validateTrigger={['onChange', 'onBlur']}
-                                name="bus_partner_id"
-                                label={GetIntlMessages("ระยะเวลาเครดิต")}
-                            >
-                                <Select
-                                    placeholder="เลือกข้อมูล"
-                                    // disabled={mode == "view"}
-                                    optionFilterProp="children"
-                                    disabled
-                                // onChange={onChangeNamePartner}
-                                >
-                                    {shopBusinessPartners.map((e, index) => (
-                                        <Select.Option value={e.id} key={index}>
-                                            {e.other_details.period_credit ? e.other_details.period_credit : "-"}
-                                        </Select.Option>
-                                    ))}
-                                </Select>
-                            </Form.Item>
-                        </Col>
-                        <Col xs={24} lg={8} xxl={8} style={{ width: "100%" }}>
-                            <Form.Item
-                                {...tailformItemLayout}
-                                validateTrigger={['onChange', 'onBlur']}
-                                name="bus_partner_id"
-                                label={GetIntlMessages("วงเงินอนุมัติ")}
-                            >
-                                <Select
-                                    placeholder="เลือกข้อมูล"
-                                    // disabled={mode == "view"}
-                                    optionFilterProp="children"
-                                    disabled
-                                // onChange={onChangeNamePartner}
-                                >
-                                    {shopBusinessPartners.map((e, index) => (
-                                        <Select.Option value={e.id} key={index}>
-                                            {e.other_details.approval_limit ? e.other_details.approval_limit : "-"}
-                                        </Select.Option>
-                                    ))}
-                                </Select>
-                            </Form.Item>
-                        </Col>
-                        <Col xs={24} lg={8} xxl={8} style={{ width: "100%" }}>
-                            <Form.Item
-                                {...tailformItemLayout}
-                                validateTrigger={['onChange', 'onBlur']}
-                                name="credit_balance"
-                                label={GetIntlMessages("เครดิตคงเหลือ")}
-                            >
-                                <Input placeholder="" disabled={mode == "view" || expireEditTimeDisable == true} />
-                            </Form.Item>
-                        </Col>
-
-                    </div>
-
-                    <Col xs={24} lg={8} xxl={8} style={{ width: "100%" }}>
-                        <Form.Item
-                            {...tailformItemLayout}
-                            validateTrigger={['onChange', 'onBlur']}
-                            name="References_doc"
-                            label={GetIntlMessages("เอกสารอ้างอิง")}
-                            rules={[
-                                {
-                                    required: true,
-                                    message: "กรุณากรอกข้อมูล",
-                                },
-                            ]}
-                        >
-                            <Input placeholder="" disabled={mode == "view"} />
-                        </Form.Item>
-                    </Col>
-
-                    <Col xs={24} lg={8} xxl={4} style={{ width: "100%" }}>
-                        <Form.Item
-                            {...tailformItemLayout}
-                            validateTrigger={['onChange', 'onBlur']}
-                            name="tax_type"
-                            label={GetIntlMessages("tax-type")}
-                        >
-                            <Select
-                                placeholder="เลือกข้อมูล"
-                                disabled={mode == "view"}
-                                optionFilterProp="children"
-                                onChange={() => isFunction(calculateResult) ? calculateResult() : null}
-                            >
-                                {taxTypeAllList.map((e, index) => (
-                                    <Select.Option value={e.id} key={`tax-type-${e.id}`}>
-                                        {e.type_name[locale.locale]}
-                                    </Select.Option>
-                                ))}
-                            </Select>
-                        </Form.Item>
-                    </Col>
-
-                    <Col xs={24} lg={8} xxl={4} style={{ width: "100%" }}>
-                        <Form.Item
-                            {...tailformItemLayout}
-                            validateTrigger={['onChange', 'onBlur']}
-                            name="tax_type"
-                            label={GetIntlMessages("tax-rate-percent")}
-                        >
-                            <Select
-                                placeholder="เลือกข้อมูล"
-                                optionFilterProp="children"
-                                disabled
-                            >
-
-                                {taxTypeAllList.map((e, index) => (
-                                    <Select.Option value={e.id} key={`tax-type-${e.id}`}>
-                                        {e.detail['tax_rate_percent']}
-                                    </Select.Option>
-
-                                ))}
-                            </Select>
-                        </Form.Item>
-                    </Col>
-
-                    <Col xs={24} lg={4} xxl={4} style={{ width: "100%" }}>
-                        <Form.Item
-                            {...tailformItemLayout}
-                            name="is_inv"
-                            label={
-                                <>
-                                    {"สถานะใบกำกับภาษี"}
-                                    < Tooltip
-                                        title="สถานะบ่งบอกว่าเอกสารใบรับเข้าใบนี้ มีเลขที่เอกสารอ้างอิง เป็นเลขที่ใบกำกับภาษีที่ออกจากทางผู้จำหน่าย">
-                                        <InfoCircleTwoTone twoToneColor={"#04afe3"} style={{ padding: "0px 1px 0px 4px " }} />
-                                    </Tooltip>
-                                </>
-                            }
-                            rules={[
-                                {
-                                    required: true,
-                                    message: "กรุณากรอกข้อมูล",
-                                },
-                            ]}
-                        >
-                            <Select
-                                disabled={mode == "view"}
-                                options={[
-                                    {
-                                        value: true,
-                                        label: 'ใช่',
-                                    },
-                                    {
-                                        value: false,
-                                        label: 'ไม่ใช่',
-                                    },
-                                ]}
-                            />
-                        </Form.Item>
-                    </Col>
-
-                    <Col xs={24} lg={4} xxl={4} style={{ width: "100%" }}>
-                        <Form.Item
-                            {...tailformItemLayout}
-                            validateTrigger={['onChange', 'onBlur']}
-                            name="tax_period"
-                            label={GetIntlMessages("ยื่นภาษีรวมในงวดที่")}
-                            rules={[
-                                {
-                                    required: true,
-                                    message: "กรุณากรอกข้อมูล",
-                                },
-                            ]}
-                        >
-                            <DatePicker picker="month" disabled={mode == "view"} format={"MM/YYYY"} style={{ width: "100%" }} />
-                        </Form.Item>
-                    </Col>
-
-                    <Col xs={24} lg={8} xxl={8}>
-                        <Form.Item
-                            {...tailformItemLayout}
-                            validateTrigger={['onChange', 'onBlur']}
-                            name="doc_date"
-                            label={GetIntlMessages("วันที่อ้างอิง")}
-
-                        >
-                            <DatePicker disabled={mode == "view" || expireEditTimeDisable == true} format={'DD/MM/YYYY'} style={{ width: "100%" }} />
-                        </Form.Item>
-                    </Col>
-
-                    <Col xs={24} lg={8} xxl={8} style={{ width: "100%" }}>
-                        <Form.Item
-                            {...tailformItemLayout}
-                            validateTrigger={['onChange', 'onBlur']}
-                            name="user_id"
-                            label={GetIntlMessages("ผู้ทำเอกสาร")}
-                        >
-                            <Select
-                                placeholder="เลือกข้อมูล"
-                                // disabled={mode == "view" || expireEditTimeDisable == true}
-                                optionFilterProp="children"
-                                disabled
-                            >
-                                {userList.map((e) => <Select.Option key={`user-${e.id}`} value={e.id}>{e.name}</Select.Option>)}
-                            </Select>
-                        </Form.Item>
-                    </Col>
-                </Row >
-            </div >
-            <Modal
-                maskClosable={false}
-                open={isBusinessPartnersDataModalVisible}
-                onCancel={handleCancelBusinessPartnersDataModal}
-                width="90vw"
-                style={{ top: 5 }}
-                footer={(
-                    <>
-                        <Button onClick={() => handleCancelBusinessPartnersDataModal()}>{GetIntlMessages("กลับ")}</Button>
-                    </>
-                )}
-            >
-                {<BusinessPartnersData title="จัดการข้อมูลผู้จำหน่าย" callBack={callBackPickBusinessPartners} />}
-            </Modal>
-        </>
-    )
-}
-
-const FormWarehouse = ({ name, index, form, expireEditTimeDisable, mode, getArrValue, dataList, pageId, visibleEachWarehouseMovementModal, configShowMovementBtn, dropDownBtnWarehouse, callbackSelectProduct }) => {
-    const { locale, mainColor } = useSelector(({ settings }) => settings);
-    const { getShelfDataAll } = dataList
-    const configColSpace = (pageId === "a6c9c754-0239-4abe-ad6b-8cdb6b81dcc0" && mode === "view" && configShowMovementBtn === true) ? true : false
-
-
-
-    useEffect(() => {
-        try {
-            if (callbackSelectProduct !== undefined) {
-                if (!callbackSelectProduct) {
-                    const { product_list } = form.getFieldValue()
-                    product_list[0].warehouse_detail[0].warehouse = getShelfDataAll[0].id
-                    product_list[0].warehouse_detail[0].shelf = getShelfDataAll[0].shelf[0].code
-                    form.setFieldsValue({ product_list })
-                }
-            }
-        } catch (error) {
-            // console.log('error :>> ', error);
-        }
-    }, [getShelfDataAll])
-
-
-
-    const getArrWarehouse = (index1, index2) => {
-        const fomeValue = form.getFieldValue();
-        const warehouse_detail = fomeValue.product_list[index1].warehouse_detail[index2];
-        const arr = warehouse_detail ? warehouse_detail.getShelfDataAll : [];
-        let newArr
-        if (warehouse_detail) {
-            // console.log('view',warehouse_detail.warehouse)
-            newArr = getShelfDataAll?.find(where => where.id == warehouse_detail.warehouse)
-            // console.log('arr warehouse_detail.warehouse', newArr)
-            arr = newArr ? newArr.shelf : []
-        }
-        return arr ?? []
-
-    }
-
-    const onChangeWarehouse = (index1, index2, value) => {
-        const arr = getShelfDataAll.find(where => where.id == value)
-        // console.log('arr', arr)
-        const formValue = form.getFieldValue()
-        formValue.product_list[index1].warehouse_detail[index2].getShelfDataAll = arr ? arr.shelf : [];
-        formValue.product_list[index1].warehouse_detail[index2].shelf = null;
-        form.setFieldsValue(formValue)
-    }
-
-
-    const addWarehouse = (index, add) => {
-        const formValue = form.getFieldValue();
-        const warehouse_detail = formValue.product_list[index]
-
-        if (warehouse_detail.warehouse_detail) {
-            if (warehouse_detail.warehouse_detail[warehouse_detail.warehouse_detail.length - 1]) {
-                const warehouse = warehouse_detail.warehouse_detail[warehouse_detail.warehouse_detail.length - 1].warehouse;
-                const shelf = warehouse_detail.warehouse_detail[warehouse_detail.warehouse_detail.length - 1].shelf ?? null;
-                const getShelfDataAll = warehouse_detail.warehouse_detail[warehouse_detail.warehouse_detail.length - 1].getShelfDataAll;
-                const defaultValue = { warehouse, getShelfDataAll, shelf, amount: null, purchase_unit_id: warehouse_detail.unit ? warehouse_detail.unit : null, dot_mfd: null }
-                add(defaultValue)
-            } else {
-                const defaultValue = { warehouse: getShelfDataAll[0].id ?? null, shelf: getShelfDataAll[0].shelf[0].code ?? null, amount: null, purchase_unit_id: warehouse_detail.unit ? warehouse_detail.unit : null, dot_mfd: null }
-                add(defaultValue)
-            }
-        } else {
-            const defaultValue = { warehouse: getShelfDataAll[0].id ?? null, shelf: getShelfDataAll[0].shelf[0].code ?? null, amount: null, purchase_unit_id: warehouse_detail.unit ? warehouse_detail.unit : null, dot_mfd: null }
-            add(defaultValue)
-        }
-    }
-    const responsiveTable = {
-        name: {
-            xs: 12,
-            sm: 6,
-            md: 6,
-            lg: 8
-        },
-        other: {
-            xs: 6,
-            sm: 3,
-            md: 3,
-            lg: 2
-        },
-        button: {
-            xs: 4,
-            sm: 2,
-            md: 2,
-            lg: 1
-        }
-    }
-    return (
-        <Form.Item
-            // label=" "
-            name={name}
-        >
-            <Form.List name={name}>
-                {(fields, { add, remove }) => (
-                    <>
-
-                        {fields.map((field, i) => (
-                            <Form.Item
-                                required={false}
-                                key={field.key}
-                            >
-                                <Row gutter={[10, 10]}>
-                                    <Col xs={responsiveTable.name.xs} sm={responsiveTable.name.sm} md={responsiveTable.name.md} lg={responsiveTable.name.lg} style={{ width: "100%" }}>
-                                        <Form.Item
-                                            {...tailformItemLayout}
-                                            validateTrigger={['onChange', 'onBlur']}
-                                            name={[field.name, "warehouse"]}
-                                            fieldKey={[field.fieldKey, "warehouse"]}
-                                            label={i >= 1 ? "" : GetIntlMessages("warehouses")}
-                                            className='form-warehouse'
-                                        // rules={[
-                                        //     {
-                                        //         required: true,
-                                        //         message: "กรุณากรอก",
-                                        //     },
-                                        // ]}
-                                        >
-                                            {/* <Input placeholder="คลังที่อยู่" disabled={mode == "view"} /> */}
-                                            <Select
-                                                placeholder="เลือกข้อมูล"
-                                                optionFilterProp="children"
-                                                disabled={mode == "view" || expireEditTimeDisable == true}
-                                                onChange={(value) => onChangeWarehouse(index, i, value)}
-                                            >
-
-                                                {getShelfDataAll?.map((e, index) => (
-                                                    <Select.Option value={e.id} key={index}>
-                                                        {e.name[locale.locale]}
-                                                    </Select.Option>
-
-                                                ))}
-                                            </Select>
-                                        </Form.Item>
-                                    </Col>
-
-                                    <Col xs={responsiveTable.name.xs} sm={responsiveTable.name.sm} md={responsiveTable.name.md} lg={responsiveTable.name.lg} style={{ width: "100%" }}>
-
-                                        <Form.Item
-                                            {...tailformItemLayout}
-                                            validateTrigger={['onChange', 'onBlur']}
-                                            name={[field.name, "shelf"]}
-                                            fieldKey={[field.fieldKey, "shelf"]}
-                                            label={i >= 1 ? "" : GetIntlMessages("shelf")}
-                                            className='form-warehouse'
-                                        // rules={[
-                                        //     {
-                                        //         required: true,
-                                        //         message: "กรุณากรอก",
-                                        //     },
-                                        // ]}
-                                        >
-                                            {/* <Input placeholder="ชั้นวางสินค้า" disabled={mode == "view"} /> */}
-                                            <Select
-                                                placeholder="เลือกข้อมูล"
-                                                optionFilterProp="children"
-                                                disabled={mode == "view" || expireEditTimeDisable == true}
-                                            //  onChange={(value)=>onChangeWareHouse(index,index2,value)}
-                                            >
-                                                {getArrWarehouse(index, i).map(e => <Select.Option value={e.code}>{e.name[locale.locale]}</Select.Option>)}
-                                            </Select>
-
-                                        </Form.Item>
-                                    </Col>
-
-                                    <Col xs={responsiveTable.other.xs} sm={responsiveTable.other.sm} md={responsiveTable.other.md} lg={responsiveTable.other.lg} style={{ width: "100%" }}>
-                                        <FormSelectDot name={[field.name, "dot_mfd"]} importedComponentsLayouts={tailformItemLayout} disabled={mode == "view" || expireEditTimeDisable == true} form={form} index={i} />
-                                    </Col>
-
-                                    {/* {pageId == "a6c9c754-0239-4abe-ad6b-8cdb6b81dcc0" && mode != "add" ? null
-                                        : */}
-                                    <Col xs={responsiveTable.other.xs} sm={responsiveTable.other.sm} md={responsiveTable.other.md} lg={responsiveTable.other.lg} style={{ width: "100%" }}>
-
-                                        <Form.Item
-                                            {...tailformItemLayout}
-                                            validateTrigger={['onChange', 'onBlur']}
-                                            name={[field.name, "purchase_unit_id"]}
-                                            fieldKey={[field.fieldKey, "purchase_unit_id"]}
-                                            label={i >= 1 ? "" : GetIntlMessages("purchase-unit")}
-                                            className='form-warehouse'
-                                            rules={[
-                                                {
-                                                    required: true,
-                                                    message: "กรุณากรอก",
-                                                },
-                                            ]}
-                                        >
-                                            <Select
-                                                // showSearch
-
-                                                showArrow={false}
-                                                placeholder="เลือกข้อมูล"
-                                                optionFilterProp="children"
-                                                disabled={mode == "view" || expireEditTimeDisable == true}
-                                                open={false}
-                                            // onChange={(value) => onChangeUnit(index, value)}
-                                            >
-                                                {getArrValue(index, "unit_list").map((e, i) => <Select.Option value={e.id} key={i}>{get(e, `type_name.${locale.locale}`, "-")}</Select.Option>)}
-                                            </Select>
-                                        </Form.Item>
-
-                                    </Col>
-                                    {/* } */}
-
-
-                                    {/* {showDot(index, i) == tireProductTypeGroupId ?
-                                        <Col span={5} style={{ width: "100%" }}>
-                                            <Form.Item
-                                                {...tailformItemLayout}
-                                                validateTrigger={['onChange', 'onBlur']}
-                                                name={[field.name, "dot_mfd"]}
-                                                fieldKey={[field.fieldKey, "dot_mfd"]}
-                                                label='dot_mfd'
-                                            // rules={[
-                                            //     {
-                                            //         required: true,
-                                            //         message: "กรุณากรอก",
-                                            //     },
-                                            // ]}
-                                            >
-                                                <Input placeholder="dot_mfd" disabled={mode == "view" || expireEditTimeDisable == true} />
-                                            </Form.Item>
-                                        </Col>
-                                        : null
-                                    } */}
-
-                                    <Col xs={responsiveTable.other.xs} sm={responsiveTable.other.sm} md={responsiveTable.other.md} lg={responsiveTable.other.lg} style={{ width: "100%" }}>
-                                        <Form.Item
-                                            {...tailformItemLayout}
-                                            validateTrigger={['onChange', 'onBlur']}
-                                            name={[field.name, "amount"]}
-                                            fieldKey={[field.fieldKey, "amount"]}
-                                            label={i >= 1 ? "" : GetIntlMessages("amount")}
-                                            className='form-warehouse'
-                                        >
-                                            <Input type="number" placeholder="จำนวน" disabled={mode == "view" || expireEditTimeDisable == true} />
-                                        </Form.Item>
-                                    </Col>
-
-                                    <>
-                                        {pageId === "a6c9c754-0239-4abe-ad6b-8cdb6b81dcc0" && mode === "view" && configShowMovementBtn === true ?
-                                            <>
-                                                <Col xs={responsiveTable.button.xs} sm={responsiveTable.button.sm} md={responsiveTable.button.md} lg={responsiveTable.button.lg} style={{ width: "100%", paddingTop: i >= 1 ? "" : "40px" }}>
-                                                    <Button type='link' icon={<TableOutlined style={{ fontSize: 20 }} />} style={{ width: "100%" }} onClick={() => visibleEachWarehouseMovementModal(index, i)} />
-                                                </Col>
-                                                <Col xs={responsiveTable.button.xs} sm={responsiveTable.button.sm} md={responsiveTable.button.md} lg={responsiveTable.button.lg} style={{ width: "100%", paddingTop: i >= 1 ? "" : "40px" }} hidden={isFunction(callbackSelectProduct) ? false : true}>
-                                                    <Button type='link' onClick={() => callbackSelectProduct(form.getFieldValue(), index, i)} icon={<ShoppingCartOutlined style={{ fontSize: 26, color: "green" }} />} style={{ width: "100%" }} />
-                                                </Col>
-                                            </>
-
-                                            :
-                                            <Col xs={responsiveTable.button.xs} sm={responsiveTable.button.sm} md={responsiveTable.button.md} lg={responsiveTable.button.lg} style={{ width: "100%", paddingTop: i >= 1 ? "" : "40px" }}>
-                                                {fields.length > 1 && mode != "view" && expireEditTimeDisable !== true ? (
-                                                    <MinusCircleOutlined
-                                                        className="dynamic-delete-button"
-                                                        style={{ fontSize: 18, paddingLeft: 10 }}
-                                                        onClick={() => remove(field.name)}
-                                                    />
-                                                ) : null}
-                                            </Col>
-                                        }
-                                    </>
-
-                                </Row>
-                            </Form.Item>
-
-                        ))}
-
-
-                        {mode !== "view" && expireEditTimeDisable !== true ?
-                            <Form.Item>
-                                <Col style={{ display: "flex", justifyContent: "center" }}>
-                                    <Button style={{ width: "30%" }} type="dashed" onClick={() => addWarehouse(index, add)} block icon={<PlusOutlined />}>
-                                        {GetIntlMessages("add-data")}{GetIntlMessages("warehouses")}
-                                    </Button>
-                                </Col>
-                            </Form.Item>
-                            : null
-                        }
-
-
-                    </>
-                )}
-
-            </Form.List>
-        </Form.Item>
-
-    )
-}
 
 const ImportDocAddEditViewModal = ({ isAllBranch = false, shopArr = null, form, mode, expireDate, pageId, getShopBusinessPartners, visibleEachWarehouseMovementModal, calculateResult, setLoading, shopId, configShowMovementBtn = true, dropDownBtnWarehouse = false, callbackSelectProduct }) => {
 
@@ -938,9 +50,12 @@ const ImportDocAddEditViewModal = ({ isAllBranch = false, shopArr = null, form, 
     const { permission_obj } = useSelector(({ permission }) => permission);
     const { locale, mainColor } = useSelector(({ settings }) => settings);
     const { authUser } = useSelector(({ auth }) => auth);
-    const { taxTypes } = useSelector(({ master }) => master);
+    const { taxTypes, productPurchaseUnitTypes } = useSelector(({ master }) => master);
     const [isProductDataModalVisible, setIsProductDataModalVisible] = useState(false);
+    const [isUomModalVisible, setIsUomModalVisible] = useState(false);
     const [listIndex, setListIndex] = useState(0);
+    const [uomIndex, setUomIndex] = useState(false);
+    const [listUom, setListUom] = useState([]);
 
     const [expireEditTimeDisable, setExpireEditTimeDisable] = useState(false)
 
@@ -1142,7 +257,7 @@ const ImportDocAddEditViewModal = ({ isAllBranch = false, shopArr = null, form, 
                 product_list[index].unit_list = unit_list_arr ? unit_list_arr ?? [] : []
                 const find = ShopProduct.Product.ProductType.ProductPurchaseUnitTypes.find(where => { return where.id === purchaseUnitTypeTire || where.id === purchaseUnitTypeService || where.id === purchaseUnitTypeBattery })
                 product_list[index].unit = isPlainObject(find) ? find.id : null
-
+                product_list[index].uom_arr = ShopProduct.details.uom_arr ?? []
                 product_list[index].warehouse_detail = isArray(product_list[index].warehouse_detail) && product_list[index].warehouse_detail.length > 0 ?
                     product_list[index].warehouse_detail.map(e => { return { ...e, purchase_unit_id: find?.id ?? null } }) : []
 
@@ -1191,7 +306,7 @@ const ImportDocAddEditViewModal = ({ isAllBranch = false, shopArr = null, form, 
             const { product_list } = form.getFieldValue()
             return isArray(product_list) ? product_list[index][type] ?? [] : []
         } catch (error) {
-            // console.log('error :>> ', error);
+            console.log('error :>> ', error);
         }
 
     }
@@ -1674,10 +789,123 @@ const ImportDocAddEditViewModal = ({ isAllBranch = false, shopArr = null, form, 
         form.setFieldsValue({ product_list })
         calculateTable(index, "price_discount", discount)
     }
+
+    const setOpenUomModal = (index) => {
+        const { product_list } = form.getFieldValue()
+        setUomIndex(index)
+        setListUom(product_list[index].uom_arr)
+        setIsUomModalVisible(true)
+    }
+    const handleCancelUomModal = () => {
+        try {
+            setIsUomModalVisible(false)
+        } catch (error) {
+            console.log("error", error)
+        }
+    }
+
+    const SelectUom = (data) => {
+        const { product_list } = form.getFieldValue()
+        let unit_list = product_list[uomIndex].unit_list
+        unit_list?.map((e) => {
+            try {
+                if (e.id === data.unit_measurement) {
+                    if (data.is_use) {
+                        e.uom_data = null
+                    } else {
+                        e.uom_data = data
+                    }
+                } else {
+                    e.uom_data = null
+                }
+            } catch (error) {
+                console.log("error", error)
+            }
+        })
+        product_list[uomIndex].unit = data.unit_measurement
+        let newListUom = listUom
+        newListUom.map((e) => {
+            if (e.unit_measurement === data.unit_measurement) {
+                if (data.is_use) {
+                    e.is_use = false
+                } else {
+                    e.is_use = true
+                }
+            } else {
+                e.is_use = false
+            }
+        })
+        setListUom()
+        product_list[uomIndex].warehouse_detail.forEach((e, index) => {
+            e.amount = e.amount
+            e.dot_mfd = e.dot_mfd
+            e.purchase_unit_id = data.unit_measurement
+            e.shelf = e.shelf
+            e.warehouse = e.warehouse
+        })
+        form.setFieldsValue({ product_list })
+        handleCancelUomModal()
+    }
+    const uomColumn = [
+        {
+            title: "หน่วยวัด",
+            dataIndex: 'unit_measurement',
+            key: 'unit_measurement',
+            align: "center",
+            width: 100,
+            use: true,
+            render: (text, record, index) => {
+                return productPurchaseUnitTypes.find(x => x.id === text).type_name[locale.locale]
+            },
+        }, {
+            title: "เท่ากับ",
+            dataIndex: 'convert_value',
+            key: 'convert_value',
+            align: "center",
+            width: 100,
+            use: true,
+        },
+        {
+            title: "หน่วยแปลง",
+            dataIndex: 'unit_convert',
+            key: 'unit_convert',
+            align: "center",
+            width: 100,
+            use: true,
+            render: (text, record, index) => {
+                return productPurchaseUnitTypes.find(x => x.id === text).type_name[locale.locale]
+            },
+        },
+        {
+            title: "",
+            dataIndex: 'is_use',
+            key: 'is_use',
+            align: "center",
+            width: 100,
+            use: true,
+            render: (text, record, index) => {
+                if (text) {
+                    return (
+                        <Button type='danger' onClick={() => { SelectUom(record) }}>
+                            ยกเลิก
+                        </Button>
+                    )
+                } else {
+                    return (
+                        <Button type='primary' onClick={() => { SelectUom(record) }}>
+                            เลือก
+                        </Button>
+                    )
+                }
+
+            },
+        },
+    ]
+
     return (
         <>
             {pageId == "a6c9c754-0239-4abe-ad6b-8cdb6b81dcc0" && mode != "add"
-                ? null : < IncomeProduct form={form} mode={mode} expireEditTimeDisable={expireEditTimeDisable} dataList={dataList} calculateResult={calculateResult} getShopBusinessPartners={getShopBusinessPartners} loadingSearch={loadingSearch} setLoadingSearch={setLoadingSearch} getArrListValue={getArrListValue} setLoading={setLoading} getShopBusinessPartnersDataListAll={getShopBusinessPartnersDataListAll} />
+                ? null : < FormImportDocument form={form} mode={mode} expireEditTimeDisable={expireEditTimeDisable} dataList={dataList} calculateResult={calculateResult} getShopBusinessPartners={getShopBusinessPartners} loadingSearch={loadingSearch} setLoadingSearch={setLoadingSearch} getArrListValue={getArrListValue} setLoading={setLoading} getShopBusinessPartnersDataListAll={getShopBusinessPartnersDataListAll} />
             }
 
             <div className="head-line-text pt-3">{GetIntlMessages("คลังสินค้า")}</div>
@@ -1862,7 +1090,7 @@ const ImportDocAddEditViewModal = ({ isAllBranch = false, shopArr = null, form, 
                                                                     {...tailformItemLayout}
                                                                     validateTrigger={['onChange', 'onBlur']}
                                                                     name={[field.name, "price_discount_percent"]}
-                                                                    label={GetIntlMessages("ส่วนลดต่อรายการ (เปอร์เซ็น)")}
+                                                                    label={GetIntlMessages("ส่วนลด/รายการ (%)")}
                                                                     rules={[{ pattern: /^(?!,$)[\d,.]+$/, message: GetIntlMessages("only-number") }]}
                                                                 >
                                                                     <InputNumber
@@ -1870,7 +1098,7 @@ const ImportDocAddEditViewModal = ({ isAllBranch = false, shopArr = null, form, 
                                                                         min={0}
                                                                         max={100}
                                                                         status
-                                                                        placeholder={"ส่วนลดต่อรายการ (เปอร์เซ็น)"}
+                                                                        placeholder={"ส่วนลด/รายการ (%)"}
                                                                         formatter={(value) => addComma(value)}
                                                                         parser={(value) => value.replace(/\$\s?|(,*)/g, '')}
                                                                         onBlur={(value) => isFunction(calculateTable) ? calculateTable(index, "price_discount_percent", value.target.value) : null}
@@ -1895,7 +1123,7 @@ const ImportDocAddEditViewModal = ({ isAllBranch = false, shopArr = null, form, 
                                                                     {...tailformItemLayout}
                                                                     validateTrigger={['onChange', 'onBlur']}
                                                                     name={[field.name, "price_discount"]}
-                                                                    label={GetIntlMessages("ส่วนลดต่อรายการ (บาท)")}
+                                                                    label={GetIntlMessages("ส่วนลด/รายการ (บาท)")}
                                                                     rules={[{ pattern: /^(?!,$)[\d,.]+$/, message: GetIntlMessages("only-number") }]}
                                                                 >
                                                                     <InputNumber
@@ -1903,7 +1131,7 @@ const ImportDocAddEditViewModal = ({ isAllBranch = false, shopArr = null, form, 
                                                                         min={0}
                                                                         max={form.getFieldValue().product_list[index].price}
                                                                         status
-                                                                        placeholder={"ส่วนลดต่อรายการ (บาท)"}
+                                                                        placeholder={"ส่วนลด/รายการ (บาท)"}
                                                                         formatter={(value) => addComma(value)}
                                                                         parser={(value) => value.replace(/\$\s?|(,*)/g, '')}
                                                                         onBlur={(value) => isFunction(calculateTable) ? calculateTable(index, "price_discount", value.target.value) : null}
@@ -1921,34 +1149,39 @@ const ImportDocAddEditViewModal = ({ isAllBranch = false, shopArr = null, form, 
 
                                                         {pageId == "a6c9c754-0239-4abe-ad6b-8cdb6b81dcc0" && mode != "add" ? null
                                                             :
-                                                            <Col lg={4} md={12} xs={24} style={{ width: "100%" }}>
-
-                                                                <Form.Item
-                                                                    {...tailformItemLayout}
-                                                                    validateTrigger={['onChange', 'onBlur']}
-                                                                    name={[field.name, "unit"]}
-                                                                    fieldKey={[field.fieldKey, "unit"]}
-                                                                    label={GetIntlMessages("purchase-unit")}
-                                                                    rules={[
-                                                                        {
-                                                                            required: true,
-                                                                            message: "กรุณากรอก",
-                                                                        },
-                                                                    ]}
-                                                                >
-                                                                    <Select
-                                                                        showSearch
-                                                                        placeholder="เลือกข้อมูล"
-                                                                        optionFilterProp="children"
-                                                                        disabled={mode == "view" || expireEditTimeDisable == true}
-                                                                        onChange={(value) => onChangeUnit(index, value)}
+                                                            <>
+                                                                <Col lg={3} md={20} xs={12} style={{ width: "100%" }}>
+                                                                    <Form.Item
+                                                                        {...tailformItemLayout}
+                                                                        validateTrigger={['onChange', 'onBlur']}
+                                                                        name={[field.name, "unit"]}
+                                                                        fieldKey={[field.fieldKey, "unit"]}
+                                                                        label={GetIntlMessages("purchase-unit")}
+                                                                        rules={[
+                                                                            {
+                                                                                required: true,
+                                                                                message: "กรุณากรอก",
+                                                                            },
+                                                                        ]}
                                                                     >
+                                                                        <Select
+                                                                            showSearch
+                                                                            placeholder="เลือกข้อมูล"
+                                                                            optionFilterProp="children"
+                                                                            disabled={mode == "view" || expireEditTimeDisable == true}
+                                                                            onChange={(value) => onChangeUnit(index, value)}
+                                                                        >
 
-                                                                        {getArrValue(index, "unit_list").map((e, i) => <Select.Option value={e.id} key={i}>{get(e, `type_name.${locale.locale}`, "-")}</Select.Option>)}
-                                                                    </Select>
-                                                                </Form.Item>
-
-                                                            </Col>
+                                                                            {getArrValue(index, "unit_list").map((e, i) => <Select.Option value={e.id} key={i}>{e.uom_data ? <span>{get(e, `type_name.${locale.locale}`, "-")} <Tag>UOM</Tag></span> : get(e, `type_name.${locale.locale}`, "-")}</Select.Option>)}
+                                                                        </Select>
+                                                                    </Form.Item>
+                                                                </Col>
+                                                                <Col lg={1} md={4} xs={12} style={{ width: "100%" }}>
+                                                                    <Form.Item label=" ">
+                                                                        <Button type='primary' onClick={() => { setOpenUomModal(index) }}>UOM</Button>
+                                                                    </Form.Item>
+                                                                </Col>
+                                                            </>
                                                         }
 
                                                         {pageId == "a6c9c754-0239-4abe-ad6b-8cdb6b81dcc0" && mode != "add" ? null
@@ -2011,6 +1244,8 @@ const ImportDocAddEditViewModal = ({ isAllBranch = false, shopArr = null, form, 
                                                         }
 
                                                     </Row>
+                                                    <Form.Item name={"is_uom"} hidden />
+                                                    <Form.Item name={"uom_data"} hidden />
 
                                                     <FormWarehouse name={[field.name, "warehouse_detail"]} index={index} form={form} expireEditTimeDisable={expireEditTimeDisable} mode={mode} getArrValue={getArrValue} dataList={dataList} pageId={pageId} visibleEachWarehouseMovementModal={visibleEachWarehouseMovementModal} configShowMovementBtn={configShowMovementBtn} dropDownBtnWarehouse={dropDownBtnWarehouse} callbackSelectProduct={callbackSelectProduct} />
 
@@ -2019,7 +1254,7 @@ const ImportDocAddEditViewModal = ({ isAllBranch = false, shopArr = null, form, 
                                                             <Form.Item >
                                                                 <Button
                                                                     style={{ display: "flex", alignItems: "center", }}
-                                                                    type="dashed"
+                                                                    type="danger"
                                                                     onClick={() => onDeleteProductList(remove, field, index)}
                                                                     block
                                                                     icon={<MinusCircleOutlined />}
@@ -2279,6 +1514,22 @@ const ImportDocAddEditViewModal = ({ isAllBranch = false, shopArr = null, form, 
                 )}
             >
                 <ProductData title="จัดการข้อมูลสินค้า" callBack={callBackProductPick} listIndex={listIndex} />
+            </Modal>
+
+            <Modal
+                maskClosable={false}
+                open={isUomModalVisible}
+                onCancel={handleCancelUomModal}
+                width="600px"
+                // style={{ top: 5 }}
+                centered
+                footer={(
+                    <>
+                        <Button onClick={() => handleCancelUomModal()}>{GetIntlMessages("กลับ")}</Button>
+                    </>
+                )}
+            >
+                <Table dataSource={listUom} columns={uomColumn}></Table>
             </Modal>
 
             <style jsx global>

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Row, Col, Card, Avatar, Form, Select, Button, Input, message, Switch, DatePicker, Empty, Table } from 'antd';
+import { Row, Col, Card, Avatar, Form, Select, Button, Input, message, Switch, DatePicker, Empty, Table, Tooltip as TooltipAntd} from 'antd';
 import { Chart } from "react-google-charts";
 import API from '../util/Api'
 import { ReloadOutlined, ScanOutlined, LoadingOutlined } from '@ant-design/icons';
@@ -114,6 +114,9 @@ const Dashboard = () => {
     const [dataChangeCompareYearly, setDataChangeCompareYearly] = useState("income");
     const [dataChangeNumberOfSales, setDataNumberOfSales] = useState("income");
     const [whichTopProduct, setWhichTopProduct] = useState("tire");
+    const [dataTopTypeOrderCeilingTire, setDataTopTypeOrderCeilingTire] = useState({ labels: [], datasets: [] });
+    const [dataTopTypeOrderCeilingSpare, setDataTopTypeOrderCeilingSpare] = useState({ labels: [], datasets: [] });
+    const [dataTopTypeOrderCeilingService, setDataTopTypeOrderCeilingService] = useState({ labels: [], datasets: [] });
 
     const [form] = Form.useForm();
     const [checkLoad, setCheckLoad] = useState(1);
@@ -344,6 +347,27 @@ const Dashboard = () => {
                         if (model_search.select_shop_ids) urlCall += `&select_shop_ids=${model_search.select_shop_ids}`
                         chartTopCustomer(urlCall)
                         break;
+                    case "api/dashboard/topTypeOrderCeiling/tire":
+                        urlCall = `/dashboard/topTypeOrderCeiling/tire?`;
+                        if (model_search.start_date) urlCall += `&start_date=${model_search.start_date}`
+                        if (model_search.end_date) urlCall += `&end_date=${model_search.end_date}`
+                        if (model_search.select_shop_ids) urlCall += `&select_shop_ids=${model_search.select_shop_ids}`
+                        chartTopTypeOrderCeilingTire(urlCall)
+                        break;
+                    case "api/dashboard/topTypeOrderCeiling/spaire":
+                        urlCall = `/dashboard/topTypeOrderCeiling/spaire?`;
+                        if (model_search.start_date) urlCall += `&start_date=${model_search.start_date}`
+                        if (model_search.end_date) urlCall += `&end_date=${model_search.end_date}`
+                        if (model_search.select_shop_ids) urlCall += `&select_shop_ids=${model_search.select_shop_ids}`
+                        chartTopTypeOrderCeilingSpare(urlCall)
+                        break;
+                    case "api/dashboard/topTypeOrderCeiling/service":
+                        urlCall = `/dashboard/topTypeOrderCeiling/service?`;
+                        if (model_search.start_date) urlCall += `&start_date=${model_search.start_date}`
+                        if (model_search.end_date) urlCall += `&end_date=${model_search.end_date}`
+                        if (model_search.select_shop_ids) urlCall += `&select_shop_ids=${model_search.select_shop_ids}`
+                        chartTopTypeOrderCeilingService(urlCall)
+                        break;
                     default:
                         break;
                 }
@@ -373,6 +397,10 @@ const Dashboard = () => {
     const [onLoadTopTypeSpare, setOnLoadTopTypeSpare] = useState(false);
     const [onLoadTopTypeService, setOnLoadTopTypeService] = useState(false);
     const [onLoadTopCustomer, setOnLoadTopCustomer] = useState(false);
+    const [onLoadTopTypeOrderCeilingTire, setOnLoadTopTypeOrderCeilingTire] = useState(false);
+    const [onLoadTopTypeOrderCeilingSpare, setOnLoadTopTypeOrderCeilingSpare] = useState(false);
+    const [onLoadTopTypeOrderCeilingService, setOnLoadTopTypeOrderCeilingService] = useState(false);
+
     const chartBrandSales = (apiPath) => {
         setOnLoadBrandSales(true)
         API.get(apiPath).then(({ data: { data } }) => {
@@ -664,6 +692,39 @@ const Dashboard = () => {
         }).catch((err) => {
             console.log(err);
 
+        });
+    }
+    const chartTopTypeOrderCeilingTire = (apiPath) => {
+        setOnLoadTopTypeOrderCeilingTire(true)
+        API.get(apiPath).then(({ data: { data } }) => {
+            // console.log(data)
+            var dtChart = isArray(data) && data.length > 0 ? data : []
+            setDataTopTypeOrderCeilingTire(dtChart)
+            setOnLoadTopTypeOrderCeilingTire(false)
+        }).catch((err) => {
+            console.log(err);
+        });
+    }
+    const chartTopTypeOrderCeilingSpare = (apiPath) => {
+        setOnLoadTopTypeOrderCeilingSpare(true)
+        API.get(apiPath).then(({ data: { data } }) => {
+            // console.log(data)
+            var dtChart = isArray(data) && data.length > 0 ? data : []
+            setDataTopTypeOrderCeilingSpare(dtChart)
+            setOnLoadTopTypeOrderCeilingSpare(false)
+        }).catch((err) => {
+            console.log(err);
+        });
+    }
+    const chartTopTypeOrderCeilingService = (apiPath) => {
+        setOnLoadTopTypeOrderCeilingService(true)
+        API.get(apiPath).then(({ data: { data } }) => {
+            // console.log(data)
+            var dtChart = isArray(data) && data.length > 0 ? data : []
+            setDataTopTypeOrderCeilingService(dtChart)
+            setOnLoadTopTypeOrderCeilingService(false)
+        }).catch((err) => {
+            console.log(err);
         });
     }
 
@@ -1049,9 +1110,95 @@ const Dashboard = () => {
             }
         },
     ]
+    const columnsTopTypeOrderCeiling = [
+        {
+            title: 'ลำดับ',
+            dataIndex: 'no',
+            key: 'no',
+            align: "center",
+        },
+        // {
+        //     title: 'product_code',
+        //     dataIndex: 'product_code',
+        //     key: 'product_code',
+        // },
+        {
+            title: 'ชื่อสินค้า',
+            dataIndex: 'product_name',
+            key: 'product_name',
+            align: "center",
+            render: (text, record) => {
+                return (
+                    <div style={{ textAlign: "start" }}>{text ?? "-"}</div>
+                )
+            }
+        },
+        {
+            title: 'จำนวนคงเหลือ',
+            dataIndex: 'amount',
+            key: 'amount',
+            align: "center",
+            render: (text, record) => {
+                let reorder_point = record?.reorder_point
+                let over_qty_point = record?.over_qty_point
+                return (
+                    <>
+                        <TooltipAntd title={reOrderPointColor(reorder_point, over_qty_point, +text) === "red" ? <div style={{ textAlign: "center" }}>จำนวนสินค้าต่ำกว่าจุดสั่งซื้อ <br></br>จุดสั่งซื้อคือ {reorder_point} </div> : reOrderPointColor(reorder_point, over_qty_point, +text) === "orange" ? <div style={{ textAlign: "center" }}>จำนวนสินค้าสูงเกินกว่าเพดานสินค้า <br></br>เพดานสินค้าซื้อคือ {over_qty_point} </div> : ""}>
+                            <span
+                                style={{
+                                    color: reOrderPointColor(reorder_point, over_qty_point, +text),
+                                    fontSize: reOrderPointColor(reorder_point, over_qty_point, +text) === "red" || reOrderPointColor(reorder_point, over_qty_point, +text) === "orange" ? "16px" : "",
+                                    fontWeight: reOrderPointColor(reorder_point, over_qty_point, +text) === "red" || reOrderPointColor(reorder_point, over_qty_point, +text) === "orange" ? "700" : "",
+                                }}>
+
+                                {text ? Number(text).toLocaleString() : "0"}
+                            </span>
+                        </TooltipAntd>
+
+                    </>
+                )
+            }
+        },
+        {
+            title: 'จุดสั่งซื้อ',
+            dataIndex: 'reorder_point',
+            key: 'reorder_point',
+            align: "center",
+            render: (text, record) => {
+                return (
+                    <div style={{ textAlign: "end" }}>{text ? (+text).toLocaleString() ?? "-" : "-"}</div>
+                )
+            }
+        },
+        {
+            title: 'จุดเพดานสินค้า',
+            dataIndex: 'over_qty_point',
+            key: 'over_qty_point',
+            align: "center",
+            render: (text, record) => {
+                return (
+                    <div style={{ textAlign: "end" }}>{text ? (+text).toLocaleString() ?? "-" : "-"}</div>
+                )
+            }
+        },
+    ]
+
+    const reOrderPointColor = (reorder_point, over_qty_point, qty) => {
+        if ((reorder_point !== undefined && reorder_point !== null) || (over_qty_point !== undefined && over_qty_point !== null)) {
+            if (qty < reorder_point) {
+                return "red"
+            } else if (qty > over_qty_point) {
+                return "orange"
+            } else {
+                return ""
+            }
+        } else {
+            return ""
+        }
+    }
 
     const MatchRound = (value) => (Math.round(+value * 100) / 100).toFixed(2)
-    
+
     return (
         <>
             <div style={{ margin: 10, marginLeft: -10 }}>
@@ -1563,7 +1710,7 @@ const Dashboard = () => {
                     </Card>
                 </Col>
 
-                <Col lg={8} md={12} xs={24}>
+                <Col lg={12} md={12} xs={24}>
                     <Card hoverable
                         title={
                             <>
@@ -1583,7 +1730,7 @@ const Dashboard = () => {
                         }
                     </Card>
                 </Col>
-                <Col lg={8} md={12} xs={24}>
+                <Col lg={12} md={12} xs={24}>
                     <Card
                         hoverable
                         bordered={false}
@@ -1648,7 +1795,72 @@ const Dashboard = () => {
                         </div>
                     </Card>
                 </Col>
-                <Col lg={8} md={12} xs={24}>
+                <Col lg={12} md={12} xs={24}>
+                    <Card
+                        hoverable
+                        bordered={false}
+                        title={
+                            <>
+                                <div style={titlestyle}>Top 10 {whichTopProduct === "tire" ? "ยาง" : whichTopProduct === "spare" ? "อะไหล่" : whichTopProduct === "service" ? "บริการ" : ""} ประจำเดือน (คงเหลือโดยคิดจากยอดขาย)</div>
+                                <div style={subtitlestyle}>{modelSearch.start_date === modelSearch.end_date ? `ข้อมูล ${moment(modelSearch.start_date).format("DD")}/${moment(modelSearch.start_date).format("MM")}/${moment(modelSearch.start_date).format("YYYY")}` : `ข้อมูล ${moment(modelSearch.start_date).format("DD")}/${moment(modelSearch.start_date).format("MM")}/${moment(modelSearch.start_date).format("YYYY")} ถึง ${moment(modelSearch.end_date).format("DD")}/${moment(modelSearch.end_date).format("MM")}/${moment(modelSearch.end_date).format("YYYY")}`} </div>
+                            </>
+                        }
+                        extra={
+                            <Select
+                                defaultValue={'tire'}
+                                style={{ minWidth: "100px" }}
+                                onChange={(e) => setWhichTopProduct(e)}>
+                                <Option value="tire">ยาง</Option>
+                                <Option value="spare">อะไหล่</Option>
+                                <Option value="service">บริการ</Option>
+                            </Select>
+                        }>
+
+                        <div hidden={whichTopProduct !== "tire"} >
+                            {
+                                onLoadTopTypeTire ?
+                                    <CarPreloader />
+                                    : isArray(dataTopTypeOrderCeilingTire) ? dataTopTypeOrderCeilingTire.length > 0 ?
+                                        <>
+                                            <Table columns={columnsTopTypeOrderCeiling} dataSource={dataTopTypeOrderCeilingTire} />
+                                        </>
+                                        :
+                                        <EmptyData />
+                                        :
+                                        <EmptyData />
+                            }
+                        </div>
+                        <div hidden={whichTopProduct !== "spare"} >
+                            {
+                                onLoadTopTypeSpare ?
+                                    <CarPreloader />
+                                    : isArray(dataTopTypeOrderCeilingSpare) ? dataTopTypeOrderCeilingSpare.length > 0 ?
+                                        <>
+                                            <Table columns={columnsTopTypeOrderCeiling} dataSource={dataTopTypeOrderCeilingSpare} />
+                                        </>
+                                        :
+                                        <EmptyData />
+                                        :
+                                        <EmptyData />
+                            }
+                        </div>
+                        <div hidden={whichTopProduct !== "service"}>
+                            {
+                                onLoadTopTypeService ?
+                                    <CarPreloader />
+                                    : isArray(dataTopTypeOrderCeilingService) ? dataTopTypeOrderCeilingService.length > 0 ?
+                                        <>
+                                            <Table columns={columnsTopTypeOrderCeiling} dataSource={dataTopTypeOrderCeilingService} />
+                                        </>
+                                        :
+                                        <EmptyData />
+                                        :
+                                        <EmptyData />
+                            }
+                        </div>
+                    </Card>
+                </Col>
+                <Col lg={12} md={12} xs={24}>
                     <Card hoverable title={
                         < >
                             <div style={titlestyle}>Top 10 ลูกค้า ประจำเดือน</div>

@@ -53,6 +53,7 @@ const BusinessCustomersData = ({ title = null, callBack }) => {
     const [lineData, setLineData] = useState(null);
     const [showModalTagsData, setShowModalTagsData] = useState(false);
     const [showModalSalesHistoryData, setShowModalSalesHistoryData] = useState(false);
+    const { productBrand } = useSelector(({ master }) => master);
 
 
 
@@ -1757,26 +1758,49 @@ const BusinessCustomersData = ({ title = null, callBack }) => {
                                                                     {fields.map((field) => (
 
                                                                         <Row key={field.key} style={{ display: 'flex', marginBottom: 8, alignContent: "center" }} align="baseline">
-                                                                            <Col xs={24} md={8} xl={8} >
-                                                                                <Form.Item label="ลำดับ" name={[field.name, 'order']} rules={[{ required: true, message: 'กรุณากรอกข้อมูล' }]}>
-                                                                                    <Input />
-                                                                                </Form.Item>
+                                                                            <Col span={12}>
+                                                                                <Row>
+                                                                                    <Col xs={24} md={8} xl={12} >
+                                                                                        <Form.Item label="ลำดับ" name={[field.name, 'order']} rules={[{ required: true, message: 'กรุณากรอกข้อมูล' }]}>
+                                                                                            <Input />
+                                                                                        </Form.Item>
+                                                                                    </Col>
+                                                                                    <Col xs={24} md={8} xl={12}>
+                                                                                        <Form.Item label="ชื่อ" name={[field.name, 'name']} rules={[{ required: true, message: 'กรุณากรอกข้อมูล' }]}>
+                                                                                            <Input />
+                                                                                        </Form.Item>
+                                                                                    </Col>
+                                                                                    <Col xs={24} md={8} xl={12}>
+                                                                                        <Form.Item label="ยี่ห้อ" name={[field.name, 'brand_id']} rules={[{ required: true, message: 'กรุณากรอกข้อมูล' }]}>
+                                                                                            <Select
+                                                                                                disabled={configModal.mode == "view"}
+                                                                                                allowClear
+                                                                                                style={{ width: '100%' }}
+                                                                                                placeholder="เลือกข้อมูล"
+                                                                                                optionFilterProp='children'
+                                                                                                showSearch
+                                                                                            >
+                                                                                                {isArray(productBrand) && productBrand.length > 0 ? productBrand.map((e, index) => (
+                                                                                                    <Select.Option value={e.id} key={index}>
+                                                                                                        {e.brand_name[locale.locale]}
+                                                                                                    </Select.Option>
+                                                                                                ))
+                                                                                                    : null
+                                                                                                }
+                                                                                            </Select>
+                                                                                        </Form.Item>
+                                                                                    </Col>
+                                                                                    <Col xs={24} md={6} xl={12} >
+                                                                                        <Form.Item label="ปี" name={[field.name, 'year']} rules={[{ required: true, message: 'กรุณากรอกข้อมูล' }, { min: 4, message: 'กรุณากรอกข้อมูลให้ถูกต้อง' }, { max: 4, message: 'กรุณากรอกข้อมูลให้ถูกต้อง' }]}>
+                                                                                            <Input maxLength={4} placeholder={moment(Date.now()).format("YYYY")} />
+                                                                                        </Form.Item>
+                                                                                    </Col>
+                                                                                    <Col span={2} style={{ textAlign: "end" }}>
+                                                                                        <Button onClick={() => remove(field.name)} type='danger'>ลบรายการ</Button>
+                                                                                    </Col>
+                                                                                </Row>
                                                                             </Col>
-                                                                            <Col xs={24} md={8} xl={8}>
-                                                                                <Form.Item label="ชื่อ" name={[field.name, 'name']} rules={[{ required: true, message: 'กรุณากรอกข้อมูล' }]}>
-                                                                                    <Input />
-                                                                                </Form.Item>
-                                                                            </Col>
-                                                                            <Col xs={24} md={6} xl={6} >
-                                                                                <Form.Item label="ปี" name={[field.name, 'year']} rules={[{ required: true, message: 'กรุณากรอกข้อมูล' }, { min: 4, message: 'กรุณากรอกข้อมูลให้ถูกต้อง' }, { max: 4, message: 'กรุณากรอกข้อมูลให้ถูกต้อง' }]}>
-                                                                                    <Input maxLength={4} placeholder={moment(Date.now()).format("YYYY")} />
-                                                                                </Form.Item>
-                                                                            </Col>
-                                                                            <Col span={2} style={{ textAlign: "end" }}>
-                                                                                <Button onClick={() => remove(field.name)} type='danger'>ลบรายการ</Button>
-                                                                            </Col>
-
-                                                                            <Col span={24}>
+                                                                            <Col span={12}>
                                                                                 <Form.Item label="ข้อมูล">
                                                                                     <Form.List name={[field.name, 'target_data']}>
                                                                                         {(subFields, subOpt) => (
@@ -1825,7 +1849,7 @@ const BusinessCustomersData = ({ title = null, callBack }) => {
                                                                     ))}
 
                                                                     <Button
-                                                                        hidden={fields.length > 0}
+                                                                        // hidden={fields.length > 0}
                                                                         type="dashed"
                                                                         onClick={() => add(
                                                                             {

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import Head from 'next/head';
-import { Table, Button, Row, Col, message, Tooltip, Input, Modal, Form, Upload, DatePicker, TimePicker, Select, Divider, Switch, Space, AutoComplete } from 'antd';
+import { Table, Button, Row, Col, message, Tooltip, Input, Modal, Form, Typography } from 'antd';
 import { ReloadOutlined, UploadOutlined, EditOutlined, PlusOutlined, MinusCircleOutlined } from '@ant-design/icons';
 import API from '../../../../util/Api'
 import GetIntlMessages from '../../../../util/GetIntlMessages';
@@ -26,6 +26,7 @@ import ProductListTable from './PoAndPrDocComponents/Components.Routes.Modal.Pro
 import { RoundingNumber, takeOutComma } from '../../../shares/ConvertToCurrency';
 import SortingData from '../../../shares/SortingData';
 
+const { Text, Link } = Typography;
 const { Search } = Input;
 const cookies = new Cookies();
 
@@ -109,34 +110,24 @@ const PurchaseOrder = ({ docTypeId }) => {
                 align: "center",
                 render: (text, record) => RoundingNumber(text) ?? "-"
             },
-            // {
-            //     title: GetIntlMessages("ROP"),
-            //     dataIndex: '',
-            //     key: '',
-            //     width: 150,
-            //     align: "center",
-            // },
-            // {
-            //     title: GetIntlMessages("EOQ"),
-            //     dataIndex: '',
-            //     key: '',
-            //     width: 150,
-            //     align: "center",
-            // },
-            // {
-            //     title: GetIntlMessages("คำสั่ง"),
-            //     dataIndex: '',
-            //     key: '',
-            //     width: 150,
-            //     align: "center",
-            // },
-            // {
-            //     title: GetIntlMessages("Stock Online"),
-            //     dataIndex: '',
-            //     key: '',
-            //     width: 150,
-            //     align: "center",
-            // },
+            {
+                title: GetIntlMessages("สถานะการใช้งาน"),
+                dataIndex: 'is_used',
+                key: 'is_used',
+                width: 150,
+                align: "center",
+                render: (text, record) => {
+                    if (text) {
+                        return (
+                            <Text style={{ color: "green" }}>ใช้งานแล้ว</Text>
+                        )
+                    } else {
+                        return (
+                            <Text style={{ color: "red" }}>ยังไม่ได้ใช้งาน</Text>
+                        )
+                    }
+                }
+            },
 
         ];
 
@@ -195,12 +186,12 @@ const PurchaseOrder = ({ docTypeId }) => {
                     let res
                     if (isuse === 2) { //isuse 2 front -> คือลบ ,back -> คือยกเลิก
                         res = await API.delete(`/shopPurchaseOrderDoc/delete/${id}`)
-                    }else{ //isuse 1 front -> คือปกติ , isuse 0 front -> คือยกเลิก ,back -> คือ ลบ
+                    } else { //isuse 1 front -> คือปกติ , isuse 0 front -> คือยกเลิก ,back -> คือ ลบ
                         res = await API.put(`/shopPurchaseOrderDoc/put/${id}`, { status: isuse === 0 ? 2 : 1 })
                     }
 
                     if (res.data.status === "success") {
-                        setModelSearch(()=>init.modelSearch)
+                        setModelSearch(() => init.modelSearch)
                         getDataSearch({
                             page: configTable.page,
                             search: modelSearch.search,
@@ -252,7 +243,7 @@ const PurchaseOrder = ({ docTypeId }) => {
             // order: "ascend",
             title: {
                 not_use_system: GetIntlMessages("ยกเลิกเอกสาร"),
-                use_system : GetIntlMessages("สถานะใช้งานเอกสาร"),
+                use_system: GetIntlMessages("สถานะใช้งานเอกสาร"),
             },
             column: {
                 created_by: false,
@@ -422,7 +413,7 @@ const PurchaseOrder = ({ docTypeId }) => {
                     // customer_list: [],
                     business_partner_id,
                     // purchase_requisition_id,
-                    ref_doc : details?.ref_doc ?? null,
+                    ref_doc: details?.ref_doc ?? null,
                     business_partners_list: [ShopBusinessPartner],
                     tax_type_id,
                     doc_type_id,
@@ -437,7 +428,7 @@ const PurchaseOrder = ({ docTypeId }) => {
                     price_grand_total: RoundingNumber(data?.price_grand_total),
                     remark: details?.remark ?? null,
                     remark_inside: details?.remark_inside ?? null,
-                    shopPurchaseOrderLists: isArray(ShopPurchaseOrderLists) &&  ShopPurchaseOrderLists.length > 0 ?
+                    shopPurchaseOrderLists: isArray(ShopPurchaseOrderLists) && ShopPurchaseOrderLists.length > 0 ?
                         ShopPurchaseOrderLists.map(e => {
                             return {
                                 id: e?.id,
@@ -477,7 +468,7 @@ const PurchaseOrder = ({ docTypeId }) => {
                 //     _model.customer_phone_list = Object.entries(data?.ShopBusinessCustomer?.mobile_no).map(e => { return { value: e[1] } })
                 // }
 
-                _model.shopPurchaseOrderLists = SortingData(_model.shopPurchaseOrderLists,`seq_number`)
+                _model.shopPurchaseOrderLists = SortingData(_model.shopPurchaseOrderLists, `seq_number`)
                 // console.log('_model :>> ', _model);
                 form.setFieldsValue(_model)
             }

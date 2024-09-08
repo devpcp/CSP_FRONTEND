@@ -757,12 +757,23 @@ const ImportDocuments = ({ view_doc_id, select_shop_ids, title = null, callBack,
                                 }
                             }),
                         })
+
+                        console.log("ee", e.details.is_uom)
+                        let unit_list = newArrProductId_list[0].Product.ProductType.ProductPurchaseUnitTypes ?? []
+                        if (e.details.is_uom) {
+                            unit_list.map((el) => {
+                                if (el.id === e.details.uom_data.unit_measurement) {
+                                    el.uom_data = e.details.uom_data
+                                }
+                            })
+                        }
+
                         initData.product_list.push({
                             productId_list: newArrProductId_list,
-                            unit_list: newArrProductId_list[0].Product.ProductType.ProductPurchaseUnitTypes ?? [],
+                            unit_list: unit_list,
 
                             product_id: e.product_id,
-                            amount_all: e.amount_all,
+                            amount_all: e.details.is_uom ? e.amount_all / e.details.uom_data.convert_value : e.amount_all,
                             price: e.details.price,
                             price_text: customFormData(e, "price"),
                             // price_text: customTextData(e.details.price_text),
@@ -770,7 +781,7 @@ const ImportDocuments = ({ view_doc_id, select_shop_ids, title = null, callBack,
                             total_price: MatchRound(e.details.total_price),
                             total_price_text: customFormData(e, "total_price"),
                             // total_price_text: customTextData(e.details.total_price),
-                            unit: e.details.unit,
+                            unit: e.details.is_uom ? e.details.uom_data.unit_measurement : e.details.unit,
 
                             discount_percentage_1: e.details.discount_percentage_1,
                             discount_percentage_1_text: customFormData(e, "discount_percentage_1"),
@@ -795,9 +806,19 @@ const ImportDocuments = ({ view_doc_id, select_shop_ids, title = null, callBack,
                             price_discount_percent: e.details.discount_3_type === "percent" && e.details.is_discount === undefined ? e.details.discount_3_text : e.details.discount_3_type === "bath" && e.details.is_discount === undefined ? ((e.details.discount_3_text / e.details.price) * 100) : e.details.price_discount_percent,
                             price_grand_total: (e.details.discount_3_type === "bath" && e.details.is_discount === undefined) || (e.details.discount_3_type === "percent" && e.details.is_discount === undefined) ? MatchRound(e.details.total_price_text - e.details.discount_thb_text) : e.details.price_grand_total,
 
+                            is_uom: e.details.is_uom,
+                            uom_data: e.details.uom_data,
+                            uom_arr: e.ShopProduct.details.uom_arr,
+
                             warehouse_detail: e.warehouse_detail.map((items, index) => {
                                 // console.log('items warehouse_detail dataDocInventoryId', items)
-                                return { warehouse: items.warehouse, shelf: items.shelf.item, amount: items.shelf.amount, dot_mfd: !!items.shelf.dot_mfd ? items.shelf.dot_mfd : null, purchase_unit_id: items.shelf.purchase_unit_id }
+                                return {
+                                    warehouse: items.warehouse,
+                                    shelf: items.shelf.item,
+                                    amount: e.details.is_uom ? items.shelf.amount / e.details.uom_data.convert_value : items.shelf.amount,
+                                    dot_mfd: !!items.shelf.dot_mfd ? items.shelf.dot_mfd : null,
+                                    purchase_unit_id: e.details.is_uom ? e.details.uom_data.unit_measurement : items.shelf.purchase_unit_id
+                                }
                             }),
                             ProductTypeGroupId: e.ShopProduct.Product.ProductType.type_group_id,
 
@@ -879,42 +900,20 @@ const ImportDocuments = ({ view_doc_id, select_shop_ids, title = null, callBack,
                     credit_balance: value.credit_balance,
                     tailgate_discount: replaceData(value?.tailgate_discount) ?? "0.00",
                     tax_type: value.tax_type,
-                    // tax_rate: value.tax_rate,
                     References_doc: value.References_doc,
-
                     total_discount: replaceData(total_discount) ?? "0.00",
-                    // total_discount_text: replaceData(`${value.total_discount_text}`),
-
-                    // total_price_all: twoDigitsString(total_price_all),
                     total_price_all: replaceData(total_price_all) ?? "0.00",
-                    // total_price_all_text: replaceData(`${value.total_price_all_text}`),
-
                     total_price_all_after_discount: replaceData(total_price_all_after_discount) ?? "0.00",
-                    // total_price_all_after_discount_text: replaceData(`${value.total_price_all_after_discount_text}`),
-
                     vat: replaceData(vat) ?? "0.00",
-                    // vat_text: replaceData(`${value.vat_text}`),
-
                     net_price: replaceData(net_price) ?? "0.00",
-                    // net_price_text: replaceData(`${value.net_price_text}`),
-
                     price_before_vat: replaceData(price_before_vat) ?? "0.00",
-
                     debt_price_amount_left: replaceData(debt_price_amount_left) ?? "0.00",
-                    // total_discount: `${value.total_discount}`,
-                    // total_price_all: `${value.total_price_all}`,
-                    // total_price_all_after_discount: value.total_price_all_after_discount ? `${value.total_price_all_after_discount}` : "0",
-                    // vat: `${value.vat}`,
-                    // net_price: `${value.net_price}`,
-
-
                     note: value.note,
                     user_id: value.user_id,
                     is_inv: value.is_inv,
                     tax_period: moment(value.tax_period).format("YYYY-MM")
                 },
                 doc_type_id: "ad06eaab-6c5a-4649-aef8-767b745fab47", //ใบนำเข้า
-                // doc_type_id: value.doc_type_id,
                 doc_date: moment(value.doc_date).format("YYYY-MM-DD"),
 
             }
@@ -925,6 +924,8 @@ const ImportDocuments = ({ view_doc_id, select_shop_ids, title = null, callBack,
 
             const warehouseModel = {
                 product_list: value.product_list.map((items, index) => {
+                    let uom_data = items?.uom_arr?.find(x => x.unit_measurement === items.unit) ?? null
+                    let is_uom = uom_data !== null
                     return {
                         // item: index + 1,
                         product_id: items.product_id,
@@ -937,16 +938,17 @@ const ImportDocuments = ({ view_doc_id, select_shop_ids, title = null, callBack,
                                 warehouse: e.warehouse,
                                 shelf: {
                                     item: e.shelf,
-                                    amount: parseInt(e.amount),
+                                    amount: is_uom ? parseInt(e.amount) * +uom_data.convert_value : parseInt(e.amount),
                                     dot_mfd: e.dot_mfd ?? null,
-                                    purchase_unit_id: e.purchase_unit_id ?? null,
+                                    purchase_unit_id: is_uom ? uom_data.unit_convert : e.purchase_unit_id ?? null,
                                 }
                             }
                         }) : null,
-                        amount_all: isNaN(parseInt(items.amount_all)) ? null : parseInt(items.amount_all),
+                        amount_all: isNaN(parseInt(items.amount_all)) ? null : is_uom ? parseInt(items.amount_all) * +uom_data.convert_value : parseInt(items.amount_all),
 
                         details: {
-
+                            uom_data: uom_data,
+                            is_uom: is_uom,
                             price: items.price,
                             price_text: replaceData(items.price_text),
 
@@ -966,7 +968,7 @@ const ImportDocuments = ({ view_doc_id, select_shop_ids, title = null, callBack,
                             total_price: items.total_price,
                             total_price_text: replaceData(items.total_price_text),
 
-                            unit: items.unit,
+                            unit: is_uom ? uom_data.unit_convert : items.unit,
 
                             price_discount: items?.price_discount ?? "0.00",
                             price_discount_percent: items?.price_discount_percent ?? "0.00",
@@ -1058,7 +1060,8 @@ const ImportDocuments = ({ view_doc_id, select_shop_ids, title = null, callBack,
             });
 
             // console.log('warehouseModel', warehouseModel)
-            // console.log('_model', _model)
+            console.log('_model', _model)
+            console.log('warehouseModel', warehouseModel)
             // console.log("_modell", warehouseModel.product_list)
             // console.log("product_list_check", product_list_check)
 
@@ -1096,7 +1099,7 @@ const ImportDocuments = ({ view_doc_id, select_shop_ids, title = null, callBack,
             }
             setLoading(false)
         } catch (error) {
-            // message.error('มีบางอย่างผิดพลาด !!');
+            message.error('มีบางอย่างผิดพลาด !!' + error);
             console.log('error', error)
         }
     }

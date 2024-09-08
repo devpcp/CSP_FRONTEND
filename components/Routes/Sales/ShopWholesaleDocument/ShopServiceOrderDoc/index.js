@@ -509,6 +509,7 @@ const RepairOrder = ({ docTypeId, view_doc_id, select_shop_ids, title = null, })
                 key: 'code_id',
                 width: 200,
                 align: "center",
+                sorter: true,
                 render: (text, record, index) => {
                     return (
                         <>
