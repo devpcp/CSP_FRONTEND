@@ -284,7 +284,7 @@ const ComponentsRoutesDocumentDebtLists = ({ onFinish, calculateResult, mode }) 
                             formatter={(value) => !!value && value.length > 0 ? `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',') : ""}
                             parser={(value) => value.replace(/\$\s?|(,*)/g, '')}
                             onBlur={() => calculateResult()}
-                            max={+form.getFieldValue().shopCustomerDebtLists[index].debt_price_amount_left}
+                            max={+form.getFieldValue()?.shopCustomerDebtLists[index]?.debt_price_amount_left}
                         />
                     </Form.Item>
                 </>
