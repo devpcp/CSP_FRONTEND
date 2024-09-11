@@ -14,7 +14,7 @@ import moment from 'moment';
 import Swal from 'sweetalert2';
 import ChequeData from '../../../../../routes/MyData/ChequeData';
 
-const ComponentsPayWithCheque = ({ icon, textButton, initForm, total, callback, loading }) => {
+const ComponentsPayWithCheque = ({ icon, textButton, initForm, total, callback, loading, disabled }) => {
 
     const { bankNameList } = useSelector(({ master }) => master);
     const { locale, mainColor } = useSelector(({ settings }) => settings);
@@ -150,7 +150,7 @@ const ComponentsPayWithCheque = ({ icon, textButton, initForm, total, callback, 
     // console.log('initForm.getFieldValue() :>> ', initForm.getFieldValue());
     return (
         <>
-            <Button className={`cash-btn`} onClick={() => setIsModalVisible(true)}>
+            <Button className={`cash-btn`} onClick={() => setIsModalVisible(true)} disabled={disabled}>
                 {isPlainObject(icon) ? icon : <img className={`cash-img-icon`} src={icon} />}
                 {textButton}
             </Button>
@@ -318,7 +318,7 @@ const ComponentsPayWithCheque = ({ icon, textButton, initForm, total, callback, 
                                     rules={[{ required: true, message: GetIntlMessages("please-fill-out") }]}
                                 >
                                     <InputNumber disabled stringMode min={0} precision={2} style={{ width: "100%" }} step="0.01"
-                                   
+
                                         formatter={(value) => !!value ? value.replace(/\B(?=(\d{3})+(?!\d))/g, ',') : ""}
                                         parser={(value) => value.replace(/\$\s?|(,*)/g, '')}
                                     />

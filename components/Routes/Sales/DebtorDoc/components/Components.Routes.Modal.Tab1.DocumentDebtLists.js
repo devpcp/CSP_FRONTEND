@@ -349,7 +349,7 @@ const ComponentsRoutesDocumentDebtLists = ({ onFinish, calculateResult, mode }) 
 
     const extractDataDocSaleType = (record, type) => {
         try {
-            console.log("record", record)
+            // console.log("record", record)
             if (!!record.doc_type_code_id) {
                 switch (record.doc_type_code_id) {
                     case 'CDN':

@@ -35,7 +35,8 @@ const LineOAInventoryBalance = ({ callBack }) => {
   const [isAddToCartModalVisible, setIsAddToCartModalVisible] = useState(false);
   const [isCartModalVisible, setIsCartModalVisible] = useState(false);
   const [cartList, setCartList] = useState([])
-
+  const cookies = new Cookies();
+  const userData = cookies.get("user_data")
   // const cookie = new Cookies();
 
   useEffect(() => {
@@ -112,8 +113,8 @@ const LineOAInventoryBalance = ({ callBack }) => {
       if (res.data.status === "success") {
         // console.log("res.data.", res.data.data)
         const { currentCount, currentPage, pages, totalCount, data } = res.data.data;
+        let yearNow = moment(Date.now()).format("YY")
         data?.map((e) => {
-
           switch (e.ShopProduct?.Product?.ProductBrand?.brand_name[locale.locale]) {
             case "BFGOODRICH":
               e.ShopProduct?.Product?.ProductBrand?.brand_pic = "https://upload.wikimedia.org/wikipedia/commons/thumb/9/90/BFGoodrich_logo.svg/2560px-BFGoodrich_logo.svg.png"
@@ -147,13 +148,16 @@ const LineOAInventoryBalance = ({ callBack }) => {
               break;
           }
           e.warehouse_show = []
+
+
           e.warehouse_detail?.map((ew) => {
+
             ew.ShopWarehouse = warehouseList?.find(x => x?.id === ew?.warehouse)
             ew.shelf.PurchaseUnit = productPurchaseUnitTypes?.find(x => x?.id === ew?.shelf?.purchase_unit_id)
             ew.shelf.balance_show = ew.shelf.balance >= 20 ? 20 : ew.shelf.balance
             ew.shelf.Shelf = ew?.ShopWarehouse?.shelf?.find(x => x?.code === ew?.shelf?.item)
             ew.price_show = getPriceShow(e, ew)
-            ew.shelf.dot_show = ew.shelf.dot_mfd ? ew.shelf.dot_mfd.split("")[0] + "X" + ew.shelf.dot_mfd.split("")[2] + ew.shelf.dot_mfd.split("")[3] : "XXXX"
+            ew.shelf.dot_show = ew.shelf.dot_mfd ? ew.shelf.dot_mfd.split("")[2] + ew.shelf.dot_mfd.split("")[3] === yearNow ? ew.shelf.dot_mfd.split("")[0] + "X" + ew.shelf.dot_mfd.split("")[2] + ew.shelf.dot_mfd.split("")[3] : ew.shelf.dot_mfd : "XXXX"
 
           })
 
@@ -161,55 +165,31 @@ const LineOAInventoryBalance = ({ callBack }) => {
 
         })
 
-
         data?.map((e, i) => {
           console.log("warehouse_detail", e.warehouse_detail)
           e.warehouse_detail?.map((ew, ei) => {
-            if (e.warehouse_show.findIndex(x => x.shelf.dot_show === ew.shelf.dot_show) === -1) {
-              ew.price_show = ew.price_show === 0 || ew.price_show === "0" || ew.price_show === "" || ew.price_show === null ? e.ShopProduct.price.suggasted_re_sell_price.wholesale : ew.price_show
-              e.warehouse_show.push(ew)
-            } else {
-              try {
-                let find = e.warehouse_show.find(x => x.price_show === ew.price_show)
-                let findIndex = e.warehouse_show.findIndex(x => x.price_show === ew.price_show)
-                let balance = e.warehouse_show[findIndex].shelf.new_balance !== undefined ? (+e.warehouse_show[findIndex].shelf.new_balance) : (+find.shelf.balance)
-                let balance_show = e.warehouse_show[findIndex].shelf.new_balance_show !== undefined ? (+e.warehouse_show[findIndex].shelf.new_balance_show) : (+find.shelf.balance_show)
-                e.warehouse_show[findIndex].shelf.new_balance_show = balance_show + (+ew.shelf.balance_show) > 20 ? "20" : (balance_show + (+ew.shelf.balance_show)).toLocaleString()
-                e.warehouse_show[findIndex].shelf.new_balance = balance + (+ew.shelf.balance) > 20 ? "20" : ((+find.shelf.balance) + (+ew.shelf.balance)).toLocaleString()
-              } catch (error) {
-                console.log("error", error)
+            if (ew.shelf.dot_mfd.split("")[2] + ew.shelf.dot_mfd.split("")[3] === yearNow) {
+              if (e.warehouse_show.findIndex(x => x.price_show === ew.price_show && x.shelf.dot_mfd.split("")[2] + x.shelf.dot_mfd.split("")[3] === yearNow) === -1) {
+                e.warehouse_show.push(ew)
+              } else {
+                try {
+                  let find = e.warehouse_show.find(x => x.price_show === ew.price_show)
+                  let findIndex = e.warehouse_show.findIndex(x => x.price_show === ew.price_show)
+                  let balance = e.warehouse_show[findIndex].shelf.new_balance !== undefined ? (+e.warehouse_show[findIndex].shelf.new_balance) : (+find.shelf.balance)
+                  let balance_show = e.warehouse_show[findIndex].shelf.new_balance_show !== undefined ? (+e.warehouse_show[findIndex].shelf.new_balance_show) : (+find.shelf.balance_show)
+                  e.warehouse_show[findIndex].shelf.new_balance_show = balance_show + (+ew.shelf.balance_show) > 20 ? "20" : (balance_show + (+ew.shelf.balance_show)).toLocaleString()
+                  e.warehouse_show[findIndex].shelf.new_balance = balance + (+ew.shelf.balance) > 20 ? "20" : (balance + (+ew.shelf.balance)).toLocaleString()
+                } catch (error) {
+                  console.log("error", error)
+                }
               }
+            } else {
+              e.warehouse_show.push(ew)
             }
           })
-          // console.log("warehouse_show", e.warehouse_show)
+          console.log("warehouse_show", e.warehouse_show)
         })
-        // data?.map((e, i) => {
-        //   e.warehouse_show?.sort((a, b) => (+b.price_value) - (+a.price_value)).map((ew) => {
 
-        //   })
-        // })
-
-        // data?.map((e, i) => {
-        //   e.warehouse_detail?.map((ew) => {
-        //     if (e.warehouse_show.findIndex(x => x.shelf.dot_show === ew.shelf.dot_show) === -1) {
-        //       let filterArrayHasStock = e.ShopProduct.price_dot_arr.filter(x => x.price_name === ew.shelf.dot_mfd)
-        //       ew.price_show = isArray(e.ShopProduct.price_dot_arr) ? filterArrayHasStock.filter(x => x.price_value !== null && +x.price_value !== 0 && x.price_value !== undefined && x.price_value !== "").sort((a, b) => (+b.price_value) - (+a.price_value)).reverse().find(x => x.dot_show === ew.shelf.dot_show)?.price_value ?? e.ShopProduct.price.suggasted_re_sell_price.wholesale : e.ShopProduct.price.suggasted_re_sell_price.wholesale
-        //       e.warehouse_show.push(ew)
-        //     }
-        //     else {
-        //       try {
-        //         let find = e.warehouse_show.find(x => x.shelf.dot_show === ew.shelf.dot_show)
-        //         let findIndex = e.warehouse_show.findIndex(x => x.shelf.dot_show === ew.shelf.dot_show)
-        //         let filterArrayHasStock = e.ShopProduct.price_dot_arr.filter(x => x.price_name !== ew.shelf.dot_mfd)
-        //         e.warehouse_show[findIndex].shelf.new_balance_show = (+find.shelf.balance_show) + (+ew.shelf.balance_show) > 20 ? "20" : ((+find.shelf.balance_show) + (+ew.shelf.balance_show)).toLocaleString()
-        //         e.warehouse_show[findIndex].shelf.new_balance = (+find.shelf.balance) + (+ew.shelf.balance) > 20 ? "20" : ((+find.shelf.balance) + (+ew.shelf.balance)).toLocaleString()
-        //         e.warehouse_show[findIndex].price_show = isArray(e.ShopProduct.price_dot_arr) ? filterArrayHasStock.filter(x => x.price_value !== null && +x.price_value !== 0 && x.price_value !== undefined && x.price_value !== "").sort((a, b) => (+b.price_value) - (+a.price_value)).reverse().find(x => x.dot_show === ew.shelf.dot_show)?.price_value ?? e.ShopProduct.price.suggasted_re_sell_price.wholesale : e.ShopProduct.price.suggasted_re_sell_price.wholesale
-        //       } catch (error) {
-        //         console.log("error", error)
-        //       }
-        //     }
-        //   })
-        // })
         setListSearchDataTable(data)
         // console.log(data)
         setConfigTable({ ...configTable, page: page, total: totalCount, limit: limit })
@@ -234,15 +214,43 @@ const LineOAInventoryBalance = ({ callBack }) => {
   }
 
   const getPriceShow = (product_data, warehouse_data) => {
-    if (product_data?.ShopProduct?.price_dot_arr) {
-      if (product_data?.ShopProduct?.price_dot_arr?.find(x => x.price_name === warehouse_data.shelf.dot_mfd)?.price_value === "" || product_data?.ShopProduct?.price_dot_arr?.find(x => x.price_name === warehouse_data.shelf.dot_mfd)?.price_value === undefined || +product_data?.ShopProduct?.price_dot_arr?.find(x => x.price_name === warehouse_data.shelf.dot_mfd)?.price_value === 0) {
-        return product_data.ShopProduct.price.suggasted_re_sell_price.wholesale
-      } else {
-        return product_data?.ShopProduct?.price_dot_arr?.find(x => x.price_name === warehouse_data.shelf.dot_mfd)?.price_value
-      }
+    let price_arr = []
+    let find_price = []
+
+    if (isArray(product_data?.ShopProduct?.price_arr) && product_data?.ShopProduct?.price_arr.length > 0) {
+      price_arr = product_data?.ShopProduct?.price_arr
     } else {
-      return product_data.ShopProduct.price.suggasted_re_sell_price.wholesale
+      return +product_data.ShopProduct.price.suggasted_re_sell_price.wholesale
     }
+
+    if (isArray(userData.tags) && userData.tags.length > 0) {
+      userData.tags.map((e) => {
+        if (price_arr.find(x => x.price_name === e.tag_name) !== undefined) {
+          find_price.push(price_arr.find(x => x.price_name === e.tag_name))
+        }
+      })
+    }
+    find_price.sort((a, b) => +a.price_value - +b.price_value)
+    return +find_price[0].price_value
+
+    // if (product_data?.ShopProduct?.price_dot_arr) {
+    //   if (product_data?.ShopProduct?.price_dot_arr?.find(x => x.price_name === warehouse_data.shelf.dot_mfd)?.price_value === "" || product_data?.ShopProduct?.price_dot_arr?.find(x => x.price_name === warehouse_data.shelf.dot_mfd)?.price_value === undefined || +product_data?.ShopProduct?.price_dot_arr?.find(x => x.price_name === warehouse_data.shelf.dot_mfd)?.price_value === 0) {
+    //     return +product_data.ShopProduct.price.suggasted_re_sell_price.wholesale
+    //   } else {
+    //     return +product_data?.ShopProduct?.price_dot_arr?.find(x => x.price_name === warehouse_data.shelf.dot_mfd)?.price_value
+    //   }
+    // } else {
+    //   return +product_data.ShopProduct.price.suggasted_re_sell_price.wholesale
+    // }
+    // if (product_data?.ShopProduct?.price_dot_arr) {
+    //   if (product_data?.ShopProduct?.price_dot_arr?.find(x => x.price_name === warehouse_data.shelf.dot_mfd)?.price_value === "" || product_data?.ShopProduct?.price_dot_arr?.find(x => x.price_name === warehouse_data.shelf.dot_mfd)?.price_value === undefined || +product_data?.ShopProduct?.price_dot_arr?.find(x => x.price_name === warehouse_data.shelf.dot_mfd)?.price_value === 0) {
+    //     return +product_data.ShopProduct.price.suggasted_re_sell_price.wholesale
+    //   } else {
+    //     return +product_data?.ShopProduct?.price_dot_arr?.find(x => x.price_name === warehouse_data.shelf.dot_mfd)?.price_value
+    //   }
+    // } else {
+    //   return +product_data.ShopProduct.price.suggasted_re_sell_price.wholesale
+    // }
   }
 
   const getShopWarehousesAllList = async () => {
@@ -386,7 +394,7 @@ const LineOAInventoryBalance = ({ callBack }) => {
   }
 
   const addEditViewAddToCartModal = async (e, ew) => {
-    // console.log("e", e)
+    let yearNow = moment(Date.now()).format("YY")
     const model = {
       list_code: e.ShopProduct.Product.master_path_code_id,
       list_name: e.ShopProduct.Product.product_name[locale.locale],
@@ -409,10 +417,9 @@ const LineOAInventoryBalance = ({ callBack }) => {
       price_discount_percent: 0,
       price_grand_total: 0,
       is_discount: false,
-      warehouse_detail: e.warehouse_detail.filter(x => x.shelf.dot_show === ew.shelf.dot_show),
+      warehouse_detail: yearNow === ew.shelf.dot_mfd.split("")[2] + ew.shelf.dot_mfd.split("")[3] ? e.warehouse_detail.filter(x => x.price_show === ew.price_show && yearNow === x.shelf.dot_mfd.split("")[2] + x.shelf.dot_mfd.split("")[3]) : e.warehouse_detail.filter(x => x.shelf.dot_show === ew.shelf.dot_show),
       product_brand_name: e?.ShopProduct?.Product?.ProductBrand?.brand_name[locale.locale] ?? null,
     }
-
     model.price_grand_total = model.amount * model.price_unit
 
 
@@ -424,6 +431,7 @@ const LineOAInventoryBalance = ({ callBack }) => {
         model.max_amount = +model.max_amount - +checkProduct.amount
       }
     }
+    // console.log("model", model)
     formAddToCart.setFieldsValue({ ...model })
     await setIsAddToCartModalVisible(true)
   }
@@ -643,7 +651,8 @@ const LineOAInventoryBalance = ({ callBack }) => {
                             DOT
                           </Col>
                           <Col span={4} style={{ display: "flex", placeContent: "end" }}>
-                            {ew.shelf.dot_show.split("X")[0]}X<span style={{ color: "red" }}>{ew.shelf.dot_show.split("X")[1]}</span>
+                            {ew.shelf.dot_show}
+                            {/* {ew.shelf.dot_show.split("X")[0]}X<span style={{ color: "red" }}>{ew.shelf.dot_show.split("X")[1]}</span> */}
                           </Col>
                           <Col span={4} style={{ display: "flex", placeContent: "end" }}>
                             {ew.shelf.new_balance_show ?? ew.shelf.balance_show}  {ew.shelf.PurchaseUnit?.type_name[locale.locale]}

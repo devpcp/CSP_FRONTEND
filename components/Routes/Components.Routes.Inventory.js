@@ -447,10 +447,10 @@ const CustomersIndex = ({ status, pageId, title = null, callBack, listIndex, sel
 
     /* ค้นหา */
     // const getDataSearch = async ({ _search = "", _limit = limit, _page = 1, _sort = "balance_date", _order = sortOrder !== "descend" ? "desc" : "asc", _which = (status === "management") ? "michelin data" : "my data" }) => {
-    const getDataSearch = async ({ search = modelSearch.search ?? "", filter_balance = modelSearch.filter_balance ?? "", limit = configTable.limit, page = configTable.page, sort = configSort.sort, order = (configSort.order === "descend" ? "desc" : "asc"), _which = (status === "management") ? "michelin data" : "my data", type_group_id = modelSearch.type_group_id ?? "", product_type_id = modelSearch.product_type_id ?? "", product_brand_id = modelSearch.product_brand_id ?? "", product_model_id = modelSearch.product_model_id ?? "", tags_id = modelSearch.tags_id }) => {
+    const getDataSearch = async ({ search = modelSearch.search ?? "", filter_balance = modelSearch.filter_balance ?? "", limit = configTable.limit, page = configTable.page, sort = configSort.sort, order = (configSort.order === "descend" ? "desc" : "asc"), _which = (status === "management") ? "michelin data" : "my data", type_group_id = modelSearch.type_group_id ?? "", product_type_id = modelSearch.product_type_id ?? "", product_brand_id = modelSearch.product_brand_id ?? "", product_model_id = modelSearch.product_model_id ?? "", tags_id = modelSearch.tags_id, filter_order_point = modelSearch.filter_order_point ?? "", filter_ceiling_point = modelSearch.filter_ceiling_point ?? "", }) => {
         try {
             if (page === 1) setLoading(true)
-            const res = await API.get(`/shopStock/all?limit=${limit}&page=${page}&sort=${sort}&order=${order}&search=${search}&status=active&min_balance=${filter_balance[0]}&max_balance=${filter_balance[1]}${!!type_group_id ? `&type_group_id=${type_group_id}` : ""}${!!product_type_id ? `&product_type_id=${product_type_id}` : ""}${!!product_brand_id ? `&product_brand_id=${product_brand_id}` : ""}${!!product_model_id ? `&product_model_id=${product_model_id}` : ""}${tags_id.length > 0 ? `&tags=${tags_id}` : ""}`)
+            const res = await API.get(`/shopStock/all?limit=${limit}&page=${page}&sort=${sort}&order=${order}&search=${search}&status=active&min_balance=${filter_balance[0]}&max_balance=${filter_balance[1]}${!!type_group_id ? `&type_group_id=${type_group_id}` : ""}${!!product_type_id ? `&product_type_id=${product_type_id}` : ""}${!!product_brand_id ? `&product_brand_id=${product_brand_id}` : ""}${!!product_model_id ? `&product_model_id=${product_model_id}` : ""}${tags_id.length > 0 ? `&tags=${tags_id}` : ""}${!!filter_order_point ? `&filter_order_point=${filter_order_point}` : ""}${!!filter_ceiling_point ? `&filter_ceiling_point=${filter_ceiling_point}` : ""}`)
             // const res = await API.get(`/shopStock/all?limit=${limit}&page=${page}&sort=${sort}&order=${order}&search=${search}&status=default&filter_available_balance=${filter_available_balance}`)
 
             if (res.data.status === "success") {
@@ -712,6 +712,8 @@ const CustomersIndex = ({ status, pageId, title = null, callBack, listIndex, sel
             product_type_id: null,
             product_brand_id: null,
             product_model_id: null,
+            filter_order_point: false,
+            filter_ceiling_point: false,
             tags_id: []
         }
     }
@@ -809,6 +811,8 @@ const CustomersIndex = ({ status, pageId, title = null, callBack, listIndex, sel
                 product_brand_id: product_brand_id ?? null,
                 product_model_id: product_model_id ?? null,
                 tags_id: value.tags_id,
+                filter_order_point: value.filter_order_point,
+                filter_ceiling_point: value.filter_ceiling_point,
             }
             setModelSearch((previousValue) => searchModel);
 
@@ -821,6 +825,8 @@ const CustomersIndex = ({ status, pageId, title = null, callBack, listIndex, sel
                 product_brand_id: product_brand_id ?? null,
                 product_model_id: product_model_id ?? null,
                 tags_id: value.tags_id,
+                filter_order_point: value.filter_order_point,
+                filter_ceiling_point: value.filter_ceiling_point,
             });
         } catch (error) {
 
@@ -855,6 +861,12 @@ const CustomersIndex = ({ status, pageId, title = null, callBack, listIndex, sel
                     break;
                 case "tags_id":
                     searchModel[type] = [];
+                    break;
+                case "filter_order_point":
+                    searchModel[type] = false;
+                    break;
+                case "filter_ceiling_point":
+                    searchModel[type] = false;
                     break;
                 default:
                     break;
@@ -893,6 +905,8 @@ const CustomersIndex = ({ status, pageId, title = null, callBack, listIndex, sel
                 product_model_id: init.modelSearch.product_model_id,
                 order: (init.configSort.order === "descend" ? "desc" : "asc"),
                 tags_id: init.modelSearch.tags_id,
+                filter_order_point: init.modelSearch.filter_order_point,
+                filter_ceiling_point: init.modelSearch.filter_ceiling_point,
             })
         } catch (error) {
 
@@ -932,23 +946,42 @@ const CustomersIndex = ({ status, pageId, title = null, callBack, listIndex, sel
                 placeholder: "ค้นหา",
                 list: null,
             },
-            // {
-            //     index: 1,
-            //     type: "select",
-            //     name: "filter_available_balance",
-            //     label: "เลือกการแสดงผลของสต๊อค",
-            //     placeholder: "เลือกการแสดงผลของสต๊อค",
-            //     list: [
-            //         {
-            //             key: "แสดงทั้งหมด",
-            //             value: false,
-            //         },
-            //         {
-            //             key: "ไม่แสดงสินค้าที่มีจำนวน 0",
-            //             value: true,
-            //         }
-            //     ],
-            // },
+            {
+                index: 1,
+                type: "select",
+                name: "filter_order_point",
+                label: "จุดสั่งซื้อ",
+                placeholder: "จุดสั่งซื้อ",
+                col_md: 4,
+                list: [
+                    {
+                        key: "ไม่แสดง",
+                        value: false,
+                    },
+                    {
+                        key: "แสดง",
+                        value: true,
+                    }
+                ],
+            },
+            {
+                index: 1,
+                type: "select",
+                name: "filter_ceiling_point",
+                label: "เพดานสินค้า",
+                placeholder: "เพดานสินค้า",
+                col_md: 4,
+                list: [
+                    {
+                        key: "ไม่แสดง",
+                        value: false,
+                    },
+                    {
+                        key: "แสดง",
+                        value: true,
+                    }
+                ],
+            },
             {
                 index: 1,
                 type: "select",

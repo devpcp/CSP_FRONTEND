@@ -50,6 +50,8 @@ module.exports = {
       '/MyData/MyPointMovementList': { page: '/MyData/MyPointMovementList' },
       '/MyData/ProductsData': { page: '/MyData/ProductsData' },
       '/MyData/BusinessPartnersData': { page: '/MyData/BusinessPartnersData' },
+      '/MyData/PersonalCustomersData': { page: '/MyData/PersonalCustomersData' },
+      '/MyData/BusinessCustomersData': { page: '/MyData/BusinessCustomersData' },
       '/MyData/EmployeeData': { page: '/MyData/EmployeeData' },
       '/MyData/BankAccountData': { page: '/MyData/BankAccountData' },
       '/MyData/ChequeData': { page: '/MyData/ChequeData' },
@@ -87,6 +89,8 @@ module.exports = {
       '/LineOA/Register': { page: '/LineOA/Register' },
       '/LineOA/TranferStatus': { page: '/LineOA/TranferStatus' },
       '/LineOA/Promotion': { page: '/LineOA/Promotion' },
+      '/LineOA/InventoryBalanceSTT': { page: '/LineOA/InventoryBalanceSTT' },
+      '/LineOA/Holiday': { page: '/LineOA/Holiday' },
 
       '/Reports/ReportShopPartnerDebt': { page: '/Reports/ReportShopPartnerDebt' },
       '/Reports/ReportProductReturnReceipt': { page: '/Reports/ReportProductReturnReceipt' },

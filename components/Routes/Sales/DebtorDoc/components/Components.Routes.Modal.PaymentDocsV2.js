@@ -36,6 +36,11 @@ const PaymentDocsV2 = ({ docId, title, loading, handleCancelDebtDoc, initForm, c
     const isPartialPaymentStatus = Form.useWatch("payment_method_list", { form, preserve: true })
 
     useEffect(() => {
+        if (fromTable) {
+            console.log("debtDocObj", debtDocObj)
+        }
+        console.log("isPartialPaymentStatus", isPartialPaymentStatus)
+        console.log("initForm", initForm.getFieldValue("payment_paid_status"))
         setTableColumns()
     }, [])
 
@@ -537,9 +542,10 @@ const PaymentDocsV2 = ({ docId, title, loading, handleCancelDebtDoc, initForm, c
 
     /* End Dropdown Cancel Payment Doc */
     const MatchRound = (value) => (Math.round(+value * 100) / 100).toFixed(2)
-    
+
     return (
         <>
+
             {fromTable !== true ?
                 (initForm.getFieldValue("status") == 1 && initForm.getFieldValue("payment_paid_status") === 1) ? (
                     <Button
@@ -738,11 +744,11 @@ const PaymentDocsV2 = ({ docId, title, loading, handleCancelDebtDoc, initForm, c
                                                         textButton={"เงินสด"}
                                                         initForm={form}
                                                         // total={getValue("debt_price_paid_total")}
-                                                        total={getValue("debt_price_paid_total")}
+                                                        total={getValue("debt_price_amount_left")}
                                                         callback={callbackPayment}
                                                         loading={loading || paymentLoading}
                                                         disabled={
-                                                            !!isPartialPaymentStatus && isPartialPaymentStatus.length !== 0 && initForm.getFieldValue("payment_paid_status") === 2 && isPartialPaymentStatus.every(val => val.is_partial_payment === true) ? true : false
+                                                            !!isPartialPaymentStatus && isPartialPaymentStatus.length !== 0 && (fromTable ? form.getFieldValue("payment_paid_status") : initForm.getFieldValue("payment_paid_status")) === 2 && isPartialPaymentStatus.every(val => val.is_partial_payment === true) ? true : false
                                                             // isPartialPaymentStatus.length > 1
                                                         }
                                                     />
@@ -754,11 +760,11 @@ const PaymentDocsV2 = ({ docId, title, loading, handleCancelDebtDoc, initForm, c
                                                         icon={"/assets/images/icon/credit-card.svg"}
                                                         textButton={"เครดิต/เดบิต"}
                                                         initForm={form}
-                                                        total={getValue("debt_price_paid_total")}
+                                                        total={getValue("debt_price_amount_left")}
                                                         callback={callbackPayment}
                                                         loading={loading || paymentLoading}
                                                         disabled={
-                                                            !!isPartialPaymentStatus && isPartialPaymentStatus.length !== 0 && initForm.getFieldValue("payment_paid_status") === 2 && isPartialPaymentStatus.every(val => val.is_partial_payment === true) ? true : false
+                                                            !!isPartialPaymentStatus && isPartialPaymentStatus.length !== 0 && (fromTable ? form.getFieldValue("payment_paid_status") : initForm.getFieldValue("payment_paid_status")) === 2 && isPartialPaymentStatus.every(val => val.is_partial_payment === true) ? true : false
                                                             // isPartialPaymentStatus.length > 1
                                                         }
                                                     />
@@ -770,11 +776,11 @@ const PaymentDocsV2 = ({ docId, title, loading, handleCancelDebtDoc, initForm, c
                                                         icon={"/assets/images/icon/money-transfer.svg"}
                                                         textButton={"โอนเงินสด"}
                                                         initForm={form}
-                                                        total={getValue("debt_price_paid_total")}
+                                                        total={getValue("debt_price_amount_left")}
                                                         callback={callbackPayment}
                                                         loading={loading || paymentLoading}
                                                         disabled={
-                                                            !!isPartialPaymentStatus && isPartialPaymentStatus.length !== 0 && initForm.getFieldValue("payment_paid_status") === 2 && isPartialPaymentStatus.every(val => val.is_partial_payment === true) ? true : false
+                                                            !!isPartialPaymentStatus && isPartialPaymentStatus.length !== 0 && (fromTable ? form.getFieldValue("payment_paid_status") : initForm.getFieldValue("payment_paid_status")) === 2 && isPartialPaymentStatus.every(val => val.is_partial_payment === true) ? true : false
                                                             // isPartialPaymentStatus.length > 1
                                                         }
                                                     />
@@ -848,8 +854,10 @@ const PaymentDocsV2 = ({ docId, title, loading, handleCancelDebtDoc, initForm, c
                                                         total={getValue("debt_price_paid_total")}
                                                         callback={callbackPayment}
                                                         loading={loading || paymentLoading}
-                                                    // isPartialPayment
-                                                    // disabled
+                                                        disabled={
+                                                            !!isPartialPaymentStatus && isPartialPaymentStatus.length !== 0 && (fromTable ? form.getFieldValue("payment_paid_status") : initForm.getFieldValue("payment_paid_status")) === 2 && isPartialPaymentStatus.every(val => val.is_partial_payment === true) ? true : false
+                                                            // isPartialPaymentStatus.length > 1
+                                                        }
                                                     />
                                                 </div>
                                             </Col>
@@ -893,7 +901,7 @@ const PaymentDocsV2 = ({ docId, title, loading, handleCancelDebtDoc, initForm, c
                         </Row>
                     </Form>
                 )}
-            </ModalFullScreen>
+            </ModalFullScreen >
 
             <style>
                 {`

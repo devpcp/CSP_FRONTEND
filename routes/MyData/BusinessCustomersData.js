@@ -643,7 +643,7 @@ const BusinessCustomersData = ({ title = null, callBack }) => {
                 district_id: value.district_id ?? null,
                 province_id: value.province_id ?? null,
                 tags: value.tags ?? undefined,
-                target: target,
+                target: target ?? [],
                 other_details: {
                     contact_name: value.contact_name ?? null,
                     contact_number: value.contact_number ?? null,

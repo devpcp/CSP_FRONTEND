@@ -382,6 +382,7 @@ const DebtorDoc = ({ docTypeId }) => {
                     const payment_paid_status = get(record, `payment_paid_status`, null)
                     switch (payment_paid_status) {
                         case 1:
+                        case 2:
                             return (
                                 <PaymentDocs fromTable={true} debtDocObj={record} docId={record?.id} title={`ชำระเงิน ใบรับชำระลูกหนี้ ${record?.code_id ?? ""}`} handleCancelDebtDoc={handleCancel} initForm={form} carPreLoading={carPreLoading} setCarPreLoading={setCarPreLoading} />
                                 // <span className='color-red font-16'>ยังไม่ชำระ</span>
@@ -650,13 +651,13 @@ const DebtorDoc = ({ docTypeId }) => {
                 }
 
             }
-          
+
             const model = {
                 ...value,
                 ref_doc: details.ref_doc ?? null,
                 debtor_billing_list,
                 shopCustomerDebtLists: ShopCustomerDebtLists.map(e => {
-                    
+
                     return {
                         ...e,
                         doc_type_code_id: e.ShopCustomerDebtCreditNoteDoc !== null ? e.ShopCustomerDebtCreditNoteDoc?.doc_type_code_id : e.ShopCustomerDebtCreditNoteDocT2 !== null ? e.ShopCustomerDebtCreditNoteDocT2?.code_id_prefix : e.ShopCustomerDebtDebitNoteDoc?.doc_type_code_id
@@ -670,7 +671,7 @@ const DebtorDoc = ({ docTypeId }) => {
                 remark: details.remark ?? null,
                 remark_inside: details.remark_inside ?? null,
             }
-          
+
             if (isArray(filterPayment) && filterPayment.length > 0) {
 
                 function getPaymentData(arr, key) {

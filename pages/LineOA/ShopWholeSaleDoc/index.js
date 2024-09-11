@@ -242,6 +242,8 @@ const LineOAShopWholeSaleDoc = ({ title = null, callBack, productWarehousePick, 
       const model = {
         id: value.id,
         code_id: value.code_id,
+        tran_code_id: value.ShopTemporaryDeliveryOrderDocs[0].code_id,
+        tax_code_id: value.ShopTaxInvoiceDocs[0].inv_code_id,
         doc_date: moment(value.doc_date),
         tax_type_id: value.tax_type_id,
         remark: value.details.remark,
@@ -608,7 +610,7 @@ const LineOAShopWholeSaleDoc = ({ title = null, callBack, productWarehousePick, 
                 } />
 
             </Form.Item>
-            <Row style={{ paddingBottom: "16px" }} gutter={8}>
+            <Row style={{ paddingBottom: "16px" }} gutter={8} hidden>
               <Col span={20}>
               </Col>
               <Col span={4}>

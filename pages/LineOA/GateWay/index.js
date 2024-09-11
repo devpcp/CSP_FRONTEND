@@ -27,17 +27,21 @@ const GateWay = () => {
       let bodyTokenLine = {}
       switch (shop_name) {
         case "STV":
+          console.log("a")
           bodyTokenLine = {
             client_id: process.env.NEXT_PUBLIC_OAUTH_STV_LINE_CLIENT_ID,
             client_secret: process.env.NEXT_PUBLIC_OAUTH_STV_LINE_CLIENT_SECRET,
           }
           break;
         case "HENGHENG":
+          console.log("b")
           bodyTokenLine = {
             client_id: process.env.NEXT_PUBLIC_OAUTH_HENGHENG_LINE_CLIENT_ID,
             client_secret: process.env.NEXT_PUBLIC_OAUTH_HENGHENG_LINE_CLIENT_SECRET,
           }
+          break;
         case "SATHITTHAM":
+          console.log("c")
           bodyTokenLine = {
             client_id: process.env.NEXT_PUBLIC_OAUTH_SATHITTHAM_LINE_CLIENT_ID,
             client_secret: process.env.NEXT_PUBLIC_OAUTH_SATHITTHAM_LINE_CLIENT_SECRET,
@@ -53,7 +57,7 @@ const GateWay = () => {
           });
           break;
       }
-      console.log("shop_name", shop_name)
+
       var querystring = require('querystring');
       await apiLine
         .post(
@@ -138,7 +142,9 @@ const GateWay = () => {
                       id: findUser.data[0].id,
                       customer_name: findUser.data[0].bus_type_id ? findUser.data[0].customer_name[locale.locale] : `${findUser.data[0].customer_name.first_name[locale.locale]} ${findUser.data[0].customer_name.last_name[locale.locale]}`,
                       customer_type: findUser.data[0].bus_type_id ? "business" : "personal",
-                      is_use_coupon_michelin_500: findUser.data[0].other_details.is_use_coupon_michelin_500 ?? false
+                      is_use_coupon_michelin_500: findUser.data[0].other_details.is_use_coupon_michelin_500 ?? false,
+                      shop_name,
+                      tags: findUser.data[0].tags ?? []
                     }
                     cookies.set("user_data", userData, { path: "/" });
 
@@ -164,6 +170,9 @@ const GateWay = () => {
                       }
                       if (redirect_uri === "InventoryBalanceSTT") {
                         router.push(`/LineOA/InventoryBalanceSTT`, undefined, { shallow: true })
+                      }
+                      if (redirect_uri === "Holiday") {
+                        router.push(`/LineOA/Holiday`, undefined, { shallow: true })
                       }
                     }
                   }

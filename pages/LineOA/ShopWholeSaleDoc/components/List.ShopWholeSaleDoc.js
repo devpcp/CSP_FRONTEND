@@ -264,10 +264,10 @@ const LineOAListShopWholeSaleDoc = ({ mode, disabledWhenDeliveryDocActive = fals
               ราคารวม <b>{(+e.price_unit * +e.amount).toLocaleString() ?? "-"}</b>
             </Col>
           </Row>
-          <Divider style={{ margin: "8px 0" }} />
+          <Divider style={{ margin: "8px 0", border: "1px solid #cfcdca" }} />
         </>
       ))}
-      <Divider style={{ margin: "8px 0", border: "1px solid #ffcc00 " }} />
+      <Divider style={{ margin: "8px 0", border: "1px solid #ffcc00" }} />
       <div style={{ color: "#40a9ff", fontSize: "18px" }}>
         <Row gutter={8}>
           <Col span={20}>

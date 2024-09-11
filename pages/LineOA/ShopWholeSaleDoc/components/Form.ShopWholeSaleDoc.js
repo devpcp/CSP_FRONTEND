@@ -30,7 +30,7 @@ const LineOAFormShopWholeSaleDoc = ({ mode, disabledWhenDeliveryDocActive = fals
 
 
   const cookies = new Cookies();
-
+  const userData = cookies.get("user_data")
   const { authUser } = useSelector(({ auth }) => auth);
 
   const showModal = () => {
@@ -200,7 +200,7 @@ const LineOAFormShopWholeSaleDoc = ({ mode, disabledWhenDeliveryDocActive = fals
             <Input style={{ width: "100%" }} disabled={true} />
           </Form.Item>
         </Col>
-        <Col lg={8} md={12} sm={12} xs={24} hidden={mode === "add"}>
+        <Col lg={8} md={12} sm={12} xs={12} hidden={mode === "add"}>
           <Form.Item
             name="code_id"
             label="เลขที่เอกสาร"
@@ -208,7 +208,23 @@ const LineOAFormShopWholeSaleDoc = ({ mode, disabledWhenDeliveryDocActive = fals
             <Input style={{ width: "100%" }} disabled={true} />
           </Form.Item>
         </Col>
-        <Col lg={8} md={12} sm={12} xs={24}>
+        <Col lg={8} md={12} sm={12} xs={12} hidden={mode === "add"}>
+          <Form.Item
+            name="tran_code_id"
+            label="เลขที่ใบส่งสินค้าชั่วคราว"
+          >
+            <Input style={{ width: "100%" }} disabled={true} />
+          </Form.Item>
+        </Col>
+        <Col lg={8} md={12} sm={12} xs={12} hidden={mode === "add"}>
+          <Form.Item
+            name="tax_code_id"
+            label="เลขที่ใบกำกับภาษี"
+          >
+            <Input style={{ width: "100%" }} disabled={true} />
+          </Form.Item>
+        </Col>
+        <Col lg={8} md={12} sm={12} xs={12}>
           <Form.Item
             name="doc_date"
             label="วันที่เอกสาร"
@@ -274,7 +290,7 @@ const LineOAFormShopWholeSaleDoc = ({ mode, disabledWhenDeliveryDocActive = fals
             </Select>
           </Form.Item>
         </Col>
-        <Col span={24} style={{ textAlign: "center" }}>
+        <Col span={24} style={{ textAlign: "center" }} hidden={userData.shop_name === "HENGHENG"}>
           <div className="coupon">
             <Button style={{ width: "100%", height: "60px", borderStyle: "dashed", borderRadius: "10px", borderColor: "white", background: "none", color: "white" }} onClick={() => showPromotionModal()}>{coupontButtonName} </Button>
           </div>

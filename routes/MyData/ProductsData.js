@@ -410,31 +410,45 @@ const ComponentsRoutesProducts = ({ title = null, callBack, listIndex }) => {
 
           /* price */
           if (_model.price) {
-            (formValue.suggasted_re_sell_price_retail =
-              _model.price.suggasted_re_sell_price.retail),
-              (formValue.suggasted_re_sell_price_wholesale =
-                _model.price.suggasted_re_sell_price.wholesale),
-              (formValue.suggested_online_price_retail =
-                _model.price.suggested_online_price.retail),
-              (formValue.suggested_online_price_wholesale =
-                _model.price.suggested_online_price.wholesale),
-              (formValue.b2b_price_retail = _model.price.b2b_price.retail),
-              (formValue.b2b_price_wholesale =
-                _model.price.b2b_price.wholesale),
-              (formValue.credit_30_price_retail =
-                _model.price.credit_30_price.retail),
-              (formValue.credit_30_price_wholesale =
-                _model.price.credit_30_price.wholesale),
-              (formValue.credit_45_price_retail =
-                _model.price.credit_45_price.retail),
-              (formValue.credit_45_price_wholesale =
-                _model.price.credit_45_price.wholesale),
-              (formValue.start_date = _model.start_date
-                ? moment(_model.start_date)
-                : null),
-              (formValue.end_date = _model.end_date
-                ? moment(_model.end_date)
-                : null);
+
+            formValue.suggasted_re_sell_price_retail = _model?.price?.suggasted_re_sell_price?.retail ?? null
+            formValue.suggasted_re_sell_price_wholesale = _model?.price?.suggasted_re_sell_price?.wholesale ?? null
+            formValue.suggested_online_price_retail = _model?.price?.suggested_online_price?.retail ?? null
+            formValue.suggested_online_price_wholesale = _model?.price?.suggested_online_price?.wholesale ?? null
+            formValue.b2b_price_retail = _model?.price?.b2b_price?.retail ?? null
+            formValue.b2b_price_wholesale = _model?.price?.b2b_price?.wholesale ?? null
+            formValue.credit_30_price_retail = _model?.price?.credit_30_price?.retail ?? null
+            formValue.credit_30_price_wholesale = _model?.price?.credit_30_price?.wholesale ?? null
+            formValue.credit_45_price_retail = _model?.price?.credit_45_price?.retail ?? null
+            formValue.credit_45_price_wholesale = _model?.price?.credit_45_price?.wholesale ?? null
+            formValue.start_date = _model?.start_date ? moment(_model?.start_date) : null
+            formValue.end_date = _model?.end_date ? moment(_model?.end_date) : null
+
+              // (formValue.suggasted_re_sell_price_retail =
+              //   _model.price.suggasted_re_sell_price.retail),
+              // (formValue.suggasted_re_sell_price_wholesale =
+              //   _model.price.suggasted_re_sell_price.wholesale),
+              // (formValue.suggested_online_price_retail =
+              //   _model.price.suggested_online_price.retail),
+              // (formValue.suggested_online_price_wholesale =
+              //   _model.price.suggested_online_price.wholesale),
+              // (formValue.b2b_price_retail = _model.price.b2b_price.retail),
+              // (formValue.b2b_price_wholesale =
+              //   _model.price.b2b_price.wholesale),
+              // (formValue.credit_30_price_retail =
+              //   _model.price.credit_30_price.retail),
+              // (formValue.credit_30_price_wholesale =
+              //   _model.price.credit_30_price.wholesale),
+              // (formValue.credit_45_price_retail =
+              //   _model.price.credit_45_price.retail),
+              // (formValue.credit_45_price_wholesale =
+              //   _model.price.credit_45_price.wholesale),
+              // (formValue.start_date = _model.start_date
+              //   ? moment(_model.start_date)
+              //   : null),
+              // (formValue.end_date = _model.end_date
+              //   ? moment(_model.end_date)
+              //   : null);
 
             // form.setFieldsValue(formValue)
             // console.log('formValue', formValue)
@@ -492,25 +506,25 @@ const ComponentsRoutesProducts = ({ title = null, callBack, listIndex }) => {
               (e, index) => {
                 return {
                   suggasted_re_sell_price_retail_log:
-                    e.price.suggasted_re_sell_price.retail,
+                    e.price.suggasted_re_sell_price?.retail,
                   suggasted_re_sell_price_wholesale_log:
-                    e.price.suggasted_re_sell_price.wholesale,
+                    e.price.suggasted_re_sell_price?.wholesale,
 
                   suggested_online_price_retail_log:
-                    e.price.suggested_online_price.retail,
+                    e.price.suggested_online_price?.retail,
                   suggested_online_price_wholesale_log:
-                    e.price.suggested_online_price.wholesale,
+                    e.price.suggested_online_price?.wholesale,
 
-                  b2b_price_retail_log: e.price.b2b_price.retail,
-                  b2b_price_wholesale_log: e.price.b2b_price.wholesale,
+                  b2b_price_retail_log: e.price.b2b_price?.retail,
+                  b2b_price_wholesale_log: e.price.b2b_price?.wholesale,
 
-                  credit_30_price_retail_log: e.price.credit_30_price.retail,
+                  credit_30_price_retail_log: e.price.credit_30_price?.retail,
                   credit_30_price_wholesale_log:
-                    e.price.credit_30_price.wholesale,
+                    e.price.credit_30_price?.wholesale,
 
-                  credit_45_price_retail_log: e.price.credit_45_price.retail,
+                  credit_45_price_retail_log: e.price.credit_45_price?.retail,
                   credit_45_price_wholesale_log:
-                    e.price.credit_45_price.wholesale,
+                    e.price.credit_45_price?.wholesale,
 
                   start_date_log: e.start_date ? moment(e.start_date) : null,
                   end_date_log: e.end_date ? moment(e.end_date) : null,
