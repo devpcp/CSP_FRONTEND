@@ -115,38 +115,38 @@ const LineOAInventoryBalance = ({ callBack }) => {
         const { currentCount, currentPage, pages, totalCount, data } = res.data.data;
         let yearNow = moment(Date.now()).format("YY")
         data?.map((e) => {
-          switch (e.ShopProduct?.Product?.ProductBrand?.brand_name[locale.locale]) {
-            case "BFGOODRICH":
-              e.ShopProduct?.Product?.ProductBrand?.brand_pic = "https://upload.wikimedia.org/wikipedia/commons/thumb/9/90/BFGoodrich_logo.svg/2560px-BFGoodrich_logo.svg.png"
-              break;
-            case "MICHELIN":
-              e.ShopProduct?.Product?.ProductBrand?.brand_pic = "https://seeklogo.com/images/M/michelin-logo-34273FA58D-seeklogo.com.png"
-              break;
-            case "CONTINENTAL":
-              e.ShopProduct?.Product?.ProductBrand?.brand_pic = "https://brandportal.continental.com/fileadmin/_processed_/4/e/csm_video_preview_b95894e9b5.jpg"
-              break;
-            case "PIRELLI":
-              e.ShopProduct?.Product?.ProductBrand?.brand_pic = "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d9/Logo_Pirelli.svg/2560px-Logo_Pirelli.svg.png"
-              break;
-            case "BRIDGESTONE":
-              e.ShopProduct?.Product?.ProductBrand?.brand_pic = "https://www.shutterstock.com/image-vector/bridgestone-logo-sign-icon-emblem-600nw-2286811601.jpg"
-              break;
-            case "GOODYEAR":
-              e.ShopProduct?.Product?.ProductBrand?.brand_pic = "https://www.autotirechecking.com/wp-content/uploads/2014/05/goodyear-logo.jpg"
-              break;
-            case "DUNLOP":
-              e.ShopProduct?.Product?.ProductBrand?.brand_pic = "https://inwfile.com/s-cz/fysovk.png"
-              break;
-            case "YOKOHAMA":
-              e.ShopProduct?.Product?.ProductBrand?.brand_pic = "https://eakkarnyang.com/image_upload/image_brand_tyre/ed099ac1ecd1220307f4bad68a026c6f_o.jpg"
-              break;
-            case "KUMHO":
-              e.ShopProduct?.Product?.ProductBrand?.brand_pic = "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a3/KUMHO_TIRE_logo.png/1200px-KUMHO_TIRE_logo.png"
-              break;
-            default:
-              e.ShopProduct?.Product?.ProductBrand?.brand_pic = ""
-              break;
-          }
+          // switch (e.ShopProduct?.Product?.ProductBrand?.brand_name[locale.locale]) {
+          //   case "BFGOODRICH":
+          //     e.ShopProduct?.Product?.ProductBrand?.brand_pic = "https://upload.wikimedia.org/wikipedia/commons/thumb/9/90/BFGoodrich_logo.svg/2560px-BFGoodrich_logo.svg.png"
+          //     break;
+          //   case "MICHELIN":
+          //     e.ShopProduct?.Product?.ProductBrand?.brand_pic = "https://seeklogo.com/images/M/michelin-logo-34273FA58D-seeklogo.com.png"
+          //     break;
+          //   case "CONTINENTAL":
+          //     e.ShopProduct?.Product?.ProductBrand?.brand_pic = "https://brandportal.continental.com/fileadmin/_processed_/4/e/csm_video_preview_b95894e9b5.jpg"
+          //     break;
+          //   case "PIRELLI":
+          //     e.ShopProduct?.Product?.ProductBrand?.brand_pic = "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d9/Logo_Pirelli.svg/2560px-Logo_Pirelli.svg.png"
+          //     break;
+          //   case "BRIDGESTONE":
+          //     e.ShopProduct?.Product?.ProductBrand?.brand_pic = "https://www.shutterstock.com/image-vector/bridgestone-logo-sign-icon-emblem-600nw-2286811601.jpg"
+          //     break;
+          //   case "GOODYEAR":
+          //     e.ShopProduct?.Product?.ProductBrand?.brand_pic = "https://www.autotirechecking.com/wp-content/uploads/2014/05/goodyear-logo.jpg"
+          //     break;
+          //   case "DUNLOP":
+          //     e.ShopProduct?.Product?.ProductBrand?.brand_pic = "https://inwfile.com/s-cz/fysovk.png"
+          //     break;
+          //   case "YOKOHAMA":
+          //     e.ShopProduct?.Product?.ProductBrand?.brand_pic = "https://eakkarnyang.com/image_upload/image_brand_tyre/ed099ac1ecd1220307f4bad68a026c6f_o.jpg"
+          //     break;
+          //   case "KUMHO":
+          //     e.ShopProduct?.Product?.ProductBrand?.brand_pic = "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a3/KUMHO_TIRE_logo.png/1200px-KUMHO_TIRE_logo.png"
+          //     break;
+          //   default:
+          //     e.ShopProduct?.Product?.ProductBrand?.brand_pic = ""
+          //     break;
+          // }
           e.warehouse_show = []
 
 
@@ -617,13 +617,13 @@ const LineOAInventoryBalance = ({ callBack }) => {
                   <Col span={24}>
                     <b>{e.ShopProduct.Product.master_path_code_id}</b>
                   </Col>
-                  <Col span={24} hidden={!e.ShopProduct?.Product?.ProductBrand?.brand_pic}>
-                    <div style={{ width: "100px", height: "35px" }}>
-                      <Image
-                        height={"100%"}
-                        width={"100%"}
-                        src={e.ShopProduct?.Product?.ProductBrand?.brand_pic} />
-                    </div>
+                  <Col span={24} hidden={!e.ShopProduct?.Product?.ProductBrand?.details?.img_url}>
+                    {/* <div style={{ width: "100px", height: "35px" }}> */}
+                    <Image
+                      height={"35px"}
+                      width={"100px"}
+                      src={e.ShopProduct?.Product?.ProductBrand?.details?.img_url} />
+                    {/* </div> */}
                   </Col>
                   {/* <Col span={24}>
                     <b>{e.ShopProduct?.Product?.ProductBrand?.brand_name[locale.locale] ?? "-"}</b>

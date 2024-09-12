@@ -17,11 +17,13 @@ import moment from "moment";
 import BankAccountData from './BankAccountData';
 import ModalFullScreen from '../../components/shares/ModalFullScreen';
 import Fieldset from '../../components/shares/Fieldset';
+import { ImageMulti } from '../../components/shares/FormUpload/ImageMulti'
+import { UploadImageCustomPathMultiple, DeleteImageCustomPathMultiple } from '../../components/shares/FormUpload/API'
 
 const ChequeData = ({ title = null, callBack }) => {
 
     const [loading, setLoading] = useState(false);
-    // const { authUser, imageProfile } = useSelector(({ auth }) => auth);
+    const { authUser } = useSelector(({ auth }) => auth);
     const [listSearchDataTable, setListSearchDataTable] = useState([])
     const [columns, setColumns] = useState([])
     const { permission_obj } = useSelector(({ permission }) => permission);
@@ -328,7 +330,8 @@ const ChequeData = ({ title = null, callBack }) => {
                         _model.doc_no_use = _model.details["doc_no_use"] ?? []
                         _model.cheque_use_status = _model.details["cheque_use_status"] ?? []
                     }
-
+                    _model.upload_shop_cheque_list = isPlainObject(_model.details) ? _model.details?.upload_shop_cheque_list ?? [] : []
+                    _model.upload_remove_list = []
 
                     // const urlImg = await CheckImage({
                     //     directory: "shopCheckCustomer",
@@ -345,6 +348,8 @@ const ChequeData = ({ title = null, callBack }) => {
                     const _model = {
                         check_status: 0,
                         customer_type: "business",
+                        upload_shop_cheque_list: [],
+                        upload_remove_list: []
                     }
                     form.setFieldsValue(_model);
                 }
@@ -381,16 +386,56 @@ const ChequeData = ({ title = null, callBack }) => {
         try {
             // console.log(value)
 
-            if (value.upload) {
-                await UploadImageSingle(value.upload.file, { name: idEdit, directory: "cheque" })
+            let shopId = authUser?.UsersProfile?.shop_id
+            let directory = "shopCheque"
+            let upload_shop_cheque_list = []
+            if (idEdit) {
+                if (value.upload_shop_cheque_list) {
+                    if (value?.upload_shop_cheque_list?.fileList?.length > 0) {
+                        await Promise.all(value.upload_shop_cheque_list.fileList.map(async (e, index) => {
+                            await UploadImageCustomPathMultiple(e, { shopId: shopId, idEdit: idEdit, directory: directory, subject: "shop_cheque_picture" }).then(({ data }) => {
+                                if (data.status === "success") {
+                                    try {
+                                        upload_shop_cheque_list.push(
+                                            {
+                                                uid: index,
+                                                name: e.name,
+                                                status: 'done',
+                                                url: process.env.NEXT_PUBLIC_DIRECTORY + data.data.path,
+                                                path: data.data.path
+                                            }
+                                        )
+                                        e.url = process.env.NEXT_PUBLIC_DIRECTORY + data.data.path
+                                        e.path = data.data.path
+                                    } catch (error) {
+                                        console.log("error: ", error)
+                                    }
+                                } else if (data.status === "failed") {
+                                    e.path = e.url.split(process.env.NEXT_PUBLIC_DIRECTORY)[1]
+                                }
+                            })
+                        })
+                        )
+                    }
+                }
 
-                const urlImg = await CheckImage({
-                    directory: "cheque",
-                    name: idEdit,
-                    fileDirectoryId: idEdit,
-                })
-                setImgEmpUrl(urlImg)
-                // dispatch(setImageProfile(urlImg));
+                if (value.upload_remove_list) {
+                    if (value?.upload_remove_list?.length > 0) {
+                        await Promise.all(value.upload_remove_list.map(async (e, index) => {
+                            await DeleteImageCustomPathMultiple(e.path).then(({ data }) => {
+                                if (data.status === "success") {
+                                    try {
+
+                                    } catch (error) {
+                                        console.log("error: ", error)
+                                    }
+                                } else if (data.status === "failed") {
+                                }
+                            })
+                        })
+                        )
+                    }
+                }
             }
 
             const _model = {
@@ -408,7 +453,8 @@ const ChequeData = ({ title = null, callBack }) => {
                     shop_bank_name: value.shop_bank_name ?? null,
                     cheque_amount_remaining: configModal.mode === "add" ? value.check_amount ?? "0.00" : value.cheque_amount_remaining ?? "0.00",
                     doc_no_use: value.doc_no_use ?? [],
-                    cheque_use_status: configModal.mode === "add" ? true : value.cheque_use_status ?? false
+                    cheque_use_status: configModal.mode === "add" ? true : value.cheque_use_status ?? false,
+                    upload_shop_cheque_list: await value.upload_shop_cheque_list.fileList === undefined ? await value.upload_shop_cheque_list : value.upload_shop_cheque_list.fileList,
                 }
             }
             if (value.customer_type === "person") {
@@ -423,6 +469,51 @@ const ChequeData = ({ title = null, callBack }) => {
             let res
             if (configModal.mode === "add") {
                 res = await API.post(`/shopCheckCustomer/add`, _model)
+                
+                if (res.data.status === "success") {
+                    let id = res.data.data.id
+                    let details = res.data.data.details
+                    console.log("id", id)
+                    console.log("details", details)
+                    if (value.upload_shop_cheque_list) {
+                        if (value?.upload_shop_cheque_list?.fileList?.length > 0) {
+                            await Promise.all(value.upload_shop_cheque_list.fileList.map(async (e, index) => {
+                                await UploadImageCustomPathMultiple(e, { shopId: shopId, idEdit: id, directory: directory, subject: "shop_cheque_picture" }).then(({ data }) => {
+                                    if (data.status === "success") {
+                                        try {
+                                            upload_shop_cheque_list.push(
+                                                {
+                                                    uid: index,
+                                                    name: e.name,
+                                                    status: 'done',
+                                                    url: process.env.NEXT_PUBLIC_DIRECTORY + data.data.path,
+                                                    path: data.data.path
+                                                }
+                                            )
+                                            e.url = process.env.NEXT_PUBLIC_DIRECTORY + data.data.path
+                                            e.path = data.data.path
+                                        } catch (error) {
+                                            console.log("error: ", error)
+                                        }
+                                    } else if (data.status === "failed") {
+                                        e.path = e.url.split(process.env.NEXT_PUBLIC_DIRECTORY)[1]
+                                    }
+                                })
+                            })
+                            )
+                        }
+                    }
+
+                    let update_model = {
+                        details: {
+                            ...details,
+                            upload_shop_cheque_list: await value.upload_shop_cheque_list.fileList === undefined ? await value.upload_shop_cheque_list : value.upload_shop_cheque_list.fileList,
+                        }
+                    }
+                    res = await API.put(`/shopCheckCustomer/put/${id}`, update_model)
+                }
+
+
             } else if (configModal.mode === "edit") {
                 res = await API.put(`/shopCheckCustomer/put/${idEdit}`, _model)
             }
@@ -656,35 +747,8 @@ const ChequeData = ({ title = null, callBack }) => {
         });
     }
 
-    const data = [
-        {
-            doc_no: 'INV00000002',
-            customer_name: 'Ant Design Title 1',
-            paid_amount: '10000.00',
-            paid_date: '18/08/2023',
-        },
-        {
-            doc_no: 'INV00000004',
-            customer_name: 'Ant Design Title 2',
-            paid_amount: '20000',
-            paid_date: '18/08/2023',
-        },
-        {
-            doc_no: 'INV00000003',
-            customer_name: 'Ant Design Title 3',
-            paid_amount: '40000',
-            paid_date: '18/08/2023',
-        },
-        {
-            doc_no: 'INV00000001',
-            customer_name: 'Ant Design Title 4',
-            paid_amount: '20000',
-            paid_date: '18/08/2024',
-        },
-    ];
-
     const MatchRound = (value) => (Math.round(+value * 100) / 100).toFixed(2)
-    
+
     return (
         <>
 
@@ -713,27 +777,22 @@ const ChequeData = ({ title = null, callBack }) => {
                         onFinish={onFinish}
                         onFinishFailed={onFinishFailed}
                     >
+                        <Form.Item name="upload_shop_cheque_list" hidden>
+
+                        </Form.Item>
+                        <Form.Item name="upload_remove_list" hidden>
+
+                        </Form.Item>
                         <Row style={{ paddingBottom: "0px" }}>
-                            <Col xs={24} xl={12} style={{ textAlign: "center", paddingBottom: "0px" }}>
-                                <Image
-                                    width={500}
-                                    height={250}
-                                    src={imgEmpUrl}
-                                />
+                            <Col xs={24} xl={12}>
+                                <Fieldset legend={`รูปหน้าเช็ค`} className={"fieldset-business-customer"}>
+                                    <Row justify={"center"}>
+                                        <ImageMulti name="upload_shop_cheque_list" listType={`picture`} isfile isMultiple={true} value={form.getFieldValue().upload_shop_cheque_list} form={form} isShowRemoveIcon={configModal.mode !== "view"} disabled={configModal.mode === "view"} lengthUpload={1} mode={configModal.mode} />
+                                    </Row>
+                                </Fieldset>
                             </Col>
                             <Col xs={24} xl={12}>
                                 <Fieldset legend={`ข้อมูลเช็ค`} className={"fieldset-business-customer"}>
-                                    {/* <ImageSingleShares
-                                        name="upload"
-                                        accept={"image/*"}
-                                        label={"รูปหน้าเช็ค"}
-                                    /> */}
-                                    <Form.Item
-                                        name={"upload"}
-                                        label={"รูปหน้าเช็ค"}
-                                    >
-                                        <Button disabled icon={<UploadOutlined />}>{GetIntlMessages("upload")}</Button>
-                                    </Form.Item>
 
                                     <Form.Item
                                         name="customer_type"
@@ -767,7 +826,7 @@ const ChequeData = ({ title = null, callBack }) => {
                                         label={GetIntlMessages(`customer`)}
                                         rules={[
                                             {
-                                                required: false,
+                                                required: true,
                                                 message: GetIntlMessages(
                                                     `fill-out-the-information-completely`
                                                 ),
@@ -1016,11 +1075,18 @@ const ChequeData = ({ title = null, callBack }) => {
                 >
                     <BankAccountData title="จัดการข้อมูลบัญชีธนาคาร" callBack={callback} />
                 </Modal>
-            </div>
+            </div >
             <style global>{`
                 .fieldset-business-customer{
                     padding: 8px;
                 }
+                .ant-btn-icon-only.ant-btn-sm {
+                    padding: 0 !important;
+                }
+                // .ant-upload-list-picture-card-container{
+                //     height: 300px;
+                //     width: 300px;
+                // }
             `}</style>
         </>
     )

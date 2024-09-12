@@ -114,38 +114,38 @@ const LineOAInventoryBalance = ({ callBack }) => {
         const { currentCount, currentPage, pages, totalCount, data } = res.data.data;
         data?.map((e) => {
 
-          switch (e.ShopProduct?.Product?.ProductBrand?.brand_name[locale.locale]) {
-            case "BFGOODRICH":
-              e.ShopProduct?.Product?.ProductBrand?.brand_pic = "https://upload.wikimedia.org/wikipedia/commons/thumb/9/90/BFGoodrich_logo.svg/2560px-BFGoodrich_logo.svg.png"
-              break;
-            case "MICHELIN":
-              e.ShopProduct?.Product?.ProductBrand?.brand_pic = "https://seeklogo.com/images/M/michelin-logo-34273FA58D-seeklogo.com.png"
-              break;
-            case "CONTINENTAL":
-              e.ShopProduct?.Product?.ProductBrand?.brand_pic = "https://brandportal.continental.com/fileadmin/_processed_/4/e/csm_video_preview_b95894e9b5.jpg"
-              break;
-            case "PIRELLI":
-              e.ShopProduct?.Product?.ProductBrand?.brand_pic = "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d9/Logo_Pirelli.svg/2560px-Logo_Pirelli.svg.png"
-              break;
-            case "BRIDGESTONE":
-              e.ShopProduct?.Product?.ProductBrand?.brand_pic = "https://www.shutterstock.com/image-vector/bridgestone-logo-sign-icon-emblem-600nw-2286811601.jpg"
-              break;
-            case "GOODYEAR":
-              e.ShopProduct?.Product?.ProductBrand?.brand_pic = "https://www.autotirechecking.com/wp-content/uploads/2014/05/goodyear-logo.jpg"
-              break;
-            case "DUNLOP":
-              e.ShopProduct?.Product?.ProductBrand?.brand_pic = "https://inwfile.com/s-cz/fysovk.png"
-              break;
-            case "YOKOHAMA":
-              e.ShopProduct?.Product?.ProductBrand?.brand_pic = "https://eakkarnyang.com/image_upload/image_brand_tyre/ed099ac1ecd1220307f4bad68a026c6f_o.jpg"
-              break;
-            case "KUMHO":
-              e.ShopProduct?.Product?.ProductBrand?.brand_pic = "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a3/KUMHO_TIRE_logo.png/1200px-KUMHO_TIRE_logo.png"
-              break;
-            default:
-              e.ShopProduct?.Product?.ProductBrand?.brand_pic = ""
-              break;
-          }
+          // switch (e.ShopProduct?.Product?.ProductBrand?.brand_name[locale.locale]) {
+          //   case "BFGOODRICH":
+          //     e.ShopProduct?.Product?.ProductBrand?.brand_pic = "https://upload.wikimedia.org/wikipedia/commons/thumb/9/90/BFGoodrich_logo.svg/2560px-BFGoodrich_logo.svg.png"
+          //     break;
+          //   case "MICHELIN":
+          //     e.ShopProduct?.Product?.ProductBrand?.brand_pic = "https://seeklogo.com/images/M/michelin-logo-34273FA58D-seeklogo.com.png"
+          //     break;
+          //   case "CONTINENTAL":
+          //     e.ShopProduct?.Product?.ProductBrand?.brand_pic = "https://brandportal.continental.com/fileadmin/_processed_/4/e/csm_video_preview_b95894e9b5.jpg"
+          //     break;
+          //   case "PIRELLI":
+          //     e.ShopProduct?.Product?.ProductBrand?.brand_pic = "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d9/Logo_Pirelli.svg/2560px-Logo_Pirelli.svg.png"
+          //     break;
+          //   case "BRIDGESTONE":
+          //     e.ShopProduct?.Product?.ProductBrand?.brand_pic = "https://www.shutterstock.com/image-vector/bridgestone-logo-sign-icon-emblem-600nw-2286811601.jpg"
+          //     break;
+          //   case "GOODYEAR":
+          //     e.ShopProduct?.Product?.ProductBrand?.brand_pic = "https://www.autotirechecking.com/wp-content/uploads/2014/05/goodyear-logo.jpg"
+          //     break;
+          //   case "DUNLOP":
+          //     e.ShopProduct?.Product?.ProductBrand?.brand_pic = "https://inwfile.com/s-cz/fysovk.png"
+          //     break;
+          //   case "YOKOHAMA":
+          //     e.ShopProduct?.Product?.ProductBrand?.brand_pic = "https://eakkarnyang.com/image_upload/image_brand_tyre/ed099ac1ecd1220307f4bad68a026c6f_o.jpg"
+          //     break;
+          //   case "KUMHO":
+          //     e.ShopProduct?.Product?.ProductBrand?.brand_pic = "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a3/KUMHO_TIRE_logo.png/1200px-KUMHO_TIRE_logo.png"
+          //     break;
+          //   default:
+          //     e.ShopProduct?.Product?.ProductBrand?.brand_pic = ""
+          //     break;
+          // }
           e.warehouse_show = []
           e.warehouse_detail?.map((ew) => {
             ew.ShopWarehouse = warehouseList?.find(x => x?.id === ew?.warehouse)
@@ -154,18 +154,15 @@ const LineOAInventoryBalance = ({ callBack }) => {
             ew.shelf.Shelf = ew?.ShopWarehouse?.shelf?.find(x => x?.code === ew?.shelf?.item)
             ew.price_show = getPriceShow(e, ew)
             ew.shelf.dot_show = ew.shelf.dot_mfd ? ew.shelf.dot_mfd.split("")[0] + "X" + ew.shelf.dot_mfd.split("")[2] + ew.shelf.dot_mfd.split("")[3] : "XXXX"
-
           })
-
           e.warehouse_detail.sort((a, b) => a.price_show - b.price_show)
-
         })
 
 
         data?.map((e, i) => {
           console.log("warehouse_detail", e.warehouse_detail)
           e.warehouse_detail?.map((ew, ei) => {
-            if (e.warehouse_show.findIndex(x => x.shelf.dot_show === ew.shelf.dot_show) === -1) {
+            if (e.warehouse_show.findIndex(x => x.price_show === ew.price_show) === -1) {
               ew.price_show = ew.price_show === 0 || ew.price_show === "0" || ew.price_show === "" || ew.price_show === null ? e.ShopProduct.price.suggasted_re_sell_price.wholesale : ew.price_show
               e.warehouse_show.push(ew)
             } else {
@@ -175,7 +172,7 @@ const LineOAInventoryBalance = ({ callBack }) => {
                 let balance = e.warehouse_show[findIndex].shelf.new_balance !== undefined ? (+e.warehouse_show[findIndex].shelf.new_balance) : (+find.shelf.balance)
                 let balance_show = e.warehouse_show[findIndex].shelf.new_balance_show !== undefined ? (+e.warehouse_show[findIndex].shelf.new_balance_show) : (+find.shelf.balance_show)
                 e.warehouse_show[findIndex].shelf.new_balance_show = balance_show + (+ew.shelf.balance_show) > 20 ? "20" : (balance_show + (+ew.shelf.balance_show)).toLocaleString()
-                e.warehouse_show[findIndex].shelf.new_balance = balance + (+ew.shelf.balance) > 20 ? "20" : ((+find.shelf.balance) + (+ew.shelf.balance)).toLocaleString()
+                e.warehouse_show[findIndex].shelf.new_balance = balance + (+ew.shelf.balance) > 20 ? "20" : (balance + (+ew.shelf.balance)).toLocaleString()
               } catch (error) {
                 console.log("error", error)
               }
@@ -409,7 +406,7 @@ const LineOAInventoryBalance = ({ callBack }) => {
       price_discount_percent: 0,
       price_grand_total: 0,
       is_discount: false,
-      warehouse_detail: e.warehouse_detail.filter(x => x.shelf.dot_show === ew.shelf.dot_show),
+      warehouse_detail: e.warehouse_detail.filter(x => x.price_show === ew.price_show),
       product_brand_name: e?.ShopProduct?.Product?.ProductBrand?.brand_name[locale.locale] ?? null,
     }
 
@@ -609,13 +606,13 @@ const LineOAInventoryBalance = ({ callBack }) => {
                   <Col span={24}>
                     <b>{e.ShopProduct.Product.master_path_code_id}</b>
                   </Col>
-                  <Col span={24} hidden={!e.ShopProduct?.Product?.ProductBrand?.brand_pic}>
-                    <div style={{ width: "100px", height: "35px" }}>
+                  <Col span={24} hidden={!e.ShopProduct?.Product?.ProductBrand?.details?.img_url}>
+                    {/* <div style={{ width: "100px", height: "35px" }}> */}
                       <Image
-                        height={"100%"}
-                        width={"100%"}
-                        src={e.ShopProduct?.Product?.ProductBrand?.brand_pic} />
-                    </div>
+                        height={"35px"}
+                        width={"100px"}
+                        src={e.ShopProduct?.Product?.ProductBrand?.details?.img_url} />
+                    {/* </div> */}
                   </Col>
                   {/* <Col span={24}>
                     <b>{e.ShopProduct?.Product?.ProductBrand?.brand_name[locale.locale] ?? "-"}</b>

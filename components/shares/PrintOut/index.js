@@ -25,11 +25,11 @@ const PrintOut = ({ documentId, morePrintOuts, loading = false, style, textButto
      */
     const printOutPdf = async (name, priceUse, footSign, documentIdPerbutton) => {
         try {
-            console.log("formSettingPrint3", settingPrint)
-            const { doc_date_show, vehicle_data_show } = settingPrint
+            // console.log("formSettingPrint3", settingPrint)
+            const { doc_date_show, vehicle_data_show, lang_en } = settingPrint
             setLoadingPrintOut(() => true)
             documentId = documentIdPerbutton !== undefined && documentIdPerbutton !== null ? documentIdPerbutton : documentId
-            let url = `/printOut/pdf/${documentId}?price_use=${priceUse == 1 ? true : false}${name ? `&doc_type_name=${name}` : ""}${vehicle_data_show !== undefined ? `&vehicle_data_show=${vehicle_data_show}` : ""}${doc_date_show !== undefined ? `&doc_date_show=${doc_date_show}` : ""}${isPlainObject(footSign) ? `&foot_sign_left=${footSign.left}&foot_sign_right=${footSign.right}` : ""}${docTypeId ? `&doc_type_id=${docTypeId}` : ""}`
+            let url = `/printOut/pdf/${documentId}?price_use=${priceUse == 1 ? true : false}${name ? `&doc_type_name=${name}` : ""}${lang_en !== undefined ? `&lang_en=${lang_en}` : ""}${vehicle_data_show !== undefined ? `&vehicle_data_show=${vehicle_data_show}` : ""}${doc_date_show !== undefined ? `&doc_date_show=${doc_date_show}` : ""}${isPlainObject(footSign) ? `&foot_sign_left=${footSign.left}&foot_sign_right=${footSign.right}` : ""}${docTypeId ? `&doc_type_id=${docTypeId}` : ""}`
             const { data } = await API.get(url)
             if (data.status === "success") {
                 window.open(`${process.env.NEXT_PUBLIC_DIRECTORY}/assets/${data.data}`)

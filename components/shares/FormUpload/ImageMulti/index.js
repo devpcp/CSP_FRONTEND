@@ -134,7 +134,7 @@ export const ImageMulti = ({ name, extra, rules, label, accept, ButtonUpload, le
                 label={label}
                 rules={rules}
                 extra={extra}
-                style={{ width: "100%" }}
+                // style={{ width: "100%" }}
             >
                 <Upload
                     onChange={handleChange}

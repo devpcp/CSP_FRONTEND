@@ -35,7 +35,7 @@ const maskmobile_no = createDefaultMaskGenerator('999 999 9999');
 
 const BusinessCustomersData = ({ title = null, callBack }) => {
     const [loading, setLoading] = useState(false);
-    const [IsBranch, setIsBranch] = useState(false);
+    const [isBranch, setIsBranch] = useState(false);
     const [listSearchDataTable, setListSearchDataTable] = useState([])
     const [columns, setColumns] = useState([])
     const { permission_obj } = useSelector(({ permission }) => permission);
@@ -54,7 +54,7 @@ const BusinessCustomersData = ({ title = null, callBack }) => {
     const [showModalTagsData, setShowModalTagsData] = useState(false);
     const [showModalSalesHistoryData, setShowModalSalesHistoryData] = useState(false);
     const { productBrand } = useSelector(({ master }) => master);
-
+    const [isBusiness, setIsBusiness] = useState(false);
 
 
     /**
@@ -471,6 +471,7 @@ const BusinessCustomersData = ({ title = null, callBack }) => {
                     _model.upload_shop_picture_list = isPlainObject(_model.other_details) ? _model.other_details?.upload_shop_picture_list ?? [] : []
                     _model.upload_shop_document_list = isPlainObject(_model.other_details) ? _model.other_details?.upload_shop_document_list ?? [] : []
                     _model.upload_remove_list = []
+                    _model.is_business = isPlainObject(_model.other_details) ? _model.other_details["is_business"] ?? null : null
 
                     if (isPlainObject(_model.other_details)) {
                         switch (_model.other_details["branch"]) {
@@ -480,6 +481,16 @@ const BusinessCustomersData = ({ title = null, callBack }) => {
 
                             case "branch":
                                 setIsBranch(true)
+                                break;
+                        }
+                    }
+                    if (isPlainObject(_model.other_details)) {
+                        switch (_model.other_details["is_business"]) {
+                            case "business":
+                                setIsBusiness(true)
+                                break;
+                            case "government":
+                                setIsBusiness(false)
                                 break;
                         }
                     }
@@ -500,10 +511,12 @@ const BusinessCustomersData = ({ title = null, callBack }) => {
                 form.setFieldsValue({
                     is_foreign: false,
                     branch: "office",
+                    is_business: "business",
                     upload_shop_picture_list: [],
                     upload_shop_document_list: [],
                     upload_remove_list: []
                 })
+                setIsBusiness(true)
             }
             form.setFieldsValue({ mode })
             setIsModalVisible(true)
@@ -652,6 +665,7 @@ const BusinessCustomersData = ({ title = null, callBack }) => {
                     branch: value.branch ?? null,
                     branch_code: value.branch_code ?? null,
                     branch_name: value.branch_name ?? null,
+                    is_business: value.is_business ?? null,
                     credit_term: value.credit_term ?? null,
                     credit_limit: MatchRound(+value.credit_limit) ?? null,
                     shipto_same_address: value.shipto_same_address ?? null,
@@ -703,6 +717,85 @@ const BusinessCustomersData = ({ title = null, callBack }) => {
             if (configModal.mode === "add") {
                 _model.master_customer_code_id = ""
                 res = await API.post(`/shopBusinessCustomers/add`, _model)
+
+                if (res.data.status === "success") {
+                    let id = res.data.data.id
+                    let other_details = res.data.data.other_details
+                    console.log("id", id)
+                    console.log("details", other_details)
+                    if (value.upload_shop_picture_list) {
+                        if (value?.upload_shop_picture_list?.fileList?.length > 0) {
+                            await Promise.all(value.upload_shop_picture_list.fileList.map(async (e, index) => {
+                                await UploadImageCustomPathMultiple(e, { shopId: shopId, idEdit: id, directory: directory, subject: "shop_picture" }).then(({ data }) => {
+                                    if (data.status === "success") {
+                                        try {
+                                            upload_shop_picture_list.push(
+                                                {
+                                                    uid: index,
+                                                    name: e.name,
+                                                    status: 'done',
+                                                    url: process.env.NEXT_PUBLIC_DIRECTORY + data.data.path,
+                                                    path: data.data.path
+                                                }
+                                            )
+                                            e.url = process.env.NEXT_PUBLIC_DIRECTORY + data.data.path
+                                            e.path = data.data.path
+                                        } catch (error) {
+                                            console.log("error: ", error)
+                                        }
+                                    } else if (data.status === "failed") {
+                                        e.path = e.url.split(process.env.NEXT_PUBLIC_DIRECTORY)[1]
+                                        // message.error(`รูปที่ ${index + 1} : ${data.data}`)
+                                    }
+                                })
+                            })
+                            )
+                        }
+                    }
+
+                    if (value.upload_shop_document_list) {
+                        if (value?.upload_shop_document_list?.fileList?.length > 0) {
+                            await Promise.all(value.upload_shop_document_list.fileList.map(async (e, index) => {
+                                await UploadImageCustomPathMultiple(e, { shopId: shopId, idEdit: id, directory: directory, subject: "shop_document" }).then(({ data }) => {
+                                    if (data.status === "success") {
+                                        try {
+                                            upload_shop_document_list.push(
+                                                {
+                                                    uid: index,
+                                                    name: e.name,
+                                                    status: 'done',
+                                                    url: process.env.NEXT_PUBLIC_DIRECTORY + data.data.path,
+                                                    path: data.data.path
+                                                }
+                                            )
+                                            e.url = process.env.NEXT_PUBLIC_DIRECTORY + data.data.path
+                                            e.path = data.data.path
+                                        } catch (error) {
+                                            console.log("error: ", error)
+                                        }
+                                    } else if (data.status === "failed") {
+                                        e.path = e.url.split(process.env.NEXT_PUBLIC_DIRECTORY)[1]
+                                        // message.error(`รูปที่ ${index + 1} : ${data.data}`)
+                                    }
+                                })
+                            })
+                            )
+                        }
+                    }
+
+                    let update_model = {
+                        other_details: {
+                            ...other_details,
+                            upload_shop_picture_list: await value.upload_shop_picture_list.fileList === undefined ? await value.upload_shop_picture_list : value.upload_shop_picture_list.fileList,
+                            upload_shop_document_list: await value.upload_shop_document_list.fileList === undefined ? await value.upload_shop_document_list : value.upload_shop_document_list.fileList,
+                        }
+                    }
+                    res = await API.put(`/shopBusinessCustomers/put/${id}`, update_model)
+                }
+
+
+
+
             } else if (configModal.mode === "edit") {
                 _model.status = checkedIsuse ? "active" : "block"
                 res = await API.put(`/shopBusinessCustomers/put/${idEdit}`, _model)
@@ -873,6 +966,21 @@ const BusinessCustomersData = ({ title = null, callBack }) => {
             setIsBranch(true)
         } else {
             setIsBranch(false)
+        }
+    }
+
+    const onChangeIsBusiness = (ev) => {
+        if (ev.target.value == "business") {
+            setIsBusiness(true)
+        } else {
+            setIsBusiness(false)
+            form.setFieldsValue(
+                {
+                    branch: null,
+                    branch_code: null,
+                    branch_name: null,
+                }
+            )
         }
     }
 
@@ -1060,7 +1168,7 @@ const BusinessCustomersData = ({ title = null, callBack }) => {
                 <ModalFullScreen
                     // width={"70vw"}
                     maskClosable={false}
-                    title={`${configModal.mode == "view" ? "ดูข้อมูล" : configModal.mode == "edit" ? "แก้ไขข้อมูล" : "เพิ่มข้อมูล"}ลูกค้าธุรกิจ`}
+                    title={`${configModal.mode == "view" ? "ดูข้อมูล" : configModal.mode == "edit" ? "แก้ไขข้อมูล" : "เพิ่มข้อมูล"}ลูกค้าธุรกิจ/ราชการ`}
                     visible={isModalVisible} onOk={handleOk} onCancel={handleCancel}
                     okButtonProps={{ disabled: configModal.mode == "view" }}
                     bodyStyle={{
@@ -1130,10 +1238,9 @@ const BusinessCustomersData = ({ title = null, callBack }) => {
                                                             >
                                                                 <Input type={'text'} disabled={configModal.mode == "view"} maxLength={13} />
                                                             </Form.Item>
-
                                                             <Form.Item
-                                                                name="branch"
-                                                                label={GetIntlMessages("สำนักงาน/สาขา")}
+                                                                name="is_business"
+                                                                label={GetIntlMessages("ธุรกิจ/ราชการ")}
                                                                 rules={[
                                                                     {
                                                                         required: true,
@@ -1141,13 +1248,28 @@ const BusinessCustomersData = ({ title = null, callBack }) => {
                                                                     },
                                                                 ]}
                                                             >
-                                                                <Radio.Group onChange={(val) => onChangeBranch(val)} disabled={configModal.mode == "view"}>
+                                                                <Radio.Group onChange={(val) => onChangeIsBusiness(val)} disabled={configModal.mode == "view"}>
+                                                                    <Radio value="business"> ธุรกิจ </Radio>
+                                                                    <Radio value="government"> ราชการ/องค์กร </Radio>
+                                                                </Radio.Group>
+                                                            </Form.Item>
+                                                            <Form.Item
+                                                                name="branch"
+                                                                label={GetIntlMessages("สำนักงาน/สาขา")}
+                                                                rules={[
+                                                                    {
+                                                                        required: isBusiness,
+                                                                        message: GetIntlMessages("กรุณาเลือกข้อมูล")
+                                                                    },
+                                                                ]}
+                                                            >
+                                                                <Radio.Group onChange={(val) => onChangeBranch(val)} disabled={configModal.mode == "view" || !isBusiness}>
                                                                     <Radio value="office"> สำนักงานใหญ่ </Radio>
                                                                     <Radio value="branch"> สาขา </Radio>
                                                                 </Radio.Group>
                                                             </Form.Item>
                                                             {
-                                                                IsBranch ?
+                                                                isBranch ?
                                                                     <>
                                                                         <Form.Item
                                                                             name="branch_code"
@@ -1155,7 +1277,7 @@ const BusinessCustomersData = ({ title = null, callBack }) => {
                                                                             rules={
                                                                                 [
                                                                                     {
-                                                                                        required: IsBranch,
+                                                                                        required: isBranch,
                                                                                         message: "กรุณากรอกข้อมูล",
                                                                                     },
                                                                                     {
@@ -1178,7 +1300,7 @@ const BusinessCustomersData = ({ title = null, callBack }) => {
                                                                             rules={
                                                                                 [
                                                                                     {
-                                                                                        required: IsBranch,
+                                                                                        required: isBranch,
                                                                                         message: "กรุณากรอกข้อมูล",
                                                                                     },
                                                                                 ]

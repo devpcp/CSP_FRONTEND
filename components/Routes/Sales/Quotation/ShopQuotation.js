@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef, useCallback } from 'react'
-import { message, Form, Tabs, Button, Popover, Dropdown, Menu, Row, Col } from 'antd';
-import { CheckCircleOutlined, CloseCircleOutlined, StopOutlined, ClockCircleOutlined, DownOutlined } from "@ant-design/icons";
+import { message, Form, Tabs, Button, Popover, Dropdown, Menu, Row, Col, Select, Typography } from 'antd';
+import { CheckCircleOutlined, CloseCircleOutlined, StopOutlined, ClockCircleOutlined, SettingOutlined } from "@ant-design/icons";
 import Swal from "sweetalert2";
 import moment from 'moment'
 import { get, isArray, isEmpty, isFunction, isPlainObject, isString, result } from 'lodash';
@@ -17,7 +17,9 @@ import FormQuotation from './QuotationComponents/Components.Routes.Modal.FormQuo
 import QuotationProductList from './QuotationComponents/Components.Routes.Modal.Tabs1.QuotationList';
 import Tab2Customer from './QuotationComponents/Components.Routes.Modal.Tabs2.Customer';
 import Tab4Vehicle from './QuotationComponents/Components.Routes.Modal.Tabs4.QuotationVehicle';
-import SortingData from '../../../shares/SortingData';
+import SortingData from '../../../shares/SortingData'
+
+const { Text, Link } = Typography;
 
 const ShopQuotation = ({ docTypeId, menuId }) => {
     const [loading, setLoading] = useState(false);
@@ -31,6 +33,9 @@ const ShopQuotation = ({ docTypeId, menuId }) => {
     const [lengthShelfData, setLengthShelfData] = useState(0)
     const [documentTypesList, setDocumentTypesList] = useState([]) //ประเภทเอกสาร
     const [taxTypesList, setTaxTypesList] = useState([]) //ประเภทภาษี
+
+    const [formSettingPrint] = Form.useForm();
+    const [settingPrint, setSettingPrint] = useState({})
 
     const { TabPane } = Tabs
 
@@ -179,14 +184,14 @@ const ShopQuotation = ({ docTypeId, menuId }) => {
                 render: (text, record) => get(text, `remark_inside`, "-") ?? "-",
             },
             {
-                title: () => GetIntlMessages("พิมพ์"),
+                title: () => (<>{GetIntlMessages("พิมพ์")}  <Popover trigger="click" content={<PopOverSettingPrint />} title="ตั้งค่าการพิมพ์"><Button type='primary' icon={<SettingOutlined />}></Button></Popover></>),
                 dataIndex: 'details',
                 key: 'details',
                 width: 120,
                 align: "center",
                 render: (text, record) => {
                     return (
-                        <PrintOut textButton={"พิมพ์"} printOutHeadTitle={"ใบเสนอราคา"} documentId={record?.id} style={{ width: "100%", display: "flex", justifyContent: "center", alignItems: "center" }} customPriceUse={true} docTypeId={docTypeId} />
+                        <PrintOut textButton={"พิมพ์"} printOutHeadTitle={"ใบเสนอราคา"} documentId={record?.id} style={{ width: "100%", display: "flex", justifyContent: "center", alignItems: "center" }} customPriceUse={true} docTypeId={docTypeId} settingPrint={settingPrint} />
                     )
                 },
             },
@@ -194,6 +199,53 @@ const ShopQuotation = ({ docTypeId, menuId }) => {
 
 
         setColumns(_column)
+    }
+
+    const PopOverSettingPrint = () => {
+        return (
+            <Form
+                form={formSettingPrint}
+                layout={"vertical"}
+                initialValues={{
+                    lang_en: false,
+                }}
+            >
+                <Row gutter={16}>
+                    <Col span={12}>
+                        <Form.Item name={"lang_en"} label="ภาษาที่พิมพ์">
+                            <Select
+                                onChange={() => handleChangeSettingPrint("doc_date")}
+                                style={{ width: "100%" }}
+                                options={[
+                                    {
+                                        value: false,
+                                        label: 'ภาษาไทย',
+                                    },
+                                    {
+                                        value: true,
+                                        label: 'ภาษาอังกฤษ',
+                                    },
+                                ]}
+                            />
+                        </Form.Item>
+                    </Col>
+                </Row>
+                <Text style={{ color: "red" }}>***เมื่อมีการปรับเปลี่ยนข้อมูลแล้วกดค้นหาอีก 1 ครั้งเพื่อใช้งานการตั้งค่า</Text>
+            </Form>
+        )
+    }
+
+    const handleChangeSettingPrint = () => {
+        try {
+            const { lang_en } = formSettingPrint.getFieldsValue()
+            let model = {
+                lang_en,
+            }
+            setSettingPrint(model)
+        } catch (error) {
+            console.log("error", error)
+        }
+
     }
 
     useEffect(() => {
@@ -825,7 +877,7 @@ const ShopQuotation = ({ docTypeId, menuId }) => {
     }
 
     const MatchRound = (value) => (Math.round(+value * 100) / 100).toFixed(2)
-    
+
     return (
         <>
             <SearchInput configSearch={configSearch} configModal={configModal} loading={loading} onAdd={() => addEditViewModal("add")} value={modelSearch} />
