@@ -17,6 +17,7 @@ import {
 import axios from "axios";
 
 const { TextArea } = Input;
+const { Text, Link } = Typography;
 
 const LineOAInventoryBalance = ({ callBack }) => {
   const dispatch = useDispatch();
@@ -115,41 +116,7 @@ const LineOAInventoryBalance = ({ callBack }) => {
         const { currentCount, currentPage, pages, totalCount, data } = res.data.data;
         let yearNow = moment(Date.now()).format("YY")
         data?.map((e) => {
-          // switch (e.ShopProduct?.Product?.ProductBrand?.brand_name[locale.locale]) {
-          //   case "BFGOODRICH":
-          //     e.ShopProduct?.Product?.ProductBrand?.brand_pic = "https://upload.wikimedia.org/wikipedia/commons/thumb/9/90/BFGoodrich_logo.svg/2560px-BFGoodrich_logo.svg.png"
-          //     break;
-          //   case "MICHELIN":
-          //     e.ShopProduct?.Product?.ProductBrand?.brand_pic = "https://seeklogo.com/images/M/michelin-logo-34273FA58D-seeklogo.com.png"
-          //     break;
-          //   case "CONTINENTAL":
-          //     e.ShopProduct?.Product?.ProductBrand?.brand_pic = "https://brandportal.continental.com/fileadmin/_processed_/4/e/csm_video_preview_b95894e9b5.jpg"
-          //     break;
-          //   case "PIRELLI":
-          //     e.ShopProduct?.Product?.ProductBrand?.brand_pic = "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d9/Logo_Pirelli.svg/2560px-Logo_Pirelli.svg.png"
-          //     break;
-          //   case "BRIDGESTONE":
-          //     e.ShopProduct?.Product?.ProductBrand?.brand_pic = "https://www.shutterstock.com/image-vector/bridgestone-logo-sign-icon-emblem-600nw-2286811601.jpg"
-          //     break;
-          //   case "GOODYEAR":
-          //     e.ShopProduct?.Product?.ProductBrand?.brand_pic = "https://www.autotirechecking.com/wp-content/uploads/2014/05/goodyear-logo.jpg"
-          //     break;
-          //   case "DUNLOP":
-          //     e.ShopProduct?.Product?.ProductBrand?.brand_pic = "https://inwfile.com/s-cz/fysovk.png"
-          //     break;
-          //   case "YOKOHAMA":
-          //     e.ShopProduct?.Product?.ProductBrand?.brand_pic = "https://eakkarnyang.com/image_upload/image_brand_tyre/ed099ac1ecd1220307f4bad68a026c6f_o.jpg"
-          //     break;
-          //   case "KUMHO":
-          //     e.ShopProduct?.Product?.ProductBrand?.brand_pic = "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a3/KUMHO_TIRE_logo.png/1200px-KUMHO_TIRE_logo.png"
-          //     break;
-          //   default:
-          //     e.ShopProduct?.Product?.ProductBrand?.brand_pic = ""
-          //     break;
-          // }
           e.warehouse_show = []
-
-
           e.warehouse_detail?.map((ew) => {
 
             ew.ShopWarehouse = warehouseList?.find(x => x?.id === ew?.warehouse)
@@ -157,7 +124,7 @@ const LineOAInventoryBalance = ({ callBack }) => {
             ew.shelf.balance_show = ew.shelf.balance >= 20 ? 20 : ew.shelf.balance
             ew.shelf.Shelf = ew?.ShopWarehouse?.shelf?.find(x => x?.code === ew?.shelf?.item)
             ew.price_show = getPriceShow(e, ew)
-            ew.shelf.dot_show = ew.shelf.dot_mfd ? ew.shelf.dot_mfd.split("")[2] + ew.shelf.dot_mfd.split("")[3] === yearNow ? ew.shelf.dot_mfd.split("")[0] + "X" + ew.shelf.dot_mfd.split("")[2] + ew.shelf.dot_mfd.split("")[3] : ew.shelf.dot_mfd : "XXXX"
+            ew.shelf.dot_show = ew.shelf.dot_mfd ? ew.shelf.dot_mfd.split("")[2] + ew.shelf.dot_mfd.split("")[3] === yearNow ? ew.shelf.dot_mfd.split("")[0] + "X" + ew.shelf.dot_mfd.split("")[2] + ew.shelf.dot_mfd.split("")[3] : ew.shelf.dot_mfd : ""
 
           })
 
@@ -166,28 +133,38 @@ const LineOAInventoryBalance = ({ callBack }) => {
         })
 
         data?.map((e, i) => {
-          console.log("warehouse_detail", e.warehouse_detail)
-          e.warehouse_detail?.map((ew, ei) => {
-            if (ew.shelf.dot_mfd.split("")[2] + ew.shelf.dot_mfd.split("")[3] === yearNow) {
-              if (e.warehouse_show.findIndex(x => x.price_show === ew.price_show && x.shelf.dot_mfd.split("")[2] + x.shelf.dot_mfd.split("")[3] === yearNow) === -1) {
-                e.warehouse_show.push(ew)
-              } else {
-                try {
-                  let find = e.warehouse_show.find(x => x.price_show === ew.price_show)
-                  let findIndex = e.warehouse_show.findIndex(x => x.price_show === ew.price_show)
-                  let balance = e.warehouse_show[findIndex].shelf.new_balance !== undefined ? (+e.warehouse_show[findIndex].shelf.new_balance) : (+find.shelf.balance)
-                  let balance_show = e.warehouse_show[findIndex].shelf.new_balance_show !== undefined ? (+e.warehouse_show[findIndex].shelf.new_balance_show) : (+find.shelf.balance_show)
-                  e.warehouse_show[findIndex].shelf.new_balance_show = balance_show + (+ew.shelf.balance_show) > 20 ? "20" : (balance_show + (+ew.shelf.balance_show)).toLocaleString()
-                  e.warehouse_show[findIndex].shelf.new_balance = balance + (+ew.shelf.balance) > 20 ? "20" : (balance + (+ew.shelf.balance)).toLocaleString()
-                } catch (error) {
-                  console.log("error", error)
+          try {
+            console.log("warehouse_detail", e.warehouse_detail)
+            e.warehouse_detail?.map((ew, ei) => {
+              if (ew.shelf.dot_mfd) {
+                if (ew.shelf.dot_mfd.split("")[2] + ew.shelf.dot_mfd.split("")[3] === yearNow) {
+                  if (e.warehouse_show.findIndex(x => x.price_show === ew.price_show && x.shelf.dot_show.split("")[2] + x.shelf.dot_show.split("")[3] === yearNow) === -1) {
+                    e.warehouse_show.push(ew)
+                  } else {
+                    try {
+                      console.log("find", find)
+                      let find = e.warehouse_show.find(x => x.price_show === ew.price_show && x.shelf.dot_show.split("")[2] + x.shelf.dot_show.split("")[3] === yearNow)
+                      let findIndex = e.warehouse_show.findIndex(x => x.price_show === ew.price_show && x.shelf.dot_show.split("")[2] + x.shelf.dot_show.split("")[3] === yearNow)
+                      console.log("find", find)
+                      console.log("findIndex", findIndex)
+                      let balance = e.warehouse_show[findIndex].shelf.new_balance !== undefined ? (+e.warehouse_show[findIndex].shelf.new_balance) : (+find.shelf.balance)
+                      let balance_show = e.warehouse_show[findIndex].shelf.new_balance_show !== undefined ? (+e.warehouse_show[findIndex].shelf.new_balance_show) : (+find.shelf.balance_show)
+                      e.warehouse_show[findIndex].shelf.new_balance_show = balance_show + (+ew.shelf.balance_show) > 20 ? "20" : (balance_show + (+ew.shelf.balance_show)).toLocaleString()
+                      e.warehouse_show[findIndex].shelf.new_balance = balance + (+ew.shelf.balance) > 20 ? "20" : (balance + (+ew.shelf.balance)).toLocaleString()
+                    } catch (error) {
+                      console.log("error", error)
+                    }
+                  }
+                } else {
+                  e.warehouse_show.push(ew)
                 }
+              } else {
+                e.warehouse_show.push(ew)
               }
-            } else {
-              e.warehouse_show.push(ew)
-            }
-          })
-          console.log("warehouse_show", e.warehouse_show)
+            })
+          } catch (error) {
+            console.log("error", error)
+          }
         })
 
         setListSearchDataTable(data)
@@ -214,24 +191,35 @@ const LineOAInventoryBalance = ({ callBack }) => {
   }
 
   const getPriceShow = (product_data, warehouse_data) => {
-    let price_arr = []
-    let find_price = []
+    try {
+      let price_arr = []
+      let find_price = []
 
-    if (isArray(product_data?.ShopProduct?.price_arr) && product_data?.ShopProduct?.price_arr.length > 0) {
-      price_arr = product_data?.ShopProduct?.price_arr
-    } else {
-      return +product_data.ShopProduct.price.suggasted_re_sell_price.wholesale
+      if (isArray(product_data?.ShopProduct?.price_arr) && product_data?.ShopProduct?.price_arr.length > 0) {
+        price_arr = product_data?.ShopProduct?.price_arr
+      } else {
+        return +product_data.ShopProduct.price.suggasted_re_sell_price.wholesale
+      }
+      console.log("price_arr", price_arr)
+      if (isArray(userData.tags) && userData.tags.length > 0) {
+        userData.tags.map((e) => {
+          if (price_arr.find(x => x?.price_name === e?.tag_name) !== undefined) {
+            find_price.push(price_arr.find(x => x?.price_name === e?.tag_name))
+          }
+        })
+      }
+      if (find_price.length === 0) {
+        find_price.push({
+          price_name: "default",
+          price_value: +product_data.ShopProduct.price.suggasted_re_sell_price.wholesale
+        })
+      }
+      find_price.sort((a, b) => +a?.price_value - +b?.price_value)
+    } catch (error) {
+      console.log("error", error)
     }
-
-    if (isArray(userData.tags) && userData.tags.length > 0) {
-      userData.tags.map((e) => {
-        if (price_arr.find(x => x.price_name === e.tag_name) !== undefined) {
-          find_price.push(price_arr.find(x => x.price_name === e.tag_name))
-        }
-      })
-    }
-    find_price.sort((a, b) => +a.price_value - +b.price_value)
-    return +find_price[0].price_value
+    console.log("ffff", find_price)
+    return +find_price[0]?.price_value
 
     // if (product_data?.ShopProduct?.price_dot_arr) {
     //   if (product_data?.ShopProduct?.price_dot_arr?.find(x => x.price_name === warehouse_data.shelf.dot_mfd)?.price_value === "" || product_data?.ShopProduct?.price_dot_arr?.find(x => x.price_name === warehouse_data.shelf.dot_mfd)?.price_value === undefined || +product_data?.ShopProduct?.price_dot_arr?.find(x => x.price_name === warehouse_data.shelf.dot_mfd)?.price_value === 0) {
@@ -394,46 +382,52 @@ const LineOAInventoryBalance = ({ callBack }) => {
   }
 
   const addEditViewAddToCartModal = async (e, ew) => {
-    let yearNow = moment(Date.now()).format("YY")
-    const model = {
-      list_code: e.ShopProduct.Product.master_path_code_id,
-      list_name: e.ShopProduct.Product.product_name[locale.locale],
-      shop_stock_id: e.id,
-      seq_number: 1,
-      shop_product_id: e.ShopProduct.id,
-      shop_warehouse_id: ew.warehouse,
-      warehouse_name: ew.ShopWarehouse.name[locale.locale],
-      shop_warehouse_shelf_item_id: ew.shelf.item,
-      shelf_name: ew.shelf.Shelf.name[locale.locale],
-      purchase_unit_id: ew.shelf.purchase_unit_id,
-      purchase_unit_name: ew.shelf.PurchaseUnit?.type_name[locale.locale],
-      dot_mfd: ew.shelf.dot_mfd,
-      dot_show: ew.shelf.dot_mfd ? ew.shelf.dot_mfd.split("")[0] + "X" + ew.shelf.dot_mfd.split("")[2] + ew.shelf.dot_mfd.split("")[3] : "XXXX",
-      amount: (ew.shelf.new_balance === undefined ? +ew.shelf.balance : +ew.shelf.new_balance) >= 4 ? 4 : ew.shelf.new_balance === undefined ? +ew.shelf.balance : +ew.shelf.new_balance,
-      max_amount: (ew.shelf.new_balance === undefined ? +ew.shelf.balance : +ew.shelf.new_balance) >= 20 ? 20 : ew.shelf.new_balance === undefined ? +ew.shelf.balance : +ew.shelf.new_balance,
-      cost_unit: e.ShopProduct.product_cost,
-      price_unit: ew.price_show,
-      price_discount: 0,
-      price_discount_percent: 0,
-      price_grand_total: 0,
-      is_discount: false,
-      warehouse_detail: yearNow === ew.shelf.dot_mfd.split("")[2] + ew.shelf.dot_mfd.split("")[3] ? e.warehouse_detail.filter(x => x.price_show === ew.price_show && yearNow === x.shelf.dot_mfd.split("")[2] + x.shelf.dot_mfd.split("")[3]) : e.warehouse_detail.filter(x => x.shelf.dot_show === ew.shelf.dot_show),
-      product_brand_name: e?.ShopProduct?.Product?.ProductBrand?.brand_name[locale.locale] ?? null,
-    }
-    model.price_grand_total = model.amount * model.price_unit
-
-
-    const product_pick_arr = JSON.parse(localStorage.getItem("product_pick"))
-    if (product_pick_arr !== null) {
-      let checkProduct = product_pick_arr.find(x => x.shop_stock_id === e.id && x.shop_product_id === e.ShopProduct.id && x.shop_warehouse_id === ew.warehouse && x.shop_warehouse_shelf_item_id === ew.shelf.item && x.dot_mfd === ew.shelf.dot_mfd)
-      if (!isUndefined(checkProduct)) {
-        // console.log("checkProduct", checkProduct)
-        model.max_amount = +model.max_amount - +checkProduct.amount
+    try {
+      console.log("ew", ew.shelf.dot_mfd)
+      let yearNow = moment(Date.now()).format("YY")
+      const model = {
+        list_code: e.ShopProduct.Product.master_path_code_id,
+        list_name: e.ShopProduct.Product.product_name[locale.locale],
+        shop_stock_id: e.id,
+        seq_number: 1,
+        shop_product_id: e.ShopProduct.id,
+        shop_warehouse_id: ew.warehouse,
+        warehouse_name: ew.ShopWarehouse.name[locale.locale],
+        shop_warehouse_shelf_item_id: ew.shelf.item,
+        shelf_name: ew.shelf.Shelf.name[locale.locale],
+        purchase_unit_id: ew.shelf.purchase_unit_id,
+        purchase_unit_name: ew.shelf.PurchaseUnit?.type_name[locale.locale],
+        dot_mfd: ew.shelf.dot_mfd,
+        dot_show: ew.shelf.dot_mfd ? ew.shelf.dot_mfd.split("")[0] + "X" + ew.shelf.dot_mfd.split("")[2] + ew.shelf.dot_mfd.split("")[3] : "XXXX",
+        amount: (ew.shelf.new_balance === undefined ? +ew.shelf.balance : +ew.shelf.new_balance) >= 4 ? 4 : ew.shelf.new_balance === undefined ? +ew.shelf.balance : +ew.shelf.new_balance,
+        max_amount: (ew.shelf.new_balance === undefined ? +ew.shelf.balance : +ew.shelf.new_balance) >= 20 ? 20 : ew.shelf.new_balance === undefined ? +ew.shelf.balance : +ew.shelf.new_balance,
+        cost_unit: e.ShopProduct.product_cost,
+        price_unit: ew.price_show,
+        price_discount: 0,
+        price_discount_percent: 0,
+        price_grand_total: 0,
+        is_discount: false,
+        warehouse_detail: e.warehouse_detail.filter(x => x.shelf.dot_show === ew.shelf.dot_show),
+        // warehouse_detail: yearNow === ew.shelf.dot_mfd.split("")[2] + ew.shelf.dot_mfd.split("")[3] ? e.warehouse_detail.filter(x => x.shelf.dot_mfd ? x.price_show === ew.price_show && yearNow === x.shelf.dot_mfd.split("")[2] + x.shelf.dot_mfd.split("")[3] : x.price_show === ew.price_show) : e.warehouse_detail.filter(x => x.shelf.dot_show === ew.shelf.dot_show),
+        product_brand_name: e?.ShopProduct?.Product?.ProductBrand?.brand_name[locale.locale] ?? null,
       }
+      model.price_grand_total = model.amount * model.price_unit
+
+
+      const product_pick_arr = JSON.parse(localStorage.getItem("product_pick"))
+      if (product_pick_arr !== null) {
+        let checkProduct = product_pick_arr.find(x => x.shop_stock_id === e.id && x.shop_product_id === e.ShopProduct.id && x.shop_warehouse_id === ew.warehouse && x.shop_warehouse_shelf_item_id === ew.shelf.item && x.dot_mfd === ew.shelf.dot_mfd)
+        if (!isUndefined(checkProduct)) {
+          // console.log("checkProduct", checkProduct)
+          model.max_amount = +model.max_amount - +checkProduct.amount
+        }
+      }
+      console.log("model", model)
+      formAddToCart.setFieldsValue({ ...model })
+      await setIsAddToCartModalVisible(true)
+    } catch (error) {
+      console.log("error", error)
     }
-    // console.log("model", model)
-    formAddToCart.setFieldsValue({ ...model })
-    await setIsAddToCartModalVisible(true)
   }
 
 

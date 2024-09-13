@@ -113,39 +113,6 @@ const LineOAInventoryBalance = ({ callBack }) => {
         // console.log("res.data.", res.data.data)
         const { currentCount, currentPage, pages, totalCount, data } = res.data.data;
         data?.map((e) => {
-
-          // switch (e.ShopProduct?.Product?.ProductBrand?.brand_name[locale.locale]) {
-          //   case "BFGOODRICH":
-          //     e.ShopProduct?.Product?.ProductBrand?.brand_pic = "https://upload.wikimedia.org/wikipedia/commons/thumb/9/90/BFGoodrich_logo.svg/2560px-BFGoodrich_logo.svg.png"
-          //     break;
-          //   case "MICHELIN":
-          //     e.ShopProduct?.Product?.ProductBrand?.brand_pic = "https://seeklogo.com/images/M/michelin-logo-34273FA58D-seeklogo.com.png"
-          //     break;
-          //   case "CONTINENTAL":
-          //     e.ShopProduct?.Product?.ProductBrand?.brand_pic = "https://brandportal.continental.com/fileadmin/_processed_/4/e/csm_video_preview_b95894e9b5.jpg"
-          //     break;
-          //   case "PIRELLI":
-          //     e.ShopProduct?.Product?.ProductBrand?.brand_pic = "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d9/Logo_Pirelli.svg/2560px-Logo_Pirelli.svg.png"
-          //     break;
-          //   case "BRIDGESTONE":
-          //     e.ShopProduct?.Product?.ProductBrand?.brand_pic = "https://www.shutterstock.com/image-vector/bridgestone-logo-sign-icon-emblem-600nw-2286811601.jpg"
-          //     break;
-          //   case "GOODYEAR":
-          //     e.ShopProduct?.Product?.ProductBrand?.brand_pic = "https://www.autotirechecking.com/wp-content/uploads/2014/05/goodyear-logo.jpg"
-          //     break;
-          //   case "DUNLOP":
-          //     e.ShopProduct?.Product?.ProductBrand?.brand_pic = "https://inwfile.com/s-cz/fysovk.png"
-          //     break;
-          //   case "YOKOHAMA":
-          //     e.ShopProduct?.Product?.ProductBrand?.brand_pic = "https://eakkarnyang.com/image_upload/image_brand_tyre/ed099ac1ecd1220307f4bad68a026c6f_o.jpg"
-          //     break;
-          //   case "KUMHO":
-          //     e.ShopProduct?.Product?.ProductBrand?.brand_pic = "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a3/KUMHO_TIRE_logo.png/1200px-KUMHO_TIRE_logo.png"
-          //     break;
-          //   default:
-          //     e.ShopProduct?.Product?.ProductBrand?.brand_pic = ""
-          //     break;
-          // }
           e.warehouse_show = []
           e.warehouse_detail?.map((ew) => {
             ew.ShopWarehouse = warehouseList?.find(x => x?.id === ew?.warehouse)
@@ -383,46 +350,53 @@ const LineOAInventoryBalance = ({ callBack }) => {
   }
 
   const addEditViewAddToCartModal = async (e, ew) => {
-    // console.log("e", e)
-    const model = {
-      list_code: e.ShopProduct.Product.master_path_code_id,
-      list_name: e.ShopProduct.Product.product_name[locale.locale],
-      shop_stock_id: e.id,
-      seq_number: 1,
-      shop_product_id: e.ShopProduct.id,
-      shop_warehouse_id: ew.warehouse,
-      warehouse_name: ew.ShopWarehouse.name[locale.locale],
-      shop_warehouse_shelf_item_id: ew.shelf.item,
-      shelf_name: ew.shelf.Shelf.name[locale.locale],
-      purchase_unit_id: ew.shelf.purchase_unit_id,
-      purchase_unit_name: ew.shelf.PurchaseUnit?.type_name[locale.locale],
-      dot_mfd: ew.shelf.dot_mfd,
-      dot_show: ew.shelf.dot_mfd ? ew.shelf.dot_mfd.split("")[0] + "X" + ew.shelf.dot_mfd.split("")[2] + ew.shelf.dot_mfd.split("")[3] : "XXXX",
-      amount: (ew.shelf.new_balance === undefined ? +ew.shelf.balance : +ew.shelf.new_balance) >= 4 ? 4 : ew.shelf.new_balance === undefined ? +ew.shelf.balance : +ew.shelf.new_balance,
-      max_amount: (ew.shelf.new_balance === undefined ? +ew.shelf.balance : +ew.shelf.new_balance) >= 20 ? 20 : ew.shelf.new_balance === undefined ? +ew.shelf.balance : +ew.shelf.new_balance,
-      cost_unit: e.ShopProduct.product_cost,
-      price_unit: ew.price_show,
-      price_discount: 0,
-      price_discount_percent: 0,
-      price_grand_total: 0,
-      is_discount: false,
-      warehouse_detail: e.warehouse_detail.filter(x => x.price_show === ew.price_show),
-      product_brand_name: e?.ShopProduct?.Product?.ProductBrand?.brand_name[locale.locale] ?? null,
-    }
-
-    model.price_grand_total = model.amount * model.price_unit
-
-
-    const product_pick_arr = JSON.parse(localStorage.getItem("product_pick"))
-    if (product_pick_arr !== null) {
-      let checkProduct = product_pick_arr.find(x => x.shop_stock_id === e.id && x.shop_product_id === e.ShopProduct.id && x.shop_warehouse_id === ew.warehouse && x.shop_warehouse_shelf_item_id === ew.shelf.item && x.dot_mfd === ew.shelf.dot_mfd)
-      if (!isUndefined(checkProduct)) {
-        // console.log("checkProduct", checkProduct)
-        model.max_amount = +model.max_amount - +checkProduct.amount
+    console.log("ew.shelf.dot_show", ew.shelf.dot_show)
+    try {
+      const model = {
+        list_code: e.ShopProduct.Product.master_path_code_id,
+        list_name: e.ShopProduct.Product.product_name[locale.locale],
+        shop_stock_id: e.id,
+        seq_number: 1,
+        shop_product_id: e.ShopProduct.id,
+        shop_warehouse_id: ew.warehouse,
+        warehouse_name: ew.ShopWarehouse.name[locale.locale],
+        shop_warehouse_shelf_item_id: ew.shelf.item,
+        shelf_name: ew.shelf.Shelf.name[locale.locale],
+        purchase_unit_id: ew.shelf.purchase_unit_id,
+        purchase_unit_name: ew.shelf.PurchaseUnit?.type_name[locale.locale],
+        dot_mfd: ew.shelf.dot_mfd,
+        dot_show: ew.shelf.dot_mfd ? ew.shelf.dot_mfd.split("")[0] + "X" + ew.shelf.dot_mfd.split("")[2] + ew.shelf.dot_mfd.split("")[3] : "XXXX",
+        amount: (ew.shelf.new_balance === undefined ? +ew.shelf.balance : +ew.shelf.new_balance) >= 4 ? 4 : ew.shelf.new_balance === undefined ? +ew.shelf.balance : +ew.shelf.new_balance,
+        max_amount: (ew.shelf.new_balance === undefined ? +ew.shelf.balance : +ew.shelf.new_balance) >= 20 ? 20 : ew.shelf.new_balance === undefined ? +ew.shelf.balance : +ew.shelf.new_balance,
+        cost_unit: e.ShopProduct.product_cost,
+        price_unit: ew.price_show,
+        price_discount: 0,
+        price_discount_percent: 0,
+        price_grand_total: 0,
+        is_discount: false,
+        warehouse_detail: e.warehouse_detail.filter(x => x.price_show === ew.price_show),
+        product_brand_name: e?.ShopProduct?.Product?.ProductBrand?.brand_name[locale.locale] ?? null,
       }
+
+      model.price_grand_total = model.amount * model.price_unit
+
+
+      const product_pick_arr = JSON.parse(localStorage.getItem("product_pick"))
+      if (product_pick_arr !== null) {
+        let checkProduct = product_pick_arr.find(x => x.shop_stock_id === e.id && x.shop_product_id === e.ShopProduct.id && x.shop_warehouse_id === ew.warehouse && x.shop_warehouse_shelf_item_id === ew.shelf.item && x.dot_mfd === ew.shelf.dot_mfd)
+        if (!isUndefined(checkProduct)) {
+          // console.log("checkProduct", checkProduct)
+          model.max_amount = +model.max_amount - +checkProduct.amount
+        }
+      }
+      // console.log("model", model)
+      formAddToCart.setFieldsValue({ ...model })
+      await setIsAddToCartModalVisible(true)
+    } catch (error) {
+      console.log("error", error)
     }
-    formAddToCart.setFieldsValue({ ...model })
-    await setIsAddToCartModalVisible(true)
+    // console.log("e", e)
+
   }
 
 
@@ -608,10 +582,10 @@ const LineOAInventoryBalance = ({ callBack }) => {
                   </Col>
                   <Col span={24} hidden={!e.ShopProduct?.Product?.ProductBrand?.details?.img_url}>
                     {/* <div style={{ width: "100px", height: "35px" }}> */}
-                      <Image
-                        height={"35px"}
-                        width={"100px"}
-                        src={e.ShopProduct?.Product?.ProductBrand?.details?.img_url} />
+                    <Image
+                      height={"35px"}
+                      width={"100px"}
+                      src={e.ShopProduct?.Product?.ProductBrand?.details?.img_url} />
                     {/* </div> */}
                   </Col>
                   {/* <Col span={24}>

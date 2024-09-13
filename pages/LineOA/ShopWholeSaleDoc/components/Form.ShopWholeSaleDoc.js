@@ -290,7 +290,7 @@ const LineOAFormShopWholeSaleDoc = ({ mode, disabledWhenDeliveryDocActive = fals
             </Select>
           </Form.Item>
         </Col>
-        <Col span={24} style={{ textAlign: "center" }} hidden={userData.shop_name === "HENGHENG"}>
+        <Col span={24} style={{ textAlign: "center" }} hidden={userData?.shop_name === "HENGHENG"}>
           <div className="coupon">
             <Button style={{ width: "100%", height: "60px", borderStyle: "dashed", borderRadius: "10px", borderColor: "white", background: "none", color: "white" }} onClick={() => showPromotionModal()}>{coupontButtonName} </Button>
           </div>
