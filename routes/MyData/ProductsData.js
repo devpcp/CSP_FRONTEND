@@ -424,31 +424,31 @@ const ComponentsRoutesProducts = ({ title = null, callBack, listIndex }) => {
             formValue.start_date = _model?.start_date ? moment(_model?.start_date) : null
             formValue.end_date = _model?.end_date ? moment(_model?.end_date) : null
 
-              // (formValue.suggasted_re_sell_price_retail =
-              //   _model.price.suggasted_re_sell_price.retail),
-              // (formValue.suggasted_re_sell_price_wholesale =
-              //   _model.price.suggasted_re_sell_price.wholesale),
-              // (formValue.suggested_online_price_retail =
-              //   _model.price.suggested_online_price.retail),
-              // (formValue.suggested_online_price_wholesale =
-              //   _model.price.suggested_online_price.wholesale),
-              // (formValue.b2b_price_retail = _model.price.b2b_price.retail),
-              // (formValue.b2b_price_wholesale =
-              //   _model.price.b2b_price.wholesale),
-              // (formValue.credit_30_price_retail =
-              //   _model.price.credit_30_price.retail),
-              // (formValue.credit_30_price_wholesale =
-              //   _model.price.credit_30_price.wholesale),
-              // (formValue.credit_45_price_retail =
-              //   _model.price.credit_45_price.retail),
-              // (formValue.credit_45_price_wholesale =
-              //   _model.price.credit_45_price.wholesale),
-              // (formValue.start_date = _model.start_date
-              //   ? moment(_model.start_date)
-              //   : null),
-              // (formValue.end_date = _model.end_date
-              //   ? moment(_model.end_date)
-              //   : null);
+            // (formValue.suggasted_re_sell_price_retail =
+            //   _model.price.suggasted_re_sell_price.retail),
+            // (formValue.suggasted_re_sell_price_wholesale =
+            //   _model.price.suggasted_re_sell_price.wholesale),
+            // (formValue.suggested_online_price_retail =
+            //   _model.price.suggested_online_price.retail),
+            // (formValue.suggested_online_price_wholesale =
+            //   _model.price.suggested_online_price.wholesale),
+            // (formValue.b2b_price_retail = _model.price.b2b_price.retail),
+            // (formValue.b2b_price_wholesale =
+            //   _model.price.b2b_price.wholesale),
+            // (formValue.credit_30_price_retail =
+            //   _model.price.credit_30_price.retail),
+            // (formValue.credit_30_price_wholesale =
+            //   _model.price.credit_30_price.wholesale),
+            // (formValue.credit_45_price_retail =
+            //   _model.price.credit_45_price.retail),
+            // (formValue.credit_45_price_wholesale =
+            //   _model.price.credit_45_price.wholesale),
+            // (formValue.start_date = _model.start_date
+            //   ? moment(_model.start_date)
+            //   : null),
+            // (formValue.end_date = _model.end_date
+            //   ? moment(_model.end_date)
+            //   : null);
 
             // form.setFieldsValue(formValue)
             // console.log('formValue', formValue)
@@ -1974,6 +1974,27 @@ const ComponentsRoutesProducts = ({ title = null, callBack, listIndex }) => {
             switchTireStatus={switchTireStatus}
             checkedTireStatus={checkedTireStatus}
           />
+
+          <Form.Item name="suggasted_re_sell_price_retail" hidden />
+          <Form.Item name="standard_margin_retail_percent" hidden />
+          <Form.Item name="standard_margin_wholesale_percent" hidden />
+          <Form.Item name="suggasted_re_sell_price_wholesale" hidden />
+          <Form.Item name="standard_margin_retail_bath" hidden />
+          <Form.Item name="standard_margin_wholesale_bath" hidden />
+          <Form.Item name="price_arr" hidden />
+          <Form.Item name="price_dot_arr" hidden />
+          <Form.Item name="warehouse_id" hidden />
+          <Form.Item name="shelf_code" hidden />
+          <Form.Item name="purchase_unit" hidden />
+          <Form.Item name="sales_unit" hidden />
+          <Form.Item name="reorder_point" hidden />
+          <Form.Item name="over_qty_point" hidden />
+          <Form.Item name="wyz_code" hidden />
+          <Form.Item name="made_in" hidden />
+          <Form.Item name="tags" hidden />
+          <Form.Item name="ref_url" hidden />
+          <Form.Item name="note" hidden />
+          <Form.Item name="uom_arr" hidden />
         </Form>
       </ModalFullScreen>
 

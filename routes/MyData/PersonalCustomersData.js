@@ -1628,6 +1628,14 @@ const PersonalCustomersData = ({ title = null, callBack }) => {
                 },
               ]}
             />
+            <Form.Item name="credit_limit" hidden />
+            <Form.Item name="credit_term" hidden />
+
+            <Form.Item name="longitude" hidden />
+            <Form.Item name="latitude" hidden />
+            <Form.Item name="line_arr" hidden />
+            <Form.Item name="code_from_old_system" hidden />
+            <Form.Item name="other_member" hidden />
           </Form>
         </ModalFullScreen>
 

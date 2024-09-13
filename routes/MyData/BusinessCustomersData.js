@@ -55,7 +55,7 @@ const BusinessCustomersData = ({ title = null, callBack }) => {
     const [showModalSalesHistoryData, setShowModalSalesHistoryData] = useState(false);
     const { productBrand } = useSelector(({ master }) => master);
     const [isBusiness, setIsBusiness] = useState(false);
-
+    const [modelList, setModelList] = useState({})
 
     /**
     * ค่าเริ่มต้นของ
@@ -473,6 +473,8 @@ const BusinessCustomersData = ({ title = null, callBack }) => {
                     _model.upload_remove_list = []
                     _model.is_business = isPlainObject(_model.other_details) ? _model.other_details["is_business"] ?? null : null
 
+                    setModelList(_model.target)
+
                     if (isPlainObject(_model.other_details)) {
                         switch (_model.other_details["branch"]) {
                             case "office":
@@ -504,6 +506,9 @@ const BusinessCustomersData = ({ title = null, callBack }) => {
                         // await setMobileNo([..._model.mobile_no])
                     }
                     console.log("setModel", _model)
+
+
+
                     form.setFieldsValue(_model)
                 }
 
@@ -1156,7 +1161,35 @@ const BusinessCustomersData = ({ title = null, callBack }) => {
         return parts.join(".");
     }
 
+    const onChangeBrand = async (index_target, index_brand_data) => {
 
+        // console.log("index_target", index_target)
+        // console.log("index_brand_data", index_brand_data)
+        // console.log("form", form.getFieldValue())
+        const { target } = form.getFieldValue()
+        const { brand_id } = target[index_target].brand_data[index_brand_data]
+        const { data } = await API.get(`/productModelType/all?limit=999999&page=1&sort=model_name.th&order=asc&product_brand_id=${brand_id}`)
+        let newModel = []
+        if (data.status === "success") {
+            console.log("data.data", data.data.data)
+            if (isArray(data.data.data) && data.data.data.length > 0) {
+                data.data.data.map((e) => {
+                    newModel.push({
+                        id: e.id,
+                        model_name: e.model_name
+                    })
+                })
+            }
+            target[index_target].brand_data[index_brand_data].model_list = newModel
+            form.setFieldValue({
+                target
+            })
+
+            setModelList(target)
+        } else {
+            console.log("error", data)
+        }
+    }
     return (
         <>
 
@@ -1865,7 +1898,7 @@ const BusinessCustomersData = ({ title = null, callBack }) => {
                                     children:
                                         <Row>
                                             <Col span={24}>
-                                                <Fieldset legend={`ข้อมูลระบบ`} className={"fieldset-business-customer"}>
+                                                <Fieldset legend={`ข้อมูลเป้า`} className={"fieldset-business-customer"}>
                                                     <Form.List name="target">
                                                         {(fields, { add, remove }) => {
 
@@ -1877,7 +1910,7 @@ const BusinessCustomersData = ({ title = null, callBack }) => {
                                                                         flexDirection: 'column',
                                                                     }}
                                                                 >
-                                                                    {fields.map((field) => (
+                                                                    {fields.map((field, index_target) => (
 
                                                                         <Row key={field.key} style={{ display: 'flex', marginBottom: 8, alignContent: "center" }} align="baseline">
                                                                             <Col span={12}>
@@ -1892,7 +1925,7 @@ const BusinessCustomersData = ({ title = null, callBack }) => {
                                                                                             <Input />
                                                                                         </Form.Item>
                                                                                     </Col>
-                                                                                    <Col xs={24} md={8} xl={12}>
+                                                                                    {/* <Col xs={24} md={8} xl={12}>
                                                                                         <Form.Item label="ยี่ห้อ" name={[field.name, 'brand_id']} rules={[{ required: true, message: 'กรุณากรอกข้อมูล' }]}>
                                                                                             <Select
                                                                                                 disabled={configModal.mode == "view"}
@@ -1911,14 +1944,93 @@ const BusinessCustomersData = ({ title = null, callBack }) => {
                                                                                                 }
                                                                                             </Select>
                                                                                         </Form.Item>
-                                                                                    </Col>
-                                                                                    <Col xs={24} md={6} xl={12} >
+                                                                                    </Col> */}
+                                                                                    <Col xs={24} md={8} xl={12} >
                                                                                         <Form.Item label="ปี" name={[field.name, 'year']} rules={[{ required: true, message: 'กรุณากรอกข้อมูล' }, { min: 4, message: 'กรุณากรอกข้อมูลให้ถูกต้อง' }, { max: 4, message: 'กรุณากรอกข้อมูลให้ถูกต้อง' }]}>
                                                                                             <Input maxLength={4} placeholder={moment(Date.now()).format("YYYY")} />
                                                                                         </Form.Item>
                                                                                     </Col>
-                                                                                    <Col span={2} style={{ textAlign: "end" }}>
+                                                                                    <Col xs={24} md={8} xl={12} style={{ textAlign: "end" }}>
                                                                                         <Button onClick={() => remove(field.name)} type='danger'>ลบรายการ</Button>
+                                                                                    </Col>
+                                                                                    <Col span={24} >
+                                                                                        <Form.Item label="ยี่ห้อสินค้า">
+                                                                                            <Form.List name={[field.name, 'brand_data']}>
+                                                                                                {(subFields, subOpt) => (
+                                                                                                    <div
+                                                                                                        style={{
+                                                                                                            display: 'flex',
+                                                                                                            flexDirection: 'column',
+                                                                                                            rowGap: 16,
+                                                                                                        }}
+                                                                                                    >
+                                                                                                        {subFields.map((subField, index_brand_data) => (
+                                                                                                            <Row key={subField.key} gutter={8}>
+                                                                                                                <Col span={12}>
+                                                                                                                    <Form.Item label="ยี่ห้อ" name={[subField.name, 'brand_id']} rules={[{ required: true, message: 'กรุณากรอกข้อมูล' }]}>
+                                                                                                                        <Select
+                                                                                                                            disabled={configModal.mode == "view"}
+                                                                                                                            allowClear
+                                                                                                                            style={{ width: '100%' }}
+                                                                                                                            placeholder="เลือกข้อมูล"
+                                                                                                                            optionFilterProp='children'
+                                                                                                                            showSearch
+                                                                                                                            onChange={() => onChangeBrand(index_target, index_brand_data)}
+                                                                                                                        >
+                                                                                                                            {isArray(productBrand) && productBrand.length > 0 ? productBrand.map((e, index) => (
+                                                                                                                                <Select.Option value={e.id} key={index}>
+                                                                                                                                    {e.brand_name[locale.locale]}
+                                                                                                                                </Select.Option>
+                                                                                                                            ))
+                                                                                                                                : null
+                                                                                                                            }
+                                                                                                                        </Select>
+                                                                                                                    </Form.Item>
+                                                                                                                </Col>
+                                                                                                                <Col span={10}>
+                                                                                                                    <Form.Item label="รุ่น" name={[subField.name, 'model']} rules={[{ required: false, message: 'กรุณากรอกข้อมูล' }]} shouldUpdate>
+                                                                                                                        <Select
+                                                                                                                            disabled={configModal.mode == "view"}
+                                                                                                                            allowClear
+                                                                                                                            style={{ width: '100%' }}
+                                                                                                                            placeholder="เลือกข้อมูล"
+                                                                                                                            optionFilterProp='children'
+                                                                                                                            showSearch
+                                                                                                                            mode='multiple'
+                                                                                                                        >
+                                                                                                                            {isArray(modelList) && modelList.length > 0 ? modelList[index_target]?.brand_data[index_brand_data]?.model_list.map((e, index) => (
+                                                                                                                                <Select.Option value={e?.id} key={index}>
+                                                                                                                                    {e?.model_name[locale.locale]}
+                                                                                                                                </Select.Option>
+                                                                                                                            ))
+                                                                                                                                : null
+                                                                                                                            }
+                                                                                                                        </Select>
+                                                                                                                    </Form.Item>
+                                                                                                                </Col>
+                                                                                                                <Col span={2}>
+                                                                                                                    <Form.Item label="">
+                                                                                                                        <Button
+                                                                                                                            onClick={() => {
+                                                                                                                                subOpt.remove(subField.name);
+                                                                                                                            }}
+                                                                                                                            type='danger'
+                                                                                                                        >
+                                                                                                                            ลบ
+                                                                                                                        </Button>
+                                                                                                                    </Form.Item>
+                                                                                                                </Col>
+                                                                                                            </Row>
+                                                                                                        ))}
+                                                                                                        <Button type="dashed" onClick={() => subOpt.add({
+                                                                                                            model_list: []
+                                                                                                        })} block>
+                                                                                                            + เพิ่มรายการ
+                                                                                                        </Button>
+                                                                                                    </div>
+                                                                                                )}
+                                                                                            </Form.List>
+                                                                                        </Form.Item>
                                                                                     </Col>
                                                                                 </Row>
                                                                             </Col>
@@ -2069,15 +2181,21 @@ const BusinessCustomersData = ({ title = null, callBack }) => {
                                 }
                             ]}
                         />
-                        <Form.Item name="upload_shop_picture_list" hidden>
+                        <Form.Item name="credit_limit" hidden />
+                        <Form.Item name="credit_term" hidden />
 
-                        </Form.Item>
-                        <Form.Item name="upload_shop_document_list" hidden>
+                        <Form.Item name="longitude" hidden />
+                        <Form.Item name="latitude" hidden />
+                        <Form.Item name="line_arr" hidden />
+                        <Form.Item name="code_from_old_system" hidden />
+                        <Form.Item name="other_member" hidden />
 
-                        </Form.Item>
-                        <Form.Item name="upload_remove_list" hidden>
+                        <Form.Item name="target" hidden />
 
-                        </Form.Item>
+                        <Form.Item name="upload_shop_picture_list" hidden />
+                        <Form.Item name="upload_shop_document_list" hidden />
+                        <Form.Item name="upload_remove_list" hidden />
+
                     </Form>
                 </ModalFullScreen>
 

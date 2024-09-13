@@ -520,10 +520,14 @@ const SettingShop = () => {
                             },
                         ]}
                     />
-
-
-
-
+                    <Form.Item name="enable_ShopSalesTransaction_INV_doc_code" hidden />
+                    <Form.Item name="enable_ShopSalesTransaction_TRN_doc_code" hidden />
+                    <Form.Item name="separate_ShopInventoryTransaction_DocType_doc_code" hidden />
+                    <Form.Item name="separate_ShopSalesTransaction_DocType_doc_code" hidden />
+                    <Form.Item name="enable_ShopSalesTransaction_legacyStyle" hidden />
+                    <Form.Item name="enable_sale_cost_show" hidden />
+                    <Form.Item name="enable_sale_tax_type" hidden />
+                    <Form.Item name="enable_warehouse_cost_show" hidden />
                 </Form>
             </Modal>
             <style jsx global>
