@@ -70,6 +70,10 @@ const LineOATarget = () => {
       let line_data = cookies.get("line_data")
       let findUserBusiness = await getCustomerBusinessByLineUserId(line_data.uid)
       setCustomerTarget(findUserBusiness?.target)
+      if (findUserBusiness?.target.length === 1) {
+        form.setFieldsValue({ target_name: findUserBusiness?.target[0].name })
+      }
+
       let modelSearch = {
         filter_year: moment(Date.now()).format("YYYY"),
         bus_customer_id: findUserBusiness?.id
@@ -85,7 +89,7 @@ const LineOATarget = () => {
     const { data } = await API.get(`/shopBusinessCustomers/all?search=${line_user_id}&jsonField.other_details=line_arr`);
     return data.status == "success" ? data?.data?.data[0] : []
   }
-   
+
 
 
   const getDataSearch = async ({ search = modelSearch.search ?? "", limit = configTable.limit, page = configTable.page, sort = configSort.sort, order = (configSort.order === "descend" ? "desc" : "asc"), _status = modelSearch.status, bus_customer_id = modelSearch.bus_customer_id ?? "", filter_month = modelSearch.filter_month ?? "", filter_year = modelSearch.filter_year ?? "", product_brand_id = modelSearch.product_brand_id ?? "", product_model_id = modelSearch.product_model_id ?? "", }) => {
@@ -119,17 +123,22 @@ const LineOATarget = () => {
       title: 'เดือน',
       dataIndex: 'name',
       key: 'name',
-      render: (text) => <a>{text}</a>,
+      align: "center",
+      render: (text) => <div style={{ textAlign: "center" }}>{text}</div>,
     },
     {
       title: 'เป้า',
       dataIndex: 'target',
       key: 'target',
+      align: "center",
+      render: (text) => <div style={{ textAlign: "end" }}>{text}</div>,
     },
     {
       title: 'จำนวน',
       dataIndex: 'value',
       key: 'value',
+      align: "center",
+      render: (text) => <div style={{ textAlign: "end" }}>{text}</div>,
     },
   ]
 
@@ -210,7 +219,8 @@ const LineOATarget = () => {
 
   const handleChangeTarget = (value) => {
     try {
-
+      console.log("value", value)
+      getDataSearch({ search: value })
     } catch (error) {
       console.log("error", error)
       Modal.error({
@@ -250,6 +260,7 @@ const LineOATarget = () => {
                 placeholder="เลือกข้อมูล"
                 optionFilterProp='children'
                 showSearch
+                onSelect={(e) => handleChangeTarget(e)}
               >
                 {isArray(customerTarget) && customerTarget.length > 0 ? customerTarget.map((e, index) => (
                   <Select.Option value={e?.name} key={index}>

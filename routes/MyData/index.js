@@ -2,7 +2,7 @@ import MyShop from '../../components/Routes/Components.Routes.MyShop'
 import MyProfile from '../../components/Routes/Components.Routes.MyProfile'
 import MyOauth from '../../components/Routes/Components.Routes.MyOauth'
 import SettingShop from '../../components/Routes/Components.Routes.SettingShop'
-
+import { Row, Col } from "antd";
 import { useSelector } from 'react-redux';
 
 const MyData = () => {
@@ -17,14 +17,14 @@ const MyData = () => {
                     permission_obj.read ?
                         <div className="pt-3">
                             <div id="emp_profile" className="pro-overview tab-pane fade show active">
-                                <div className="row">
-                                    <div className="col-md-6 d-flex">
+                                <Row gutter={16}>
+                                    <Col span="12">
                                         <MyShop />
-                                    </div>
-                                    <div className="col-md-6 d-flex">
+                                    </Col>
+                                    <Col span="12">
                                         <SettingShop />
-                                    </div>
-                                </div>
+                                    </Col>
+                                </Row>
                             </div>
                         </div>
                         : null

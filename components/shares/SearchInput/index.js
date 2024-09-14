@@ -215,6 +215,22 @@ const SearchInputSharesComponents = ({ className, configSearch = { col: 3, searc
                         </Col>
                     </>
                 )
+            case "monthyearpicker":
+                return <Col md={isUndefined(item.col_md) ? configSearch.col ?? 24 : item.col_md} span={24} key={`input-${key}`}>
+                    <Form.Item label={item.label} name={item.name} key={`select-${key}`} rules={item.rules}>
+                        <DatePicker
+                            picker="month"
+                            style={{ width: "100%" }}
+                            disabled={item.disabled}
+                            placeholder={item.placeholder}
+                            onChange={search}
+                            allowClear={item.allowClear !== null ? item.allowClear : false}
+                            showSearch={item.showSearch !== null ? item.showSearch : false}
+                            optionFilterProp="children"
+                            format={"MM/YYYY"}
+                        />
+                    </Form.Item>
+                </Col>
             default: return null;
         }
     }
