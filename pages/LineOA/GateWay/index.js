@@ -144,7 +144,7 @@ const GateWay = () => {
                       customer_type: findUser.data[0].bus_type_id ? "business" : "personal",
                       is_use_coupon_michelin_500: findUser.data[0].other_details.is_use_coupon_michelin_500 ?? false,
                       shop_name,
-                      tags: findUser.data[0].tags ?? []
+                      tags: findUser.data[0].tags ?? [],
                     }
                     cookies.set("user_data", userData, { path: "/" });
 
@@ -173,6 +173,9 @@ const GateWay = () => {
                       }
                       if (redirect_uri === "Holiday") {
                         router.push(`/LineOA/Holiday`, undefined, { shallow: true })
+                      }
+                      if (redirect_uri === "Target") {
+                        router.push(`/LineOA/Target`, undefined, { shallow: true })
                       }
                     }
                   }

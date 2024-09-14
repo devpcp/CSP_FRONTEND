@@ -20,48 +20,53 @@ const LineOARegister = () => {
 
 
   const onFinish = async (values) => {
-    console.log(values)
-    let line_data = cookies.get("line_data")
-    dataForRegister.other_details.line_arr.map((e) => {
-      if (e.line_mobile_number === values.line_mobile_number) {
-        e.line_mobile_number = values.line_mobile_number
-        e.line_user_id = line_data.uid
-        e.line_register_date = moment(new Date()).format("YYYY-MM-DD HH:mm:ss")
-        e.line_data = line_data
-      }
-    })
-
-
-    const _model = { other_details: dataForRegister.other_details }
-    console.log("_model", _model)
-    let apiUrl = dataForRegister.bus_type_id ? "shopBusinessCustomers" : "shopPersonalCustomers"
-    let res
-    res = await API.put(`/${apiUrl}/put/${dataForRegister.id}`, _model)
-
-    if (res.data.status == "success") {
-      Modal.success({
-        title: 'ลงทะเบียนสำเร็จ',
-        centered: true,
-        footer: null,
-        closable: false,
-        okText: "ตกลง",
-        onOk: () => {
-          if (redirect_page === "InventoryBalance") {
-            router.push(`/LineOA/InventoryBalance`, undefined, { shallow: true })
-          }
-          if (redirect_page === "ShopWholeSaleDoc") {
-            router.push(`/LineOA/ShopWholeSaleDoc`, undefined, { shallow: true })
-          }
+    try {
+      console.log(values)
+      let line_data = cookies.get("line_data")
+      dataForRegister.other_details.line_arr.map((e) => {
+        if (e.line_mobile_number === values.line_mobile_number) {
+          e.line_mobile_number = values.line_mobile_number
+          e.line_user_id = line_data.uid
+          e.line_register_date = moment(new Date()).format("YYYY-MM-DD HH:mm:ss")
+          e.line_data = line_data
         }
-      });
+      })
 
-    } else {
-      Modal.error({
-        title: 'เกิดข้อผิดพลาด',
-        centered: true,
-        footer: null,
-      });
+
+      const _model = { other_details: dataForRegister.other_details }
+      console.log("_model", _model)
+      let apiUrl = dataForRegister.bus_type_id ? "shopBusinessCustomers" : "shopPersonalCustomers"
+      let res
+      res = await API.put(`/${apiUrl}/put/${dataForRegister.id}`, _model)
+
+      if (res.data.status == "success") {
+        Modal.success({
+          title: 'ลงทะเบียนสำเร็จ',
+          centered: true,
+          footer: null,
+          closable: false,
+          okText: "ตกลง",
+          onOk: () => {
+            if (redirect_page === "InventoryBalance") {
+              router.push(`/LineOA/InventoryBalance`, undefined, { shallow: true })
+            }
+            if (redirect_page === "ShopWholeSaleDoc") {
+              router.push(`/LineOA/ShopWholeSaleDoc`, undefined, { shallow: true })
+            }
+          }
+        });
+
+      } else {
+        Modal.error({
+          title: 'เกิดข้อผิดพลาด',
+          centered: true,
+          footer: null,
+        });
+      }
+    } catch (error) {
+      console.log("error", error)
     }
+
   };
 
   const onFinishFailed = (errorInfo) => {

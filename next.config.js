@@ -97,6 +97,8 @@ module.exports = {
       '/Reports/ReportReceiveTranferInventoryDoc': { page: '/Reports/ReportReceiveTranferInventoryDoc' },
       '/Reports/ReportReturnProduct': { page: '/Reports/ReportReturnProduct' },
       '/Reports/ReportTranferInventory': { page: '/Reports/ReportTranferInventory' },
+      '/Reports/ReportFinance': { page: '/Reports/ReportFinance' },
+      '/Reports/ReportTarget': { page: '/Reports/ReportTarget' },
 
       '/401': { page: '/401' },
       '/Dashboard': { page: '/Dashboard' },
