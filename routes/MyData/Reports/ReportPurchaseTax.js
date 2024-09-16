@@ -155,12 +155,12 @@ const ReportPurchaseTax = () => {
                 align: "center",
                 render: (text, record) => {
                     if (text) {
-                        if(record.status === 0 || record.code_id.search("PCN") !== -1){
+                        if (record.status === 0 || record.code_id.search("PCN") !== -1) {
                             return <div style={{ textAlign: "end" }}>-{(+text).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
-                        }else{
+                        } else {
                             return <div style={{ textAlign: "end" }}>{(+text).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
                         }
-                    }else{
+                    } else {
                         return "-"
                     }
                 }
@@ -173,12 +173,12 @@ const ReportPurchaseTax = () => {
                 align: "center",
                 render: (text, record) => {
                     if (text) {
-                        if(record.status === 0 || record.code_id.search("PCN") !== -1){
+                        if (record.status === 0 || record.code_id.search("PCN") !== -1) {
                             return <div style={{ textAlign: "end" }}>-{(+text).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
-                        }else{
+                        } else {
                             return <div style={{ textAlign: "end" }}>{(+text).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
                         }
-                    }else{
+                    } else {
                         return "-"
                     }
                 }
@@ -191,12 +191,12 @@ const ReportPurchaseTax = () => {
                 align: "center",
                 render: (text, record) => {
                     if (text) {
-                        if(record.status === 0 || record.code_id.search("PCN") !== -1){
+                        if (record.status === 0 || record.code_id.search("PCN") !== -1) {
                             return <div style={{ textAlign: "end" }}>-{(+text).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
-                        }else{
+                        } else {
                             return <div style={{ textAlign: "end" }}>{(+text).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
                         }
-                    }else{
+                    } else {
                         return "-"
                     }
                 }
@@ -254,7 +254,7 @@ const ReportPurchaseTax = () => {
 
 
     /* ค้นหา */
-    const getDataSearch = async ({ search = modelSearch.search ?? "", limit = configTable.limit, page = configTable.page, sort = configSort.sort, order = (configSort.order === "descend" ? "desc" : "asc"), doc_date = modelSearch.doc_date, select_shop_ids = modelSearch.select_shop_ids ?? [], filter_zero = modelSearch.filter_zero ?? false }) => {
+    const getDataSearch = async ({ search = modelSearch.search ?? "", limit = configTable.limit, page = configTable.page, sort = configSort.sort, order = (configSort.order === "descend" ? "desc" : "asc"), doc_date = modelSearch.doc_date, select_shop_ids = modelSearch.select_shop_ids ?? [], filter_zero = modelSearch.filter_zero ?? false, tax_period = modelSearch.tax_period ?? "" }) => {
         try {
             if (page === 1) setLoading(true)
 
@@ -293,7 +293,7 @@ const ReportPurchaseTax = () => {
                 filter_zero: filter_zero
             })
 
-            let url = `/shopReports/salesTax?bolFilter_show_zero_vat=${filter_zero}&report_tax_type=purchase_tax&arrStrFilter__status=0,1,2,3,4&arrStrFilter__payment_paid_status=${paymentStatusValue}&limit=${limit}&page=${page}&sort=${sort}&order=${order}&search=${search}${doc_date_startDate !== "" ? `&doc_date_startDate=${doc_date_startDate}` : ""}${doc_date_endDate !== "" ? `&doc_date_endDate=${doc_date_endDate}` : ""}${select_shop_ids !== "" ? `&select_shop_ids=${select_shop_ids}` : ""}`
+            let url = `/shopReports/salesTax?bolFilter_show_zero_vat=${filter_zero}&report_tax_type=purchase_tax&arrStrFilter__status=0,1,2,3,4&arrStrFilter__payment_paid_status=${paymentStatusValue}&limit=${limit}&page=${page}&sort=${sort}&order=${order}&search=${search}${doc_date_startDate !== "" ? `&doc_date_startDate=${doc_date_startDate}` : ""}${doc_date_endDate !== "" ? `&doc_date_endDate=${doc_date_endDate}` : ""}${select_shop_ids !== "" ? `&select_shop_ids=${select_shop_ids}` : ""}${tax_period !== "" ? `&tax_period=${tax_period}` : ""}`
             const res = await API.get(url)
             if (res.data.status === "success") {
                 const { totalCount, data } = res.data.data;
@@ -365,7 +365,8 @@ const ReportPurchaseTax = () => {
                 page: init.configTable.page,
                 doc_date: value.doc_date,
                 select_shop_ids: value.select_shop_ids,
-                filter_zero: value.filter_zero
+                filter_zero: value.filter_zero,
+                tax_period: moment(value.tax_period).format("YYYY-MM")
             })
         } catch (error) {
 
@@ -499,6 +500,14 @@ const ReportPurchaseTax = () => {
                         key: e?.shop_name?.shop_local_name === undefined || e?.shop_name?.shop_local_name === null || e?.shop_name?.shop_local_name === "" ? e?.shop_name?.[`${locale.locale}`] : e?.shop_name?.shop_local_name,
                         value: e?.id
                     })) : []],
+            },
+            {
+                index: 1,
+                type: "monthyearpicker",
+                name: "tax_period",
+                label: GetIntlMessages("งวดภาษี"),
+                allowClear: true,
+                placeholder:"เลือกข้อมูล"
             },
         ],
         col: 8,

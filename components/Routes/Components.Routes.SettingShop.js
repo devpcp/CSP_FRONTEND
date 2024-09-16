@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Form, Input, Select, Button, Modal, Image, Switch, Col, Row, Tabs } from 'antd';
+import { Form, Input, Select, Button, Modal, Image, Switch, Col, Row, Tabs, TimePicker, Radio, DatePicker } from 'antd';
 import API from '../../util/Api'
 import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
 import Swal from "sweetalert2";
@@ -13,6 +13,7 @@ import FormProvinceDistrictSubdistrict from '../shares/FormProvinceDistrictSubdi
 import ImageSingleShares from '../shares/FormUpload/ImageSingle';
 import { CheckImage, UploadImageSingle } from '../shares/FormUpload/API';
 import { Label } from 'reactstrap';
+import moment from 'moment'
 
 const SettingShop = () => {
     const [form] = Form.useForm();
@@ -35,6 +36,9 @@ const SettingShop = () => {
         separate_ShopInventoryTransaction_DocType_doc_code: false,
         separate_ShopSalesTransaction_DocType_doc_code: false
     }])
+    const [businessHours, setBusinessHours] = useState([]);
+
+    const { RangePicker } = DatePicker;
 
     useEffect(() => {
         getSettingShop()
@@ -59,6 +63,43 @@ const SettingShop = () => {
                         if (data.status === "success") {
                             setIsShow(true)
                             const _model = data.data
+                            let business_hours = [
+                                {
+                                    order: 1,
+                                    day: "อาทิตย์",
+                                    is_open: true,
+                                },
+                                {
+                                    order: 2,
+                                    day: "จันทร์",
+                                    is_open: true,
+                                },
+                                {
+                                    order: 3,
+                                    day: "อังคาร",
+                                    is_open: true,
+                                },
+                                {
+                                    order: 4,
+                                    day: "พุธ",
+                                    is_open: true,
+                                },
+                                {
+                                    order: 5,
+                                    day: "พฤหัสบดี",
+                                    is_open: true,
+                                },
+                                {
+                                    order: 6,
+                                    day: "ศุกร์",
+                                    is_open: true,
+                                },
+                                {
+                                    order: 7,
+                                    day: "เสาร์",
+                                    is_open: true,
+                                },
+                            ]
 
                             if (isPlainObject(_model.shop_config)) {
                                 _model.enable_ShopSalesTransaction_INV_doc_code = _model.shop_config.enable_ShopSalesTransaction_INV_doc_code
@@ -70,9 +111,30 @@ const SettingShop = () => {
                                 _model.enable_sale_warehouse_show = _model.shop_config.enable_sale_warehouse_show
                                 _model.enable_warehouse_cost_show = _model.shop_config.enable_warehouse_cost_show
                                 _model.enable_sale_tax_type = _model.shop_config.enable_sale_tax_type
+                                _model.business_hours = _model.shop_config.business_hours ?? business_hours
+                                _model.holidays = _model.shop_config.holidays
+                            }
+                            try {
+                                _model.business_hours.map((e) => {
+                                    e.open_time = e.open_time ? moment(e.open_time) : null
+                                    e.close_time = e.close_time ? moment(e.close_time) : null
+                                })
+                                console.log("business_hours", _model.business_hours)
+                            } catch (error) {
+                                console.log("error", error)
                             }
 
+                            try {
+                                _model.holidays.map((e) => {
+                                    console.log("eeee", e)
+                                    e.range_date = e.range_date ? [moment(e.range_date[0]), moment(e.range_date[1])] : null
+                                })
+                                console.log("holidays", _model.holidays)
+                            } catch (error) {
+                                console.log("error", error)
+                            }
 
+                            setBusinessHours(_model.business_hours)
 
                             form.setFieldsValue(_model)
                             setMyDealers(_model)
@@ -128,7 +190,9 @@ const SettingShop = () => {
                     enable_sale_cost_show: value.enable_sale_cost_show,
                     enable_sale_warehouse_show: value.enable_sale_warehouse_show,
                     enable_warehouse_cost_show: value.enable_warehouse_cost_show,
-                    enable_sale_tax_type: value.enable_sale_tax_type
+                    enable_sale_tax_type: value.enable_sale_tax_type,
+                    business_hours: value.business_hours,
+                    holidays: value.holidays,
                 }
             }
 
@@ -245,6 +309,16 @@ const SettingShop = () => {
         setIsModalVisible(false);
     };
 
+
+    const onChangeIsOpen = async (index_business_hours) => {
+        const { business_hours } = form.getFieldValue()
+        if (!business_hours[index_business_hours].is_open) {
+            business_hours[index_business_hours].open_time = null
+            business_hours[index_business_hours].close_time = null/*  */
+        }
+        setBusinessHours(business_hours)
+    }
+
     return (
         <>
 
@@ -319,8 +393,8 @@ const SettingShop = () => {
                     onFinish={onFinish}
                     onFinishFailed={onFinishFailed}
                     style={{ padding: 20 }}
-                    labelCol={{ span: 20 }}
-                    wrapperCol={{ span: 4 }}
+                // labelCol={{ span: 20 }}
+                // wrapperCol={{ span: 4 }}
                 >
                     <Tabs
                         defaultActiveKey="1"
@@ -330,7 +404,7 @@ const SettingShop = () => {
                                 key: '1',
                                 children:
                                     <Row>
-                                        <Col md={12} xs={24}>
+                                        <Col span={24}>
                                             <Row>
                                                 <Col span={20}>
                                                     เปิดใช้งานเลขที่เอกสารใบเสร็จรับเงิน/ใบกำกับภาษี
@@ -427,7 +501,7 @@ const SettingShop = () => {
                                                 </Col>
                                             </Row>
                                         </Col>
-                                        <Col md={12} xs={24}></Col>
+                                        {/* <Col md={12} xs={24}></Col> */}
                                     </Row>
                                 ,
                             },
@@ -518,6 +592,156 @@ const SettingShop = () => {
                                         </Col>
                                     </Row>,
                             },
+                            {
+                                label: `เวลาทำการ`,
+                                key: '4',
+                                children:
+                                    <Row>
+                                        <Col span={24}>
+                                            <Form.List name="business_hours" >
+                                                {(fields, { add, remove }) => (
+                                                    <>
+                                                        {fields.map(({ key, name, }) => (
+                                                            <Row
+                                                                key={key}
+                                                                gutter={8}
+                                                            >
+                                                                <Form.Item name={"order"} hidden />
+                                                                <Col span={6}>
+                                                                    <Form.Item
+
+                                                                        name={[name, 'day']}
+                                                                        rules={[
+                                                                            {
+                                                                                required: true,
+                                                                                message: 'วัน',
+                                                                            },
+                                                                        ]}
+                                                                    >
+                                                                        <Input placeholder="วัน" style={{ width: "100%" }} disabled />
+                                                                    </Form.Item>
+                                                                </Col>
+                                                                <Col span={6}>
+                                                                    <Form.Item
+                                                                        name={[name, 'is_open']}
+                                                                        rules={[
+                                                                            {
+                                                                                required: true,
+                                                                                message: 'กรุณากรอกข้อมูล',
+                                                                            },
+                                                                        ]}
+                                                                    >
+                                                                        <Select
+                                                                            onChange={() => { onChangeIsOpen(key) }}
+                                                                            style={{ width: "100%" }}
+                                                                            options={[
+                                                                                { label: 'เปิด', value: true },
+                                                                                { label: 'ปิด', value: false },
+                                                                            ]}
+                                                                        />
+                                                                    </Form.Item>
+                                                                </Col>
+                                                                <Col span={6}>
+                                                                    <Form.Item
+                                                                        name={[name, 'open_time']}
+                                                                        rules={[
+                                                                            {
+                                                                                required: businessHours[key]?.is_open,
+                                                                                message: 'กรุณากรอกข้อมูล',
+                                                                            },
+                                                                        ]}
+                                                                    >
+                                                                        <TimePicker placeholder="เวลาเปิด" style={{ width: "100%" }} disabled={!businessHours[key]?.is_open} />
+                                                                    </Form.Item>
+                                                                </Col>
+                                                                <Col span={6}>
+                                                                    <Form.Item
+                                                                        name={[name, 'close_time']}
+                                                                        rules={[
+                                                                            {
+                                                                                required: businessHours[key]?.is_open,
+                                                                                message: 'กรุณากรอกข้อมูล',
+                                                                            },
+                                                                        ]}
+                                                                    >
+                                                                        <TimePicker placeh older="เวลาปิด" style={{ width: "100%" }} disabled={!businessHours[key]?.is_open} />
+                                                                    </Form.Item>
+                                                                </Col>
+                                                                {/* <MinusCircleOutlined onClick={() => remove(name)} /> */}
+                                                            </Row>
+                                                        ))}
+                                                        {/* <Form.Item>
+                                                            <Button type="dashed" onClick={() => add()} block icon={<PlusOutlined />}>
+                                                                Add field
+                                                            </Button>
+                                                        </Form.Item> */}
+                                                    </>
+                                                )}
+                                            </Form.List>
+                                        </Col>
+                                    </Row>,
+                            },
+                            {
+                                label: `วันหยุดพิเศษ`,
+                                key: '5',
+                                children:
+                                    <Row>
+                                        <Col span={24}>
+                                            <Form.List name="holidays" labelCol={0} wrapperCol={0}>
+                                                {(fields, { add, remove }) => (
+                                                    <>
+                                                        {fields.map(({ key, name, }) => (
+                                                            <Row
+                                                                key={key}
+                                                                gutter={8}
+                                                            >
+                                                                <Col span={2}>
+                                                                    <Form.Item name={[name, 'order']} >
+                                                                        <Input placeholder='ลำดับ' />
+                                                                    </Form.Item>
+                                                                </Col>
+                                                                <Col span={12}>
+                                                                    <Form.Item
+                                                                        name={[name, 'day']}
+                                                                        rules={[
+                                                                            {
+                                                                                required: true,
+                                                                                message: 'วัน',
+                                                                            },
+                                                                        ]}
+                                                                    >
+                                                                        <Input placeholder="วัน" style={{ width: "100%" }} />
+                                                                    </Form.Item>
+                                                                </Col>
+                                                                <Col span={8}>
+                                                                    <Form.Item
+                                                                        name={[name, 'range_date']}
+                                                                        rules={[
+                                                                            {
+                                                                                required: true,
+                                                                                message: 'กรุณากรอกข้อมูล',
+                                                                            },
+                                                                        ]}
+                                                                    >
+                                                                        <RangePicker style={{ width: "100%" }} format={"DD/MM/YYYY"} />
+                                                                    </Form.Item>
+                                                                </Col>
+                                                                <Col span={2}>
+                                                                    <Button onClick={() => remove(name)} type='danger' style={{ width: "100%" }}>ลบ</Button>
+                                                                </Col>
+                                                            </Row>
+                                                        ))}
+                                                        <Form.Item>
+                                                            <Button type="dashed" onClick={() => add({ order: fields.length + 1, })} block icon={<PlusOutlined />}>
+                                                                เพิ่มรายการ
+                                                            </Button>
+                                                        </Form.Item>
+                                                    </>
+                                                )}
+                                            </Form.List>
+                                        </Col>
+                                    </Row>,
+                            },
                         ]}
                     />
                     <Form.Item name="enable_ShopSalesTransaction_INV_doc_code" hidden />
@@ -528,6 +752,9 @@ const SettingShop = () => {
                     <Form.Item name="enable_sale_cost_show" hidden />
                     <Form.Item name="enable_sale_tax_type" hidden />
                     <Form.Item name="enable_warehouse_cost_show" hidden />
+                    <Form.Item name="business_hours" hidden />
+                    <Form.Item name="holidays" hidden />
+
                 </Form>
             </Modal>
             <style jsx global>
