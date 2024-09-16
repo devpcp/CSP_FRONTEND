@@ -50,8 +50,7 @@ const ReportTarget = () => {
             }
         },
         configSort: {
-            sort: `created_date`,
-            // sort: `created_date`,
+            sort: `doc_date`,
             order: "descend",
         },
         modelSearch: {
@@ -59,10 +58,7 @@ const ReportTarget = () => {
             status: "",
             documentdate: [],
             bus_customer_id: "",
-            filter_year: "",
-            filter_month: "",
-            product_brand_id: "",
-            product_model_id: "",
+            filter_year: moment(Date.now()).format("YYYY"),
         },
     }
 
@@ -90,100 +86,127 @@ const ReportTarget = () => {
                 },
             },
             {
-                title: 'ชื่อเป้า',
-                dataIndex: 'document_code_id',
-                key: 'document_code_id',
-                width: 150,
-                align: "center",
-            },
-            {
-                title: 'ยี่ห้อ',
-                dataIndex: 'document_date',
-                key: 'document_date',
-                width: 150,
-                align: "center",
-            },
-            {
-                title: 'รุ่น',
+                title: 'ชื่อลูกค้า',
                 dataIndex: 'customer_name',
                 key: 'customer_name',
                 width: 150,
                 align: "center",
             },
             {
+                title: 'ชื่อเป้า',
+                dataIndex: 'name',
+                key: 'name',
+                width: 150,
+                align: "center",
+            },
+            {
+                title: 'ยี่ห้อ',
+                dataIndex: 'brand_name',
+                key: 'brand_name',
+                width: 150,
+                align: "center",
+                render: (text, record, index) => {
+                    return text ? text.toString() : ""
+                },
+            },
+            {
+                title: 'รุ่น',
+                dataIndex: 'model_name',
+                key: 'model_name',
+                width: 150,
+                align: "center",
+                render: (text, record, index) => {
+                    return text ? text.toString() : ""
+                },
+            },
+            {
                 title: 'ปี',
-                dataIndex: 'customer_vehicle_reg_plate',
-                key: 'customer_vehicle_reg_plate',
+                dataIndex: 'year',
+                key: 'year',
+                width: 150,
+                align: "center",
+            },
+            {
+                title: 'เป้าทั้งหมด',
+                dataIndex: 'target_total',
+                key: 'target_total',
+                width: 150,
+                align: "center",
+            },
+            {
+                title: 'ยอดขายทั้งหมด',
+                dataIndex: 'sale_total',
+                key: 'sale_total',
                 width: 150,
                 align: "center",
             },
             {
                 title: 'เป้า มกราคม',
-                dataIndex: 'customer_tel_no',
-                key: 'customer_tel_no',
+                dataIndex: 'target_1',
+                key: 'target_1',
                 width: 150,
                 align: "center",
             },
             {
                 title: 'ยอดขาย มกราคม',
-                dataIndex: 'product_code',
-                key: 'product_code',
+                dataIndex: 'sale_1',
+                key: 'sale_1',
                 width: 150,
                 align: "center",
             },
             {
                 title: 'เป้า กุมภาพันธ์',
-                dataIndex: 'customer_tel_no',
-                key: 'customer_tel_no',
+                dataIndex: 'target_2',
+                key: 'target_2',
                 width: 150,
                 align: "center",
             },
             {
                 title: 'ยอดขาย กุมภาพันธ์',
-                dataIndex: 'product_code',
-                key: 'product_code',
+                dataIndex: 'sale_2',
+                key: 'sale_2',
                 width: 150,
                 align: "center",
             },
             {
                 title: 'เป้า มีนาคม',
-                dataIndex: 'customer_tel_no',
-                key: 'customer_tel_no',
+                dataIndex: 'target_3',
+                key: 'target_3',
                 width: 150,
                 align: "center",
             },
             {
                 title: 'ยอดขาย มีนาคม',
-                dataIndex: 'product_code',
-                key: 'product_code',
+                dataIndex: 'sale_3',
+                key: 'sale_3',
                 width: 150,
                 align: "center",
             },
             {
                 title: 'เป้า เมษายน',
-                dataIndex: 'customer_tel_no',
-                key: 'customer_tel_no',
+                dataIndex: 'target_4',
+                key: 'target_4',
                 width: 150,
                 align: "center",
             },
             {
                 title: 'ยอดขาย เมษายน',
-                dataIndex: 'product_code',
-                key: 'product_code',
+                dataIndex: 'sale_4',
+                key: 'sale_4',
                 width: 150,
                 align: "center",
             },
             {
                 title: 'เป้า พฤษภาคม',
-                dataIndex: 'customer_tel_no',
-                key: 'customer_tel_no',
+                dataIndex: 'target_5',
+                key: 'target_5',
                 width: 150,
                 align: "center",
             },
             {
                 title: 'ยอดขาย พฤษภาคม',
-                dataIndex: 'product_code',
-                key: 'product_code',
+                dataIndex: 'sale_5',
+                key: 'sale_5',
                 width: 150,
                 align: "center",
             },
@@ -196,92 +219,92 @@ const ReportTarget = () => {
             },
             {
                 title: 'ยอดขาย มิถุนายน',
-                dataIndex: 'product_code',
-                key: 'product_code',
+                dataIndex: 'sale_6',
+                key: 'sale_6',
                 width: 150,
                 align: "center",
             },
             {
                 title: 'เป้า กรกฎาคม',
-                dataIndex: 'customer_tel_no',
-                key: 'customer_tel_no',
+                dataIndex: 'target_7',
+                key: 'target_7',
                 width: 150,
                 align: "center",
             },
             {
                 title: 'ยอดขาย กรกฎาคม',
-                dataIndex: 'product_code',
-                key: 'product_code',
+                dataIndex: 'sale_7',
+                key: 'sale_7',
                 width: 150,
                 align: "center",
             },
             {
                 title: 'เป้า สิงหาคม',
-                dataIndex: 'customer_tel_no',
-                key: 'customer_tel_no',
+                dataIndex: 'target_8',
+                key: 'target_8',
                 width: 150,
                 align: "center",
             },
             {
                 title: 'ยอดขาย สิงหาคม',
-                dataIndex: 'product_code',
-                key: 'product_code',
+                dataIndex: 'sale_8',
+                key: 'sale_8',
                 width: 150,
                 align: "center",
             },
             {
                 title: 'เป้า กันยายน',
-                dataIndex: 'customer_tel_no',
-                key: 'customer_tel_no',
+                dataIndex: 'target_9',
+                key: 'target_9',
                 width: 150,
                 align: "center",
             },
             {
                 title: 'ยอดขาย กันยายน',
-                dataIndex: 'product_code',
-                key: 'product_code',
+                dataIndex: 'sale_9',
+                key: 'sale_9',
                 width: 150,
                 align: "center",
             },
             {
                 title: 'เป้า ตุลาคม',
-                dataIndex: 'customer_tel_no',
-                key: 'customer_tel_no',
+                dataIndex: 'target_10',
+                key: 'target_10',
                 width: 150,
                 align: "center",
             },
             {
                 title: 'ยอดขาย ตุลาคม',
-                dataIndex: 'product_code',
-                key: 'product_code',
+                dataIndex: 'sale_10',
+                key: 'sale_10',
                 width: 150,
                 align: "center",
             },
             {
                 title: 'เป้า พฤศจิกายน',
-                dataIndex: 'customer_tel_no',
-                key: 'customer_tel_no',
+                dataIndex: 'target_11',
+                key: 'target_11',
                 width: 150,
                 align: "center",
             },
             {
                 title: 'ยอดขาย พฤศจิกายน',
-                dataIndex: 'product_code',
-                key: 'product_code',
+                dataIndex: 'sale_11',
+                key: 'sale_11',
                 width: 150,
                 align: "center",
             },
             {
                 title: 'เป้า ธันวาคม',
-                dataIndex: 'customer_tel_no',
-                key: 'customer_tel_no',
+                dataIndex: 'target_12',
+                key: 'target_12',
                 width: 150,
                 align: "center",
             },
             {
                 title: 'ยอดขาย ธันวาคม',
-                dataIndex: 'product_code',
-                key: 'product_code',
+                dataIndex: 'sale_12',
+                key: 'sale_12',
                 width: 150,
                 align: "center",
             },
@@ -305,6 +328,15 @@ const ReportTarget = () => {
             search: modelSearch.search,
             _status: modelSearch.status,
         })
+        const { data } = await API.get(`/shopProducts/filter/categories`)
+        if (isPlainObject(data) && !isEmpty(data)) {
+            const { productBrandLists, productModelLists } = data
+            setFilterProductBrands(() => productBrandLists)
+            setFilterProductModelTypes(() => productModelLists)
+        } else {
+            onReset()
+            Swal.fire('มีบางอย่างผิดพลาดกรุณาติดต่อเจ้าหน้าที่ !!', '', 'error')
+        }
     }, [])
 
     useEffect(() => {
@@ -318,7 +350,6 @@ const ReportTarget = () => {
     const getDataSearch = async ({ search = modelSearch.search ?? "", limit = configTable.limit, page = configTable.page, sort = configSort.sort, order = (configSort.order === "descend" ? "desc" : "asc"), _status = modelSearch.status, documentdate = modelSearch.documentdate, bus_customer_id = modelSearch.bus_customer_id ?? "", filter_month = modelSearch.filter_month ?? "", filter_year = modelSearch.filter_year ?? "", product_brand_id = modelSearch.product_brand_id ?? "", product_model_id = modelSearch.product_model_id ?? "", }) => {
         try {
             if (page === 1) setLoading(true)
-
             const dateFomat = "YYYY-MM-DD"
             let start_date = ""
             let end_date = ""
@@ -332,7 +363,7 @@ const ReportTarget = () => {
             setStartDate(() => start_date)
             setEndDate(() => end_date)
             // filter_shop_business_partner_ids
-            let url = `/shopLegacySalesOut/all?limit=${limit}&page=${page}&sort=${sort}&order=${order}&search=${search}${filter_year !== "" ? `&filter_year=${filter_year}` : ""}${filter_month !== "" ? `&filter_month=${filter_month}` : ""}${bus_customer_id !== "" ? `&bus_customer_id=${bus_customer_id}` : ""}${product_brand_id !== "" ? `&product_brand_id=${product_brand_id}` : ""}${product_model_id !== "" ? `&product_model_id=${product_model_id}` : ""}`
+            let url = `shopReports/customerTarget?limit=${limit}&page=${page}&sort=${sort}&order=${order}&search=${search}${filter_year !== "" ? `&year=${filter_year}` : ""}${filter_month !== "" && filter_month !== null ? `&month_arr=${filter_month}` : ""}${bus_customer_id !== "" ? `&bus_customer_id_arr=${bus_customer_id}` : ""}${product_brand_id !== null && product_brand_id !== "" ? `&product_brand_id=${product_brand_id}` : ""}${product_model_id !== null && product_model_id !== "" ? `&product_model_id=${product_model_id}` : ""}`
             const res = await API.get(url)
             if (res.data.status === "success") {
                 const { currentCount, currentPage, pages, totalCount, data } = res.data.data;
@@ -405,8 +436,8 @@ const ReportTarget = () => {
                 const { data } = await API.get(`/shopProducts/filter/categories?${product_brand_id ? `&product_brand_id=${product_brand_id}` : ""}${product_model_id ? `&product_model_id=${product_model_id}` : ""}`)
                 if (isPlainObject(data) && !isEmpty(data)) {
                     const { productBrandLists, productModelLists } = data
-                    if (productBrandLists?.length === 1) product_brand_id = productBrandLists?.[0]?.id ?? null
-                    if (productModelLists?.length === 1) product_model_id = productModelLists?.[0]?.id ?? null
+                    // if (productBrandLists?.length === 1) product_brand_id = productBrandLists?.[0]?.id ?? null
+                    // if (productModelLists?.length === 1) product_model_id = productModelLists?.[0]?.id ?? null
 
                     setFilterProductBrands(() => productBrandLists)
                     setFilterProductModelTypes(() => productModelLists)
@@ -415,19 +446,19 @@ const ReportTarget = () => {
                     Swal.fire('มีบางอย่างผิดพลาดกรุณาติดต่อเจ้าหน้าที่ !!', '', 'error')
                 }
             }
-            getDataSearch(
-                {
-                    search: value.search,
-                    _status: value.status,
-                    page: init.configTable.page,
-                    documentdate: value.documentdate,
-                    bus_customer_id: value.bus_customer_id,
-                    filter_month: value.filter_month,
-                    filter_year: value.filter_year,
-                    product_brand_id: product_brand_id ?? null,
-                    product_model_id: product_model_id ?? null,
-                }
-            )
+            let _model = {
+                search: value.search,
+                _status: value.status,
+                page: init.configTable.page,
+                documentdate: value.documentdate,
+                bus_customer_id: value.bus_customer_id,
+                filter_month: value.filter_month,
+                filter_year: value.filter_year,
+                product_brand_id: product_brand_id ?? null,
+                product_model_id: product_model_id ?? null,
+            }
+            setModelSearch(_model)
+            getDataSearch(_model)
         } catch (error) {
             console.log("error", error)
         }
@@ -453,6 +484,10 @@ const ReportTarget = () => {
             page: init.configTable.page,
             sort: init.configSort.sort,
             order: (init.configSort.order === "descend" ? "desc" : "asc"),
+            product_brand_id: null,
+            product_model_id: null,
+            filter_year: init.modelSearch.filter_year,
+            filter_month: null,
         })
     }
 
@@ -460,13 +495,6 @@ const ReportTarget = () => {
     const [startDate, setStartDate] = useState("")
     const [endDate, setEndDate] = useState("")
 
-    // const exportExcel = async () => {
-    //     setLoading(true)
-    //     const res = await API.get(`/shopLegacySalesOut/all?export_format=xlsx&start_date=${startDate}&end_date=${endDate}`)
-    //     if (res.data.status === "success") window.open(`${process.env.NEXT_PUBLIC_DIRECTORY}/assets/${res.data.data}`)
-    //     else message.warn('มีบางอย่างผิดพลาดกรุณาติดต่อเจ้าหน้าที่ !!');
-    //     setLoading(false)
-    // }
 
     const [loadingExport, setLoadingExport] = useState(false)
 
@@ -474,20 +502,17 @@ const ReportTarget = () => {
 
         try {
             setLoadingExport(true)
-            const { search } = modelSearch
-            const res = await API.get(`/shopLegacySalesOut/all?search=${search}${!!startDate ? `&start_date=${moment(startDate).format("YYYY-MM-DD")}` : ""}${!!endDate ? `&end_date=${moment(endDate).format("YYYY-MM-DD")}` : ""}&order=${configSort.order === "descend" ? "desc" : "asc"}&export_format=xlsx`)
+            const { search, bus_customer_id, _status, filter_month, filter_year, product_model_id, product_brand_id } = modelSearch
+            console.log("searc", modelSearch)
+            let url = `/shopReports/customerTarget?export_format=xlsx${_status ? `&status=${_status}` : ""}${search ? `&search=${search}` : ""}${bus_customer_id ? `&bus_customer_id=${bus_customer_id}` : ""}${filter_month ? `&filter_month=${filter_month}` : ""}${filter_year ? `&filter_year=${filter_year}` : ""}${product_brand_id !== "" ? `&product_brand_id=${product_brand_id}` : ""}${product_model_id !== "" ? `&product_model_id=${product_model_id}` : ""}`;
+            const res = await API.get(url)
             // &sort=${configSort.sort}
-            if (res.data.status === "success") window.open(`${process.env.NEXT_PUBLIC_DIRECTORY}${res.data.data.filePath}`)
+            if (res.data.status === "success") window.open(`${process.env.NEXT_PUBLIC_DIRECTORY}/assets/${res.data.data}`)
             else message.warn('มีบางอย่างผิดพลาดกรุณาติดต่อเจ้าหน้าที่ !!');
             setLoadingExport(false)
         } catch (error) {
             setLoadingExport(false)
         }
-    }
-
-    const onFinishExportFailed = async () => {
-        setLoadingExport(false)
-        message.warn('มีบางอย่างผิดพลาดกรุณาติดต่อเจ้าหน้าที่ !!');
     }
 
     /* end export excel */
@@ -503,84 +528,8 @@ const ReportTarget = () => {
         setIsModalImportVisible(true)
     }
 
-    const handleImportOk = async () => {
-        try {
-            if (fileImport) {
-                setLoading(true)
-                const formData = new FormData();
-                formData.append("file", fileImport.originFileObj);
-                // const userAuth = cookies.get("userAuth");
-                // console.log(authUser)
-                // const token = authUser.access_token
-                // const token = cookies.get("access_token");
-                // console.log("token",token)
-                const { data } = await axios({
-                    method: "post",
-                    url: `${process.env.NEXT_PUBLIC_SERVICE}/shopLegacySalesOut/addByFile`,
-                    config: { headers: { "Content-Type": "multipart/form-data" } },
-                    headers: { Authorization: "Bearer " + token },
-                    data: formData,
-                });
 
-                if (data.status == "success") {
-                    message.success("บันทึกสำเร็จ")
-                    setFileImportList([])
-                    setFileImport(null)
-                    setIsModalImportVisible(false)
-                    getDataSearch({
-                        page: configTable.page,
-                        search: modelSearch.search,
-                        _status: modelSearch.status,
-                    })
-                    setLoading(false)
-                } else {
-                    setLoading(true)
-                    message.error('มีบางอย่างผิดพลาด !!');
-                    setUrlImportErrorFile(process.env.NEXT_PUBLIC_DIRECTORY + data.data.filePath)
-                    setLoading(false)
-                }
 
-            } else {
-                message.warning("กรุณาเลือกไฟล์")
-            }
-        } catch (error) {
-            message.error("มีบางอย่างผิดพลาดกรุณาติดต่อเจ้าหน้าที่ !!!")
-        }
-    }
-
-    const handleImportCancel = () => {
-        setIsModalImportVisible(false)
-        setFileImportList([])
-        setFileImport(null)
-    }
-
-    const handleImportChange = (info) => {
-        setUrlImportErrorFile("")
-        let fileList = [...info.fileList];
-        // 1. Limit the number of uploaded files
-        // Only to show two recent uploaded files, and old ones will be replaced by the new
-        fileList = fileList.slice(-1);
-
-        if (fileList.length > 0) {
-            const infoFileList = fileList[0];
-            if (infoFileList.status === "done") {
-                fileList = fileList.map((file) => {
-                    if (file.response) {
-                        // console.log(`file`, file)
-                    }
-                    return file;
-                });
-            }
-        }
-
-        // console.log('fileList :>> ', fileList);
-        setFileImportList(fileList);
-        if (fileList.length > 0) setFileImport(fileList[0]);
-        else {
-            setFileImport(null);
-            // setFileType(null);
-        }
-    };
 
     /* end export excel */
 
@@ -589,10 +538,6 @@ const ReportTarget = () => {
         window.open('../../../templates/excel/CSP_Template_ข้อมูลการขายเก่า.xlsx', '_blank');
     }
 
-    /* Download File Error */
-    const downloadFileError = () => {
-        window.open(urlImportErrorFile, '_blank');
-    }
 
     /** 
     * ตั้งค่า Form ค้นหา 
@@ -626,29 +571,29 @@ const ReportTarget = () => {
                     { value: "2025", key: "2025" },
                 ],
             },
-            {
-                index: 1,
-                type: "select",
-                name: "filter_month",
-                mode: "multiple",
-                label: GetIntlMessages("เดือน"),
-                allowClear: true,
-                placeholder: "เลือกเดือน",
-                list: [
-                    { value: "1", key: "มกราคม" },
-                    { value: "2", key: "กุมภาพันธ์" },
-                    { value: "3", key: "มีนาคม" },
-                    { value: "4", key: "เมษายน" },
-                    { value: "5", key: "พฤษภาคม" },
-                    { value: "6", key: "มิถุนายน" },
-                    { value: "7", key: "กรกฎาคม" },
-                    { value: "8", key: "สิงหาคม" },
-                    { value: "9", key: "กันยายน" },
-                    { value: "10", key: "ตุลาคม" },
-                    { value: "11", key: "พฤศจิกายน" },
-                    { value: "12", key: "ธันวาคม" },
-                ],
-            },
+            // {
+            //     index: 1,
+            //     type: "select",
+            //     name: "filter_month",
+            //     mode: "multiple",
+            //     label: GetIntlMessages("เดือน"),
+            //     allowClear: true,
+            //     placeholder: "เลือกเดือน",
+            //     list: [
+            //         { value: "1", key: "มกราคม" },
+            //         { value: "2", key: "กุมภาพันธ์" },
+            //         { value: "3", key: "มีนาคม" },
+            //         { value: "4", key: "เมษายน" },
+            //         { value: "5", key: "พฤษภาคม" },
+            //         { value: "6", key: "มิถุนายน" },
+            //         { value: "7", key: "กรกฎาคม" },
+            //         { value: "8", key: "สิงหาคม" },
+            //         { value: "9", key: "กันยายน" },
+            //         { value: "10", key: "ตุลาคม" },
+            //         { value: "11", key: "พฤศจิกายน" },
+            //         { value: "12", key: "ธันวาคม" },
+            //     ],
+            // },
             {
                 index: 1,
                 type: "select",
@@ -663,7 +608,7 @@ const ReportTarget = () => {
                     value: e?.id
                 })) : [{
                     key: "ไม่พบข้อมูล",
-                    value: ""
+                    value: null
                 }],
             },
             {
@@ -680,15 +625,15 @@ const ReportTarget = () => {
                     value: e?.id
                 })) : [{
                     key: "ไม่พบข้อมูล",
-                    value: ""
+                    value: null
                 }],
             },
         ],
         col: 8,
         button: {
             create: false,
-            download: true,
-            import: true,
+            download: false,
+            import: false,
             export: true,
         },
         onFinishSearch,
@@ -699,73 +644,6 @@ const ReportTarget = () => {
         downloadTemplate,
     }
 
-    // const getBusinessPartner = async () => {
-    //     try {
-    //         const { data } = await API.get(`/shopBusinessPartners/all?limit=999999&page=1&sort=partner_name.th&order=desc&status=active`)
-    //         return data.status === "success" ? data.data.data : []
-    //     } catch (error) {
-
-    //     }
-    // }
-
-    const dummyRequest = ({ file, onSuccess }) => {
-        setTimeout(() => {
-            onSuccess("ok");
-        }, 0);
-    };
-
-    const handleOk = () => {
-        form.submit()
-    }
-
-    const handleCancel = () => {
-        form.resetFields()
-        setIsModalVisible(false)
-    }
-
-    const onFinish = async (value) => {
-        try {
-            const _model = {
-                customer_name: value.customer_name ?? null,
-                customer_tel_no: value.customer_tel_no ?? null,
-                customer_vehicle_reg_plate: value.customer_vehicle_reg_plate ?? null,
-                document_code_id: value.document_code_id ?? null,
-                document_date: moment(value.document_date).format("YYYY-MM-DD") ?? null,
-                price_grand_total: value.price_grand_total ?? null,
-                product_amount: value.product_amount ?? null,
-                product_code: value.product_code ?? null,
-                product_name: value.product_name ?? null
-            }
-            let res
-            if (configModal.mode === "add") {
-                // _model.master_customer_code_id = ""
-                res = await API.post(`/shopLegacySalesOut/add`, _model)
-            } else if (configModal.mode === "edit") {
-                // _model.status = checkedIsuse ? "active" : "block"
-                // res = await API.put(`/shopLegacySalesOut/put/${idEdit}`, _model)
-            }
-
-            if (res.data.status == "success") {
-                message.success('บันทึกสำเร็จ');
-                setIsModalVisible(false)
-                form.resetFields()
-                getDataSearch({
-                    page: configTable.page,
-                    search: modelSearch.search,
-                })
-            } else {
-                message.error('มีบางอย่างผิดพลาด !!');
-            }
-
-        } catch (error) {
-            message.error('มีบางอย่างผิดพลาด !!');
-            console.log('error :>> ', error);
-        }
-    }
-
-    const onFinishFailed = (error) => {
-        // message.warn('กรอกข้อมูลให้ครบถ้วน !!');
-    }
 
 
 
@@ -773,219 +651,6 @@ const ReportTarget = () => {
         <>
             <SearchInput configSearch={configSearch} configModal={configModal} loading={loading} onAdd={() => addEditViewModal('add')} value={modelSearch} />
             <TableList columns={columns} data={listSearchDataTable} loading={loading} configTable={configTable} callbackSearch={getDataSearch} addEditViewModal={addEditViewModal} changeStatus={changeStatus} />
-
-            <Modal
-                width={850}
-                maskClosable={false}
-                title={`นำเข้าข้อมูล`}
-                visible={isModalImportVisible} onOk={handleImportOk} onCancel={handleImportCancel}
-                okButtonProps={{ loading: loading }}
-                bodyStyle={{
-                    maxHeight: "80vh",
-                    overflowX: "auto",
-                }}
-            >
-                <Row style={{ textAlign: "center" }}>
-                    {/* <Col md={12} xs={24}>
-                        <div style={{ padding: "0 0 8px 0" }}>ดาวน์โหลด Template</div>
-
-                        <Button icon={<DownloadOutlined />} onClick={downloadTemplate}>Download</Button>
-                    </Col> */}
-                    <Col xs={24}>
-                        <div style={{ padding: "0 0 8px 0" }}>เลือกไฟล์</div>
-                        <Upload
-                            onChange={handleImportChange}
-                            customRequest={dummyRequest}
-                            fileList={fileImportList}
-                            multiple={false}
-                            accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
-                        >
-                            <Button icon={<UploadOutlined />}>Upload</Button>
-                        </Upload>
-                        <div
-                            hidden={urlImportErrorFile === ""}
-                            style={{
-                                padding: "16px 0px",
-                                margin: "16px 0 0 0",
-                                color: "red",
-                                border: "1px solid red",
-                                borderRadius: "10px"
-                            }}>
-                            <div style={{ padding: "0 0 8px 0" }} hidden={urlImportErrorFile === ""}>
-                                เกิดข้อผิดพลาด ดาวน์โหลดไฟล์เพื่อตรวจสอบ
-                            </div>
-                            <Button hidden={urlImportErrorFile === ""} icon={<DownloadOutlined />} onClick={downloadFileError}>Download</Button>
-                        </div>
-                    </Col>
-                    <Col md={12} xs={24}>
-
-                    </Col>
-                </Row>
-            </Modal >
-            <Modal
-                width={850}
-                maskClosable={false}
-                // style={{ top: 0 }}
-                title={`${configModal.mode == "view" ? "ดูข้อมูล" : configModal.mode == "edit" ? "แก้ไขข้อมูล" : "เพิ่มข้อมูล"}การนัดหมาย`}
-                visible={isModalVisible} onOk={handleOk} onCancel={handleCancel}
-                okButtonProps={{ disabled: configModal.mode == "view" }}
-                bodyStyle={{
-                    maxHeight: "80vh",
-                    overflowX: "auto",
-                }}
-            >
-                <Form
-                    form={form}
-                    labelCol={{ span: 24 }}
-                    wrapperCol={{ span: 20 }}
-                    layout="vertical"
-                    onFinish={onFinish}
-                    onFinishFailed={onFinishFailed}
-                    autoComplete='off'
-                >
-                    <Row>
-                        <Col md={12} xs={24}>
-                            <Form.Item
-                                name="document_code_id"
-                                label={GetIntlMessages(`เลขที่เอกสาร`)}
-                                rules={[
-                                    {
-                                        required: true,
-                                        message: GetIntlMessages(`กรุณากรอกข้อมูล`),
-                                    },
-                                ]}
-                            >
-                                <Input type={'text'} maxLength={100} disabled={configModal.mode == "view"} placeholder="กรอกข้อมูล" />
-                            </Form.Item>
-                        </Col>
-                        <Col md={12} xs={24}>
-                            <Form.Item
-                                name="document_date"
-                                label={GetIntlMessages(`เลขที่เอกสาร`)}
-                                rules={[
-                                    {
-                                        required: true,
-                                        message: GetIntlMessages(`กรุณากรอกข้อมูล`),
-                                    },
-                                ]}
-                            >
-                                <DatePicker style={{ width: "100%" }} disabled={configModal.mode == "view"} />
-                            </Form.Item>
-                        </Col>
-                        <Col md={12} xs={24}>
-                            <Form.Item
-                                name="customer_name"
-                                label={GetIntlMessages(`ชื่อลูกค้า`)}
-                                rules={[
-                                    {
-                                        required: true,
-                                        message: GetIntlMessages(`กรุณากรอกข้อมูล`),
-                                    },
-                                ]}
-                            >
-                                <Input type={'text'} maxLength={100} disabled={configModal.mode == "view"} placeholder="กรอกข้อมูล" />
-                            </Form.Item>
-                        </Col>
-                        <Col md={12} xs={24}>
-                            <Form.Item
-                                name="customer_vehicle_reg_plate"
-                                label={GetIntlMessages(`ทะเบียนรถ`)}
-                                rules={[
-                                    {
-                                        required: true,
-                                        message: GetIntlMessages(`กรุณากรอกข้อมูล`),
-                                    },
-                                ]}
-                            >
-                                <Input type={'text'} maxLength={100} disabled={configModal.mode == "view"} placeholder="ตัวอย่าง ทส-5123 กรุงเทพมหานคร" />
-                            </Form.Item>
-                        </Col>
-                        <Col md={12} xs={24}>
-                            <Form.Item
-                                name="customer_tel_no"
-                                label={GetIntlMessages(`เบอร์มือถือ`)}
-                                rules={[
-                                    {
-                                        required: true,
-                                        message: GetIntlMessages(`กรุณากรอกข้อมูล`),
-                                    },
-                                    {
-                                        min: 10,
-                                        message: GetIntlMessages("กรุณากรอกเบอร์โทรศัพท์อย่างน้อย 10 ตัว"),
-                                    },
-                                    {
-                                        pattern: new RegExp("^[0-9]*$"),
-                                        message: GetIntlMessages("กรุณากรอกช้อมูลให้ถูกต้อง"),
-                                    }
-                                ]}
-                            >
-                                <Input type={'text'} maxLength={10} disabled={configModal.mode == "view"} placeholder="กรอกข้อมูล" />
-                            </Form.Item>
-                        </Col>
-                        <Col md={12} xs={24}>
-                            <Form.Item
-                                name="product_code"
-                                label={GetIntlMessages(`รหัสสินค้า`)}
-                                rules={[
-                                    {
-                                        required: true,
-                                        message: GetIntlMessages(`กรุณากรอกข้อมูล`),
-                                    },
-                                ]}
-                            >
-                                <Input type={'text'} maxLength={100} disabled={configModal.mode == "view"} placeholder="กรอกข้อมูล" />
-                            </Form.Item>
-                        </Col>
-                        <Col md={12} xs={24}>
-                            <Form.Item
-                                name="product_name"
-                                label={GetIntlMessages(`ชื่อสินค้า`)}
-
-                                rules={[
-                                    {
-                                        required: true,
-                                        message: GetIntlMessages(`กรุณากรอกข้อมูล`),
-                                    },
-                                ]}
-                            >
-                                <Input type={'text'} maxLength={100} disabled={configModal.mode == "view"} placeholder="กรอกข้อมูล" />
-                            </Form.Item>
-                        </Col>
-                        <Col md={12} xs={24}>
-                            <Form.Item
-                                name="product_amount"
-                                label={GetIntlMessages(`จำนวนสินค้า`)}
-                                rules={[
-                                    {
-                                        required: true,
-                                        message: GetIntlMessages(`กรุณากรอกข้อมูล`),
-                                    },
-                                    {
-                                        pattern: new RegExp("^[0-9]*$"),
-                                        message: GetIntlMessages("กรุณากรอกช้อมูลให้ถูกต้อง"),
-                                    }
-                                ]}
-                            >
-                                <Input type={'text'} maxLength={100} disabled={configModal.mode == "view"} placeholder="กรอกข้อมูล" />
-                            </Form.Item>
-                        </Col>
-                        <Col md={12} xs={24}>
-                            <Form.Item
-                                name="price_grand_total"
-                                label={GetIntlMessages(`ยอดเงิน (รวม VAT)`)}
-                                rules={[
-                                    {
-                                        required: true,
-                                        message: GetIntlMessages(`กรุณากรอกข้อมูล`),
-                                    },
-                                ]}
-                            >
-                                <Input type={'text'} maxLength={100} disabled={configModal.mode == "view"} placeholder="กรอกข้อมูล" />
-                            </Form.Item>
-                        </Col>
-                    </Row>
-                </Form>
-            </Modal>
 
             <style jsx global>
                 {`

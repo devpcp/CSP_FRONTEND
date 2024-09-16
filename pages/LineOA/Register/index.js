@@ -53,6 +53,21 @@ const LineOARegister = () => {
             if (redirect_page === "ShopWholeSaleDoc") {
               router.push(`/LineOA/ShopWholeSaleDoc`, undefined, { shallow: true })
             }
+            if (redirect_page === "Promotion") {
+              router.push(`/LineOA/Promotion`, undefined, { shallow: true })
+            }
+            if (redirect_page === "TranferStatus") {
+              router.push(`/LineOA/TranferStatus`, undefined, { shallow: true })
+            }
+            if (redirect_page === "InventoryBalanceSTT") {
+              router.push(`/LineOA/InventoryBalanceSTT`, undefined, { shallow: true })
+            }
+            if (redirect_page === "Holiday") {
+              router.push(`/LineOA/Holiday`, undefined, { shallow: true })
+            }
+            if (redirect_page === "Target") {
+              router.push(`/LineOA/Target`, undefined, { shallow: true })
+            }
           }
         });
 
