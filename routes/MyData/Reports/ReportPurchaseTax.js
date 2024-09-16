@@ -57,7 +57,8 @@ const ReportPurchaseTax = () => {
             status: "default",
             doc_date: [],
             select_shop_ids: authUser.UsersProfile.ShopsProfile.id,
-            filter_zero: true
+            filter_zero: true,
+            tax_period: null
         },
     }
 
@@ -290,10 +291,11 @@ const ReportPurchaseTax = () => {
                 page: page,
                 doc_date: doc_date,
                 select_shop_ids: select_shop_ids,
-                filter_zero: filter_zero
+                filter_zero: filter_zero,
+                tax_period: tax_period ? moment(tax_period) : null
             })
 
-            let url = `/shopReports/salesTax?bolFilter_show_zero_vat=${filter_zero}&report_tax_type=purchase_tax&arrStrFilter__status=0,1,2,3,4&arrStrFilter__payment_paid_status=${paymentStatusValue}&limit=${limit}&page=${page}&sort=${sort}&order=${order}&search=${search}${doc_date_startDate !== "" ? `&doc_date_startDate=${doc_date_startDate}` : ""}${doc_date_endDate !== "" ? `&doc_date_endDate=${doc_date_endDate}` : ""}${select_shop_ids !== "" ? `&select_shop_ids=${select_shop_ids}` : ""}${tax_period !== "" ? `&tax_period=${tax_period}` : ""}`
+            let url = `/shopReports/salesTax?bolFilter_show_zero_vat=${filter_zero}&report_tax_type=purchase_tax&arrStrFilter__status=0,1,2,3,4&arrStrFilter__payment_paid_status=${paymentStatusValue}&limit=${limit}&page=${page}&sort=${sort}&order=${order}&search=${search}${doc_date_startDate !== "" ? `&doc_date_startDate=${doc_date_startDate}` : ""}${doc_date_endDate !== "" ? `&doc_date_endDate=${doc_date_endDate}` : ""}${select_shop_ids !== "" ? `&select_shop_ids=${select_shop_ids}` : ""}${tax_period !== "" || tax_period !== undefined || tax_period !== null ? `&tax_period=${tax_period}` : ""}`
             const res = await API.get(url)
             if (res.data.status === "success") {
                 const { totalCount, data } = res.data.data;
@@ -405,6 +407,7 @@ const ReportPurchaseTax = () => {
             let search = modelSearch.search
             let select_shop_ids = modelSearch.select_shop_ids
             let filter_zero = modelSearch.filter_zero
+            let tax_period =  moment(modelSearch.tax_period).format("YYYY-MM")
             const dateFomat = "YYYY-MM-DD"
             let doc_date_startDate = ""
             let doc_date_endDate = ""
@@ -420,12 +423,13 @@ const ReportPurchaseTax = () => {
                 return e.value;
             });
 
-            const res = await API.get(`/shopReports/salesTax?bolFilter_show_zero_vat=${filter_zero}&report_tax_type=purchase_tax&sort=doc_date&arrStrFilter__payment_paid_status=${paymentStatusValue}&limit=999999&page=1&search=${search}${doc_date_startDate !== "" ? `&doc_date_startDate=${doc_date_startDate}` : ""}${doc_date_endDate !== "" ? `&doc_date_endDate=${doc_date_endDate}` : ""}${select_shop_ids !== "" ? `&select_shop_ids=${select_shop_ids}` : ""}&export_format=xlsx`)
+            const res = await API.get(`/shopReports/salesTax?bolFilter_show_zero_vat=${filter_zero}&report_tax_type=purchase_tax&sort=doc_date&arrStrFilter__payment_paid_status=${paymentStatusValue}&limit=999999&page=1&search=${search}${doc_date_startDate !== "" ? `&doc_date_startDate=${doc_date_startDate}` : ""}${doc_date_endDate !== "" ? `&doc_date_endDate=${doc_date_endDate}` : ""}${select_shop_ids !== "" ? `&select_shop_ids=${select_shop_ids}` : ""}${tax_period !== "" || tax_period !== undefined || tax_period !== null ? `&tax_period=${tax_period}` : ""}&export_format=xlsx`)
 
             if (res.data.status === "success") window.open(`${process.env.NEXT_PUBLIC_DIRECTORY}/assets/${res.data.data}`)
             else message.warn('มีบางอย่างผิดพลาดกรุณาติดต่อเจ้าหน้าที่ !!');
             setLoadingExport(false)
         } catch (error) {
+            console.log("error", error)
             setLoadingExport(false)
         }
     }
@@ -507,7 +511,7 @@ const ReportPurchaseTax = () => {
                 name: "tax_period",
                 label: GetIntlMessages("งวดภาษี"),
                 allowClear: true,
-                placeholder:"เลือกข้อมูล"
+                placeholder: "เลือกข้อมูล"
             },
         ],
         col: 8,
