@@ -556,16 +556,26 @@ const BusinessCustomersData = ({ title = null, callBack }) => {
 
     const onFinish = async (value) => {
         try {
-
+            let new_model = []
             const { target } = value
             if (target) {
                 target.map((e) => {
+                    e.brand_data.map((eel) => {
+                        if (eel.model !== undefined) {
+                            eel.model.map((eeel) => {
+                                new_model.push(eel.model_list.find(x => x.id === eeel))
+                            })
+                            eel.model_list = new_model
+                        } else {
+                            eel.model_list = []
+                        }
+                    })
+
                     e.target_data.map((el) => {
                         el.year = e.year
                     })
                 })
             }
-
 
             let shopId = authUser?.UsersProfile?.shop_id
             let directory = "shopBusinessCustomer"
