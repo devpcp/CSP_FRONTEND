@@ -12,7 +12,7 @@ import _, { get, isArray, isFunction, isPlainObject } from 'lodash';
 import axios from 'axios';
 import { Label } from 'recharts';
 const { TabPane } = Tabs;
-const ReportShopLegacySalesOut = () => {
+const ReportFinance = () => {
     const [loading, setLoading] = useState(false);
 
     const [listSearchDataTable, setListSearchDataTable] = useState([])
@@ -47,7 +47,7 @@ const ReportShopLegacySalesOut = () => {
             }
         },
         configSort: {
-            sort: `created_date`,
+            sort: `doc_date`,
             // sort: `created_date`,
             order: "descend",
         },
@@ -85,17 +85,27 @@ const ReportShopLegacySalesOut = () => {
             },
             {
                 title: 'เลขที่เอกสาร',
-                dataIndex: 'document_code_id',
-                key: 'document_code_id',
+                dataIndex: 'ShopServiceOrderDoc',
+                key: 'ShopServiceOrderDoc',
                 width: 150,
                 align: "center",
+                render: (text, record, index) => {
+                    return get(text, "code_id", "-")
+                },
             },
             {
-                title: 'วันที่เอกสาร',
-                dataIndex: 'document_date',
-                key: 'document_date',
+                title: 'จำนวนเงิน',
+                dataIndex: 'payment_price_paid',
+                key: 'payment_price_paid',
                 width: 150,
                 align: "center",
+                render: (text, record) => {
+                    return (
+                        <>
+                            <span>{text ? Number(text).toLocaleString() : "0"} </span>
+                        </>
+                    )
+                },
             },
             // {
             //     title: 'ชื่อลูกค้า',
@@ -220,7 +230,7 @@ const ReportShopLegacySalesOut = () => {
             setStartDate(() => start_date)
             setEndDate(() => end_date)
             // filter_shop_business_partner_ids
-            let url = `/shopReports/partnerDebtDoc?limit=${limit}&page=${page}&sort=${sort}&order=${order}&search=${search}&filter_by=${filter_by}${start_date !== "" ? `&start_date=${start_date}` : ""}${end_date !== "" ? `&end_date=${end_date}` : ""}`
+            let url = `/shopReports/paymentTransaction?limit=${limit}&page=${page}&sort=${sort}&order=${order}&search=${search}&filter_by=${filter_by}${start_date !== "" ? `&start_date=${start_date}` : ""}${end_date !== "" ? `&end_date=${end_date}` : ""}`
             const res = await API.get(url)
             if (res.data.status === "success") {
                 const { currentCount, currentPage, pages, totalCount, data } = res.data.data;
@@ -285,49 +295,13 @@ const ReportShopLegacySalesOut = () => {
     /** กดปุ่มค้นหา */
     const onFinishSearch = (value) => {
         try {
-            let filter_by = []
-            if (isArray(value.filter_by) && value.filter_by.length === 0) value.filter_by = init.modelSearch.filter_by
-            setModelSearch((prevValue) => {
-                if (isArray(prevValue.filter_by)) {
-                    if (isArray(value.filter_by) && value.filter_by.length === 5) {
-                        filter_by = ["all"]
-                        return {
-                            ...prevValue,
-                            filter_by: ["all"],
-                        }
-                    } else {
-                        const find = prevValue.filter_by.find(where => where === "all")
-                        const filterByWithOutAll = value.filter_by.filter(where => where !== "all")
-                        if (find) {
-                            filter_by = filterByWithOutAll
-                            return {
-                                ...prevValue,
-                                filter_by: filterByWithOutAll
-                            }
-                        } else {
-                            const _find = value.filter_by.find(where => where === "all")
-                            if (_find) {
-                                filter_by = ["all"]
-                                return {
-                                    ...prevValue,
-                                    filter_by: ["all"],
-                                }
-                            } else {
-                                filter_by = filterByWithOutAll
-                                return {
-                                    ...prevValue,
-                                    filter_by: filterByWithOutAll,
-                                }
-                            }
-
-                        }
-                    }
-
+            getDataSearch(
+                {
+                    search: value.search,
                 }
-            })
-            getDataSearch({ search: value.search, _status: value.status, page: init.configTable.page, documentdate: value.documentdate, businessPartner: value.businessPartner ,filter_by})
+            )
         } catch (error) {
-
+            console.log("error", error)
         }
 
     }
@@ -354,7 +328,7 @@ const ReportShopLegacySalesOut = () => {
 
     // const exportExcel = async () => {
     //     setLoading(true)
-    //     const res = await API.get(`/shopLegacySalesOut/all?export_format=xlsx&start_date=${startDate}&end_date=${endDate}`)
+    //     const res = await API.get(`/shopReports/paymentTransaction?export_format=xlsx&start_date=${startDate}&end_date=${endDate}`)
     //     if (res.data.status === "success") window.open(`${process.env.NEXT_PUBLIC_DIRECTORY}/assets/${res.data.data}`)
     //     else message.warn('มีบางอย่างผิดพลาดกรุณาติดต่อเจ้าหน้าที่ !!');
     //     setLoading(false)
@@ -367,7 +341,7 @@ const ReportShopLegacySalesOut = () => {
         try {
             setLoadingExport(true)
             const { search } = modelSearch
-            const res = await API.get(`/shopLegacySalesOut/all?search=${search}${!!startDate ? `&start_date=${moment(startDate).format("YYYY-MM-DD")}` : ""}${!!endDate ? `&end_date=${moment(endDate).format("YYYY-MM-DD")}` : ""}&order=${configSort.order === "descend" ? "desc" : "asc"}&export_format=xlsx`)
+            const res = await API.get(`/shopReports/paymentTransaction?search=${search}${!!startDate ? `&start_date=${moment(startDate).format("YYYY-MM-DD")}` : ""}${!!endDate ? `&end_date=${moment(endDate).format("YYYY-MM-DD")}` : ""}&order=${configSort.order === "descend" ? "desc" : "asc"}&export_format=xlsx`)
             // &sort=${configSort.sort}
             if (res.data.status === "success") window.open(`${process.env.NEXT_PUBLIC_DIRECTORY}${res.data.data.filePath}`)
             else message.warn('มีบางอย่างผิดพลาดกรุณาติดต่อเจ้าหน้าที่ !!');
@@ -867,4 +841,4 @@ const ReportShopLegacySalesOut = () => {
     )
 }
 
-export default ReportShopLegacySalesOut
+export default ReportFinance

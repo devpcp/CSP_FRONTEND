@@ -36,6 +36,18 @@ const PaymentDocsV2 = ({ docId, title, loading, handleCancelTemDoc, initForm, ca
     const isPartialPaymentStatus = Form.useWatch("payment_method_list", { form, preserve: true })
 
     useEffect(() => {
+        try {
+            let payment_list = serviceOrderDocObj ? serviceOrderDocObj.ShopServiceOrderDoc.ShopPaymentTransactions : initForm.getFieldValue("ShopPaymentTransactions")
+            let total = serviceOrderDocObj ? serviceOrderDocObj.ShopServiceOrderDoc.price_grand_total : initForm.getFieldValue("price_grand_total")
+            let paid_list = 0
+            payment_list.map((e) => {
+                paid_list += +e.payment_price_paid
+            })
+            let price_balance = +total - +paid_list
+            form.setFieldsValue({ price_balance })
+        } catch (error) {
+            console.log("error", error)
+        }
         setTableColumns()
     }, [])
 
@@ -571,7 +583,7 @@ const PaymentDocsV2 = ({ docId, title, loading, handleCancelTemDoc, initForm, ca
     /* End Dropdown Cancel Payment Doc */
 
     const MatchRound = (value) => (Math.round(+value * 100) / 100).toFixed(2)
-    
+
     return (
         <>
             {fromTable !== true ?
@@ -693,6 +705,10 @@ const PaymentDocsV2 = ({ docId, title, loading, handleCancelTemDoc, initForm, ca
                                             <div className="invoices-totalprice pt-3 pb-2">
                                                 <div>ราคารวม</div>
                                                 <div>{getValue("price_sub_total", true)} บาท</div>
+                                            </div>
+                                            <div className="invoices-totalprice pt-3 pb-2" hidden={(serviceOrderDocObj ? serviceOrderDocObj.ShopServiceOrderDoc.payment_paid_status : initForm.getFieldValue("payment_paid_status")) !== 2}>
+                                                <div>ยอดคงเหลือ</div>
+                                                <div>{getValue("price_balance", true)} บาท</div>
                                             </div>
 
                                             <div className="invoices-price-paid">

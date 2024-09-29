@@ -927,6 +927,8 @@ const ShopTemporaryDeliveryOrderDocWholeSale = ({ docTypeId, title = null, callB
                 credit_limit: isPersonal ? (+value?.ShopPersonalCustomer?.other_details?.credit_limit).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) ?? null : (+value?.ShopBusinessCustomer?.other_details?.credit_limit).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) ?? null,
                 credit_term: isPersonal ? (+value?.ShopPersonalCustomer?.other_details?.credit_term).toLocaleString() ?? null : (+value?.ShopBusinessCustomer?.other_details?.credit_term).toLocaleString() ?? null,
 
+                payment_paid_status: value.ShopServiceOrderDoc.payment_paid_status,
+                ShopPaymentTransactions: value.ShopServiceOrderDoc.ShopPaymentTransactions ?? [],
             }
 
             if (isArray(filterPayment) && filterPayment.length > 0) {

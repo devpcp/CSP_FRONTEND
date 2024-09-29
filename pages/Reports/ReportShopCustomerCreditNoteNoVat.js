@@ -6,17 +6,16 @@ import Preloader from "../../components/_App/Preloader";
 import { Card } from 'antd';
 import GetHeadTitlePermission from "../../util/GetHeadTitlePermission";
 import { useSelector } from "react-redux";
-const ReportFinance = dynamic(() => import("../../routes/Reports/ReportFinance"), { loading: () => <Preloader /> });
+const ReportShopCustomerCreditNoteNoVat = dynamic(() => import("../../routes/Reports/ReportShopCustomerCreditNoteNoVat"), { loading: () => <Preloader /> });
 
 export default Page(() => (
-    
     <React.Fragment>
         <Head>
             <title>{GetHeadTitlePermission(useSelector)}</title>
         </Head>
         <React.Fragment>
             <Card className="mb-5">
-                <ReportFinance />
+                <ReportShopCustomerCreditNoteNoVat />
             </Card>
         </React.Fragment>
     </React.Fragment>

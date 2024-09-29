@@ -36,11 +36,18 @@ const PaymentDocsV2 = ({ docId, title, loading, handleCancelDebtDoc, initForm, c
     const isPartialPaymentStatus = Form.useWatch("payment_method_list", { form, preserve: true })
 
     useEffect(() => {
-        if (fromTable) {
-            console.log("debtDocObj", debtDocObj)
+        try {
+            let payment_list = debtDocObj ? debtDocObj.ShopPaymentTransactions : initForm.getFieldValue("ShopPaymentTransactions")
+            let total = debtDocObj ? debtDocObj.price_grand_total : initForm.getFieldValue("price_grand_total")
+            let paid_list = 0
+            payment_list.map((e) => {
+                paid_list += +e.payment_price_paid
+            })
+            let price_balance = +total - +paid_list 
+            form.setFieldsValue({ price_balance })
+        } catch (error) {
+            console.log("error", error)
         }
-        console.log("isPartialPaymentStatus", isPartialPaymentStatus)
-        console.log("initForm", initForm.getFieldValue("payment_paid_status"))
         setTableColumns()
     }, [])
 
@@ -55,45 +62,17 @@ const PaymentDocsV2 = ({ docId, title, loading, handleCancelDebtDoc, initForm, c
                     align: "center",
                     width: "2%",
                     render: (text, record, index) => {
-                        // index += ((configTable.page - 1) * configTable.limit)
                         return index + 1
                     },
                 },
                 {
-                    // title: () => GetIntlMessages(docTypeId == "67c45df3-4f84-45a8-8efc-de22fef31978" ? `เลขที่ใบสั่งขาย/ใบจองสินค้า` : "เลขที่ใบสั่งซ่อม"),
                     title: () => GetIntlMessages("เลขที่เอกสาร"),
                     dataIndex: '',
                     key: '',
                     width: "5%",
                     align: "center",
-                    // render: (text, record) =>  console.log('record :>> ', record)
                     render: (text, record) => get(record, `ShopServiceOrderDoc.code_id`, record?.code_id ?? record?.ShopCustomerDebtCreditNoteDoc?.code_id ?? record?.ShopCustomerDebtDebitNoteDoc?.code_id)
                 },
-                // {
-                //     title: () => GetIntlMessages("เลขที่ใบกำกับ(จากใบส่งของขั่วคราว)"),
-                //     dataIndex: 'ShopTemporaryDeliveryOrderDocs',
-                //     key: 'ShopTemporaryDeliveryOrderDocs',
-                //     width: "15%",
-                //     align: "center",
-                //     render: (text, record) => text?.find(where => where.status === 1)?.code_id ?? record.ShopTemporaryDeliveryOrderDoc.code_id ?? "-",
-                //     // render: (text, record) => console.log('record :>> ', record),
-                // },
-                // {
-                //     title: () => GetIntlMessages("วันที่"),
-                //     dataIndex: 'doc_date',
-                //     key: 'doc_date',
-                //     width: "5%",
-                //     align: "center",
-                //     // render: (text, record) => text ? moment(text).format("DD/MM/YYYY") : "-",
-                // },
-                // {
-                //     title: () => GetIntlMessages("ครบกำหนด"),
-                //     dataIndex: '',
-                //     key: '',
-                //     width: "10%",
-                //     align: "center",
-                //     render: (text, record) => "-",
-                // },
                 {
                     title: () => GetIntlMessages("จำนวนเงิน"),
                     dataIndex: '',
@@ -101,8 +80,6 @@ const PaymentDocsV2 = ({ docId, title, loading, handleCancelDebtDoc, initForm, c
                     width: "10%",
                     align: "center",
                     render: (text, record) => <div style={{ textAlign: "end" }}>{extractDataDocSaleType(record, 'debt_price_amount')}</div>
-                    // render: (text, record) => <div style={{ textAlign: "end" }}>{RoundingNumber(Number(get(record, `ShopServiceOrderDoc.debt_price_amount`, 0))) ?? RoundingNumber(Number(record.debt_price_amount)) ?? "-"}</div>
-                    // render: (text, record) => <div style={{ textAlign: "end" }}>{RoundingNumber(Number(text)) ?? "-"}</div>,
                 },
                 {
                     title: () => GetIntlMessages("ยอดคงเหลือ"),
@@ -111,8 +88,6 @@ const PaymentDocsV2 = ({ docId, title, loading, handleCancelDebtDoc, initForm, c
                     width: "10%",
                     align: "center",
                     render: (text, record) => <div style={{ textAlign: "end" }}>{extractDataDocSaleType(record, 'debt_price_amount_left')}</div>
-                    // render: (text, record) => <div style={{ textAlign: "end" }}>{RoundingNumber(Number(get(record, `ShopServiceOrderDoc.debt_price_amount_left`, 0))) ?? RoundingNumber(Number(record.debt_price_amount_left)) ?? "-"}</div>
-                    // render : (text, record) =><div style={{ textAlign: "end" }}>{RoundingNumber(Number(text)) ?? "-"}</div>
                 },
                 {
                     title: () => GetIntlMessages("ยอดชำระ"),
@@ -121,15 +96,6 @@ const PaymentDocsV2 = ({ docId, title, loading, handleCancelDebtDoc, initForm, c
                     width: "10%",
                     align: "center",
                     render: (text, record) => RoundingNumber(text) ?? "-"
-                    // render: (text, record, index) => (
-                    //     <>
-                    //         <Form.Item rules={[RegexMultiPattern() ,RegexMultiPattern("4" ,GetIntlMessages("ตัวเลขเท่านั้น"))]} key={`debt-price-paid-total-${index}`} style={{ margin: 0 }} name={["shopCustomerDebtLists",index,"debt_price_paid_total"]}>
-                    //             <InputNumber stringMode style={{width : "100%"}} formatter={(value) => !!value && value.length > 0 ? `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',') : ""}
-                    //                 parser={(value) => value.replace(/\$\s?|(,*)/g, '')} onBlur={()=>calculateResult()}/>
-                    //         </Form.Item>
-                    //     </>
-                    // )
-                    // render: (text, record) => <div style={{ textAlign: "end" }}>{RoundingNumber(Number(record.price_grand_total)) ?? "-"}</div>,
                 },
             )
             setColumns(() => [..._column])
@@ -229,17 +195,14 @@ const PaymentDocsV2 = ({ docId, title, loading, handleCancelDebtDoc, initForm, c
 
     const handleVisibleModal = async () => {
         try {
-            // setCarPreLoading(true)
             const { data } = await API.get(`/shopCustomerDebtDoc/byId/${docId}`), { ShopCustomerDebtLists, ShopPaymentTransactions } = data.data
             if (data.status === "success") {
                 const payment_method_list = ShopPaymentTransactions?.map(e => ({ ...e, type: e.payment_method, cash: e.payment_price_paid, showDeleteBtn: false })).filter(where => !where.canceled_payment_by) ?? []
                 setDataSource(() => [...ShopCustomerDebtLists])
                 form.setFieldsValue({ ...data.data, payment_method_list })
             }
-            // setCarPreLoading(false)
             setIsModalVisible(true)
         } catch (error) {
-            // setCarPreLoading(() => false)
             console.log('error handleVisibleModal:>> ', error);
         }
     }
@@ -348,15 +311,12 @@ const PaymentDocsV2 = ({ docId, title, loading, handleCancelDebtDoc, initForm, c
                     break;
             }
 
-            // console.log('model :>> ', model);
-            // res = { data: { status: "success" } }
             if (type !== 0) {
                 res = await API.post(`/shopPaymentTransaction/add`, model)
             } else {
                 res = await API.post(`/shopPaymentTransaction/addPartialPayments`, model)
             }
 
-            // console.log('res :>> ', res);
             if (res.data.status === "success") {
 
                 if (type === 4) {
@@ -367,8 +327,6 @@ const PaymentDocsV2 = ({ docId, title, loading, handleCancelDebtDoc, initForm, c
                             let dataApi = data.data[0]
 
                             let calRemaining = +model.details.cheque_amount_remaining - +model.payment_price_paid
-                            // console.log("model.details.cheque_amount_remaining",model.details.cheque_amount_remaining)
-                            // console.log("model.payment_price_paid",model.payment_price_paid)
                             let modelUpdateCheque = {}
                             modelUpdateCheque.details = dataApi.details
                             modelUpdateCheque.details.cheque_amount_remaining = MatchRound(calRemaining)
@@ -665,7 +623,10 @@ const PaymentDocsV2 = ({ docId, title, loading, handleCancelDebtDoc, initForm, c
                                             <div className="invoices-totalprice pt-3 pb-2">
                                                 <div>ราคารวม</div>
                                                 <div>{getValue("debt_price_paid_total", true)} บาท</div>
-                                                {/* <div>{getValue("price_grand_total", true)} บาท</div> */}
+                                            </div>
+                                            <div className="invoices-totalprice pt-3 pb-2" hidden={(debtDocObj ? debtDocObj.payment_paid_status : initForm.getFieldValue("payment_paid_status")) !== 2}>
+                                                <div>ยอดคงเหลือ</div>
+                                                <div>{getValue("price_balance", true)} บาท</div>
                                             </div>
 
                                             <div className="invoices-price-paid">

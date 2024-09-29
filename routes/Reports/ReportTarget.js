@@ -504,7 +504,7 @@ const ReportTarget = () => {
             setLoadingExport(true)
             const { search, bus_customer_id, _status, filter_month, filter_year, product_model_id, product_brand_id } = modelSearch
             console.log("searc", modelSearch)
-            let url = `/shopReports/customerTarget?export_format=xlsx${_status ? `&status=${_status}` : ""}${search ? `&search=${search}` : ""}${bus_customer_id ? `&bus_customer_id=${bus_customer_id}` : ""}${filter_month ? `&filter_month=${filter_month}` : ""}${filter_year ? `&filter_year=${filter_year}` : ""}${product_brand_id !== "" ? `&product_brand_id=${product_brand_id}` : ""}${product_model_id !== "" ? `&product_model_id=${product_model_id}` : ""}`;
+            let url = `/shopReports/customerTarget?export_format=xlsx${_status ? `&status=${_status}` : ""}${search ? `&search=${search}` : ""}${bus_customer_id ? `&bus_customer_id=${bus_customer_id}` : ""}${filter_month ? `&filter_month=${filter_month}` : ""}${filter_year ? `&filter_year=${filter_year}` : ""}${product_brand_id ?? "" !== "" ? `&product_brand_id=${product_brand_id}` : ""}${product_model_id ?? "" !== "" ? `&product_model_id=${product_model_id}` : ""}`;
             const res = await API.get(url)
             // &sort=${configSort.sort}
             if (res.data.status === "success") window.open(`${process.env.NEXT_PUBLIC_DIRECTORY}/assets/${res.data.data}`)

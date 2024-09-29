@@ -924,7 +924,10 @@ const TemporaryDeliveryOrderDoc = ({ docTypeId }) => {
                 upload_car_list: value.details?.upload_car_list ?? [],
                 upload_product_list: value.details?.upload_product_list ?? [],
                 upload_payment_list: value.details?.upload_payment_list ?? [],
-                upload_remove_list: []
+                upload_remove_list: [],
+
+                payment_paid_status: value.ShopServiceOrderDoc.payment_paid_status,
+                ShopPaymentTransactions: value.ShopServiceOrderDoc.ShopPaymentTransactions ?? [],
             }
 
             if (isArray(filterPayment) && filterPayment.length > 0) {

@@ -14,7 +14,7 @@ const FormTranferInventoryDoc = ({ mode, calculateResult, }) => {
     const { authUser } = useSelector(({ auth }) => auth);
 
     const [isEmployeeModalVisible, setIsEmployeeModalVisible] = useState(false);
-
+    console.log("hii")
     const callBackEmployee = (data) => {
         console.log(data)
         setIsEmployeeModalVisible(false)
@@ -109,7 +109,7 @@ const FormTranferInventoryDoc = ({ mode, calculateResult, }) => {
                             disabled={mode === "view"}
 
                         >
-                            {shopInCorporate?.filter(x => x.id !== authUser?.UsersProfile?.ShopsProfile?.id).map(e => <Select.Option value={e.id} key={`partner-id-${e.id}`}>{`${e.shop_name[locale.locale]} ${!!e.shop_name.shop_local_name ? `(${e.shop_name.shop_local_name})` : ""}`}</Select.Option>)}
+                            {shopInCorporate?.map(e => <Select.Option value={e.id} key={`partner-id-${e.id}`}>{`${e.shop_name[locale.locale]} ${!!e.shop_name.shop_local_name ? `(${e.shop_name.shop_local_name})` : ""}`}</Select.Option>)}
 
                         </Select>
                     </Form.Item>

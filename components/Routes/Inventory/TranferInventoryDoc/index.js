@@ -473,7 +473,8 @@ const TranferInventoryDoc = ({ docTypeId, title = null, callBack, filter_shop_id
             setLoading(true)
             setConfigModal({ ...configModal, mode })
             if (id) {
-                const { data } = await API.get(`/shopInventoryTransaction/byid/${id}`)
+                let url = `/shopInventoryTransaction/byid/${id}${isFunction(callBack) ? `?select_shop_ids=${modelSearch.select_shop_ids}` : ""}`
+                const { data } = await API.get(url)
                 if (data.status == "success") {
                     setFormValueData(data.data)
                 }

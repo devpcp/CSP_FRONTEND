@@ -36,6 +36,19 @@ const PaymentDocsV2 = ({ docId, title, loading, handleCancelTaxDoc, initForm, se
     const isPartialPaymentStatus = Form.useWatch("payment_method_list", { form, preserve: true })
 
     useEffect(() => {
+        try {
+            console.log("serviceOrderDocObj", serviceOrderDocObj)
+            let payment_list = serviceOrderDocObj ? serviceOrderDocObj.ShopPaymentTransactions : initForm.getFieldValue("ShopPaymentTransactions")
+            let total = serviceOrderDocObj ? serviceOrderDocObj.price_grand_total : initForm.getFieldValue("price_grand_total")
+            let paid_list = 0
+            payment_list.map((e) => {
+                paid_list += +e.payment_price_paid
+            })
+            let price_balance = +total - +paid_list
+            form.setFieldsValue({ price_balance })
+        } catch (error) {
+            console.log("error", error)
+        }
         setTableColumns()
     }, [])
 
@@ -377,7 +390,7 @@ const PaymentDocsV2 = ({ docId, title, loading, handleCancelTaxDoc, initForm, se
                         console.log("update Chque error : ", error)
                     }
                 }
-                
+
                 // Swal.fire({title: 'ชำระสำเร็จ!!', icon : "success" , timer: 2000 , timerProgressBar :true})
                 // handleCancel()
                 let inputOptions = {
@@ -700,6 +713,10 @@ const PaymentDocsV2 = ({ docId, title, loading, handleCancelTaxDoc, initForm, se
                                                     <div>ราคารวม</div>
                                                     <div>{getValue("price_sub_total", true)} บาท</div>
                                                 </div>
+                                                <div className="invoices-totalprice pt-3 pb-2" hidden={(serviceOrderDocObj ? serviceOrderDocObj.payment_paid_status : initForm.getFieldValue("payment_paid_status")) !== 2}>
+                                                    <div>ยอดคงเหลือ</div>
+                                                    <div>{getValue("price_balance", true)} บาท</div>
+                                                </div>
 
                                                 <div className="invoices-price-paid">
                                                     <div className="invoices-text-detail">
@@ -780,7 +797,7 @@ const PaymentDocsV2 = ({ docId, title, loading, handleCancelTaxDoc, initForm, se
                                                             callback={callbackPayment}
                                                             loading={loading || paymentLoading}
                                                             // disabled={!!isPartialPaymentStatus && isPartialPaymentStatus.length > 1}
-                                                            disabled={!!isPartialPaymentStatus && isPartialPaymentStatus.length !== 0 && initForm.getFieldValue("ShopServiceOrderDoc")?.payment_paid_status === 2 && isPartialPaymentStatus.every(val => val.is_partial_payment === true) ? true : false}
+                                                            disabled={!!isPartialPaymentStatus && isPartialPaymentStatus.length !== 0 && (fromTable ? form.getFieldValue("ShopServiceOrderDoc")?.payment_paid_status : initForm.getFieldValue("ShopServiceOrderDoc")?.payment_paid_status) === 2 && isPartialPaymentStatus.every(val => val.is_partial_payment === true) ? true : false}
                                                         />
                                                     </div>
                                                 </Col>
@@ -793,7 +810,7 @@ const PaymentDocsV2 = ({ docId, title, loading, handleCancelTaxDoc, initForm, se
                                                             total={getValue("price_grand_total")}
                                                             callback={callbackPayment}
                                                             loading={loading || paymentLoading}
-                                                            disabled={!!isPartialPaymentStatus && isPartialPaymentStatus.length !== 0 && initForm.getFieldValue("ShopServiceOrderDoc")?.payment_paid_status === 2 && isPartialPaymentStatus.every(val => val.is_partial_payment === true) ? true : false}
+                                                            disabled={!!isPartialPaymentStatus && isPartialPaymentStatus.length !== 0 && (fromTable ? form.getFieldValue("ShopServiceOrderDoc")?.payment_paid_status : initForm.getFieldValue("ShopServiceOrderDoc")?.payment_paid_status) === 2 && isPartialPaymentStatus.every(val => val.is_partial_payment === true) ? true : false}
                                                         />
                                                     </div>
                                                 </Col>
@@ -806,7 +823,7 @@ const PaymentDocsV2 = ({ docId, title, loading, handleCancelTaxDoc, initForm, se
                                                             total={getValue("price_grand_total")}
                                                             callback={callbackPayment}
                                                             loading={loading || paymentLoading}
-                                                            disabled={!!isPartialPaymentStatus && isPartialPaymentStatus.length !== 0 && initForm.getFieldValue("ShopServiceOrderDoc")?.payment_paid_status === 2 && isPartialPaymentStatus.every(val => val.is_partial_payment === true) ? true : false}
+                                                            disabled={!!isPartialPaymentStatus && isPartialPaymentStatus.length !== 0 && (fromTable ? form.getFieldValue("ShopServiceOrderDoc")?.payment_paid_status : initForm.getFieldValue("ShopServiceOrderDoc")?.payment_paid_status) === 2 && isPartialPaymentStatus.every(val => val.is_partial_payment === true) ? true : false}
                                                         />
                                                     </div>
                                                 </Col>
@@ -844,8 +861,8 @@ const PaymentDocsV2 = ({ docId, title, loading, handleCancelTaxDoc, initForm, se
                                                             total={getValue("price_grand_total")}
                                                             callback={callbackPayment}
                                                             loading={loading || paymentLoading}
-                                                        // isPartialPayment
-                                                        // disabled
+                                                            // isPartialPayment
+                                                            disabled={!!isPartialPaymentStatus && isPartialPaymentStatus.length !== 0 && (fromTable ? form.getFieldValue("ShopServiceOrderDoc")?.payment_paid_status : initForm.getFieldValue("ShopServiceOrderDoc")?.payment_paid_status) === 2 && isPartialPaymentStatus.every(val => val.is_partial_payment === true) ? true : false}
                                                         />
                                                     </div>
                                                 </Col>
@@ -860,8 +877,8 @@ const PaymentDocsV2 = ({ docId, title, loading, handleCancelTaxDoc, initForm, se
                                                             total={getValue("price_grand_total")}
                                                             callback={callbackPayment}
                                                             loading={loading || paymentLoading}
-                                                        // isPartialPayment
-                                                        // disabled
+                                                            // isPartialPayment
+                                                            disabled={!!isPartialPaymentStatus && isPartialPaymentStatus.length !== 0 && (fromTable ? form.getFieldValue("ShopServiceOrderDoc")?.payment_paid_status : initForm.getFieldValue("ShopServiceOrderDoc")?.payment_paid_status) === 2 && isPartialPaymentStatus.every(val => val.is_partial_payment === true) ? true : false}
                                                         />
                                                     </div>
                                                 </Col>

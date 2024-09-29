@@ -99,6 +99,8 @@ module.exports = {
       '/Reports/ReportTranferInventory': { page: '/Reports/ReportTranferInventory' },
       '/Reports/ReportFinance': { page: '/Reports/ReportFinance' },
       '/Reports/ReportTarget': { page: '/Reports/ReportTarget' },
+      '/Reports/ReportShopCustomerCreditNote': { page: '/Reports/ReportShopCustomerCreditNote' },
+      '/Reports/ReportShopCustomerCreditNoteNoVat': { page: '/Reports/ReportShopCustomerCreditNoteNoVat' },
 
       '/401': { page: '/401' },
       '/Dashboard': { page: '/Dashboard' },
