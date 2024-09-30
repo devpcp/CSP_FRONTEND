@@ -83,14 +83,99 @@ const ReportFinance = () => {
                     return index + 1
                 },
             },
+            // {
+            //     title: 'เลขที่เอกสาร',
+            //     dataIndex: 'code_id',
+            //     key: 'code_id',
+            //     width: 150,
+            //     align: "center",
+            //     render: (text, record) => {
+            //         return (
+            //             <>
+            //                 <span>{text ? text : ""} </span>
+            //             </>
+            //         )
+            //     },
+            // },
+            // {
+            //     title: 'วันที่เอกสาร',
+            //     dataIndex: 'payment_paid_date',
+            //     key: 'payment_paid_date',
+            //     width: 150,
+            //     align: "center",
+            //     sort: true,
+            //     render: (text, record) => {
+            //         return (
+            //             <>
+            //                 <span>{text ? moment(text).format("DD/MM/YYYY") : ""} </span>
+            //             </>
+            //         )
+            //     },
+            // },
             {
-                title: 'เลขที่เอกสาร',
+                title: 'ชื่อลูกค้า',
+                dataIndex: '',
+                key: '',
+                width: 150,
+                align: "center",
+                render: (text, record) => {
+                    if (text.ShopBusinessCustomer) {
+                        return (
+                            <>
+                                <span>{text ? text.ShopBusinessCustomer.customer_name[locale.locale] : ""} </span>
+                            </>
+                        )
+                    }
+                    if (text.ShopPersonalCustomer) {
+                        return (
+                            <>
+                                <span>{text.ShopPersonalCustomer ? text.ShopPersonalCustomer.customer_name.first_name[locale.locale] + " " + text.ShopPersonalCustomer.customer_name.last_name[locale.locale] : ""} </span>
+                            </>
+                        )
+                    }
+
+                },
+            },
+            {
+                title: 'เลขที่ใบสั่งซ่อม/ขาย',
                 dataIndex: 'ShopServiceOrderDoc',
                 key: 'ShopServiceOrderDoc',
                 width: 150,
                 align: "center",
-                render: (text, record, index) => {
-                    return get(text, "code_id", "-")
+                render: (text, record) => {
+                    return (
+                        <>
+                            <span>{text ? text.code_id : ""} </span>
+                        </>
+                    )
+                },
+            },
+            {
+                title: 'เลขที่ใบส่งสินค้าชั่วคราว',
+                dataIndex: 'ShopTemporaryDeliveryOrderDoc',
+                key: 'ShopTemporaryDeliveryOrderDoc',
+                width: 150,
+                align: "center",
+                render: (text, record) => {
+                    return (
+                        <>
+                            <span>{text ? text.code_id : ""} </span>
+                        </>
+                    )
+                },
+            },
+            {
+                title: 'เลขที่ใบกำกับภาษี',
+                dataIndex: 'ShopTaxInvoiceDoc',
+                key: 'ShopTaxInvoiceDoc',
+                width: 150,
+                align: "center",
+                render: (text, record) => {
+                    return (
+                        <>
+                            <span>{text ? text.inv_code_id : ""} </span>
+                        </>
+                    )
                 },
             },
             {
@@ -107,13 +192,81 @@ const ReportFinance = () => {
                     )
                 },
             },
-            // {
-            //     title: 'ชื่อลูกค้า',
-            //     dataIndex: 'customer_name',
-            //     key: 'customer_name',
-            //     width: 150,
-            //     align: "center",
-            // },
+            {
+                title: 'ชำระโดย',
+                dataIndex: 'payment_method',
+                key: 'payment_method',
+                width: 150,
+                align: "center",
+                sort: true,
+                render: (text, record) => {
+                    switch (text) {
+                        case 1:
+                            return (
+                                <span>เงินสด</span>
+                            )
+                        case 2:
+                            return (
+                                <span>เครดิต/เดบิต</span>
+                            )
+                        case 3:
+                            return (
+                                <span>โอนเงินสด</span>
+                            )
+                        case 4:
+                            return (
+                                <span>เช็ค</span>
+                            )
+                        case 5:
+                            return (
+                                <span>ลูกหนี้การค้า</span>
+                            )
+
+                        default:
+                            return (
+                                <span> - </span>
+                            )
+                    }
+                },
+            },
+            {
+                title: 'Partial Payment',
+                dataIndex: 'is_partial_payment',
+                key: 'is_partial_payment',
+                width: 150,
+                align: "center",
+                render: (text, record) => {
+                    if (text) {
+                        return (
+                            <>
+                                <span>{"ใช่"} </span>
+                            </>
+                        )
+                    } else {
+                        return (
+                            <>
+                                <span>{"ไม่ใช่"} </span>
+                            </>
+                        )
+                    }
+
+                },
+            },
+            {
+                title: 'วันที่ชำระ',
+                dataIndex: 'payment_paid_date',
+                key: 'payment_paid_date',
+                width: 150,
+                align: "center",
+                sort: true,
+                render: (text, record) => {
+                    return (
+                        <>
+                            <span>{text ? moment(text).format("DD/MM/YYYY HH:mm:ss") : ""} </span>
+                        </>
+                    )
+                },
+            },
             // {
             //     title: 'ทะเบียนรถ',
             //     dataIndex: 'customer_vehicle_reg_plate',
@@ -343,7 +496,7 @@ const ReportFinance = () => {
             const { search } = modelSearch
             const res = await API.get(`/shopReports/paymentTransaction?search=${search}${!!startDate ? `&start_date=${moment(startDate).format("YYYY-MM-DD")}` : ""}${!!endDate ? `&end_date=${moment(endDate).format("YYYY-MM-DD")}` : ""}&order=${configSort.order === "descend" ? "desc" : "asc"}&export_format=xlsx`)
             // &sort=${configSort.sort}
-            if (res.data.status === "success") window.open(`${process.env.NEXT_PUBLIC_DIRECTORY}${res.data.data.filePath}`)
+            if (res.data.status === "success") window.open(`${process.env.NEXT_PUBLIC_DIRECTORY}/assets/${res.data.data}`)
             else message.warn('มีบางอย่างผิดพลาดกรุณาติดต่อเจ้าหน้าที่ !!');
             setLoadingExport(false)
         } catch (error) {
@@ -506,8 +659,8 @@ const ReportFinance = () => {
         col: 8,
         button: {
             create: false,
-            download: true,
-            import: true,
+            download: false,
+            import: false,
             export: true,
         },
         onFinishSearch,

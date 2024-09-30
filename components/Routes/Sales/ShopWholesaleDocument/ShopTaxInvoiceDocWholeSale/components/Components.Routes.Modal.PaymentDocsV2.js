@@ -709,11 +709,11 @@ const PaymentDocsV2 = ({ docId, title, loading, handleCancelTaxDoc, initForm, se
                                     <div className="container-fluid" >
                                         <div id="invoices-container">
                                             <div className='detail-before-table'>
-                                                <div className="invoices-totalprice pt-3 pb-2">
+                                                {/* <div className="invoices-totalprice pt-3 pb-2">
                                                     <div>ราคารวม</div>
                                                     <div>{getValue("price_sub_total", true)} บาท</div>
-                                                </div>
-                                                <div className="invoices-totalprice pt-3 pb-2" hidden={(serviceOrderDocObj ? serviceOrderDocObj.payment_paid_status : initForm.getFieldValue("payment_paid_status")) !== 2}>
+                                                </div> */}
+                                                <div className="invoices-totalprice pt-3 pb-2" hidden={(serviceOrderDocObj ? serviceOrderDocObj?.payment_paid_status : initForm.getFieldValue("payment_paid_status")) !== 2}>
                                                     <div>ยอดคงเหลือ</div>
                                                     <div>{getValue("price_balance", true)} บาท</div>
                                                 </div>

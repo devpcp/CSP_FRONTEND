@@ -37,8 +37,8 @@ const PaymentDocsV2 = ({ docId, title, loading, handleCancelTemDoc, initForm, ca
 
     useEffect(() => {
         try {
-            let payment_list = serviceOrderDocObj ? serviceOrderDocObj.ShopServiceOrderDoc.ShopPaymentTransactions : initForm.getFieldValue("ShopPaymentTransactions")
-            let total = serviceOrderDocObj ? serviceOrderDocObj.ShopServiceOrderDoc.price_grand_total : initForm.getFieldValue("price_grand_total")
+            let payment_list = serviceOrderDocObj ? serviceOrderDocObj.ShopPaymentTransactions : initForm.getFieldValue("ShopPaymentTransactions")
+            let total = serviceOrderDocObj ? serviceOrderDocObj.price_grand_total : initForm.getFieldValue("price_grand_total")
             let paid_list = 0
             payment_list.map((e) => {
                 paid_list += +e.payment_price_paid
@@ -702,11 +702,11 @@ const PaymentDocsV2 = ({ docId, title, loading, handleCancelTemDoc, initForm, ca
                                 <div className="container-fluid">
                                     <div id="invoices-container">
                                         <div className="detail-before-table">
-                                            <div className="invoices-totalprice pt-3 pb-2">
+                                            {/* <div className="invoices-totalprice pt-3 pb-2">
                                                 <div>ราคารวม</div>
                                                 <div>{getValue("price_sub_total", true)} บาท</div>
-                                            </div>
-                                            <div className="invoices-totalprice pt-3 pb-2" hidden={(serviceOrderDocObj ? serviceOrderDocObj.ShopServiceOrderDoc.payment_paid_status : initForm.getFieldValue("payment_paid_status")) !== 2}>
+                                            </div> */}
+                                            <div className="invoices-totalprice pt-3 pb-2" hidden={(serviceOrderDocObj ? serviceOrderDocObj?.payment_paid_status : initForm.getFieldValue("payment_paid_status")) !== 2}>
                                                 <div>ยอดคงเหลือ</div>
                                                 <div>{getValue("price_balance", true)} บาท</div>
                                             </div>
