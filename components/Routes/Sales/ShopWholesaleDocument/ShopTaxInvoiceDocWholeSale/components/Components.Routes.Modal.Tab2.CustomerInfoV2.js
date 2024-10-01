@@ -45,7 +45,7 @@ const ComponentsRoutesModalTab2customerInfo = () => {
                                     style={{ width: "100%" }}
                                     disabled
                                 >
-                                    {getArrValue("customer_list").map(e => <Select.Option value={e.id} key={`customer-id-${e.id}`}>{e.customer_name}</Select.Option>)}
+                                    {getArrValue("customer_list").map(e => <Select.Option value={e.id} key={`customer-id-${e.id}`}>{e.customer_full_name}</Select.Option>)}
                                 </Select>
                             </Form.Item>
                         </Col>

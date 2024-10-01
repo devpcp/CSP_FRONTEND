@@ -6,7 +6,7 @@ import Preloader from "../../components/_App/Preloader";
 import { Card } from 'antd';
 import GetHeadTitlePermission from "../../util/GetHeadTitlePermission";
 import { useSelector } from "react-redux";
-const ReportFinance = dynamic(() => import("../../routes/Reports/ReportFinance"), { loading: () => <Preloader /> });
+const ReportFinance = dynamic(() => import("../../routes/Reports/ReportFInance"), { loading: () => <Preloader /> });
 
 export default Page(() => (
     
