@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Button, message, Input, Modal, Select, Form, Switch, Row, Col, DatePicker, Image } from 'antd';
+import { Button, message, Input, Modal, Select, Form, Switch, Row, Col, DatePicker, Image, Typography } from 'antd';
 import { KeyOutlined } from '@ant-design/icons';
 import API from '../../util/Api'
 import { useSelector } from 'react-redux';
@@ -16,6 +16,8 @@ import Fieldset from '../../components/shares/Fieldset';
 import ModalFullScreen from "../../components/shares/ModalFullScreen";
 import ImageSingleShares from '../../components/shares/FormUpload/ImageSingle';
 import { CheckImage, UploadImageSingle } from '../../components/shares/FormUpload/API';
+
+const { Text, Link } = Typography;
 
 const EmployeeData = ({ title = null, callBack, filter_department_id = null }) => {
     const masktel_no = createDefaultMaskGenerator('999 999 9999');
@@ -95,22 +97,19 @@ const EmployeeData = ({ title = null, callBack, filter_department_id = null }) =
                 width: 150,
                 align: "center",
                 use: true,
-                render: (text, record) => text.details.emp_code ? text.details.emp_code : "-",
-                // sorter: (a, b, c) => { },
-                // sortOrder: configSort.sort == "id_code" ? configSort.order : false,
-                // onHeaderCell: (obj) => {
-                //     return {
-                //         onClick: () => {
-                //             getDataSearch({
-                //                 page: configTable.page,
-                //                 search: modelSearch.search,
-                //                 sort: "emp_code",
-                //                 order: configSort.order !== "descend" ? "desc" : "asc",
-                //             })
-                //             setConfigSort({ sort: "emp_code", order: obj.sortOrder === "ascend" ? "descend" : "ascend" })
-                //         }
-                //     };
-                // }
+                render: (text, record) => {
+                    if (isFunction(callBack)) {
+                        return (
+                            <Link href="#" onClick={() => callBack(record)}>
+                                {text.details.emp_code}
+                            </Link>
+                        )
+                    } else {
+                        return (
+                            <Text>{text.details.emp_code ?? "-"}</Text>
+                        )
+                    }
+                },
             },
 
             {
@@ -120,6 +119,15 @@ const EmployeeData = ({ title = null, callBack, filter_department_id = null }) =
                 width: 200,
                 use: true,
                 render: (text, record) => `${get(text, `fname.${locale.locale}`, "-")} ${get(text, `lname.${locale.locale}`, "-")}`,
+            },
+            {
+                title: () => GetIntlMessages("ชื่อเล่น"),
+                dataIndex: 'UsersProfile',
+                key: 'UsersProfile',
+                width: 200,
+                use: true,
+                align: "center",
+                render: (text, record) => `${get(text, `details.nickname`, "-")}`,
             },
             {
                 title: () => GetIntlMessages("tel-no"),

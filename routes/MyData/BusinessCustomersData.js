@@ -1125,7 +1125,7 @@ const BusinessCustomersData = ({ title = null, callBack }) => {
         // console.log("callback", data)
         form.setFieldsValue({
             employee_sales_man_id: data.id,
-            employee_sales_man_name: data.UsersProfile.fname[locale.locale] + " " + data.UsersProfile.lname[locale.locale],
+            employee_sales_man_name: data.UsersProfile.fname[locale.locale] + " " + data.UsersProfile.lname[locale.locale] + `${data.UsersProfile.details.nickname ? ` (${data.UsersProfile.details.nickname})` : ""}`,
         });
     }
 

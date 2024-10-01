@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { message, Modal, Form, Row, Col, Image, Select, Input, Divider, Space, DatePicker, InputNumber, Button, List, Switch, Tooltip } from 'antd';
+import { message, Modal, Form, Row, Col, Image, Select, Input, Divider, Space, DatePicker, InputNumber, Button, List, Switch, Tooltip, Typography } from 'antd';
 import { PlusOutlined, UploadOutlined, InfoCircleTwoTone } from "@ant-design/icons";
 import API from '../../util/Api'
 import { useSelector } from 'react-redux';
@@ -19,6 +19,8 @@ import ModalFullScreen from '../../components/shares/ModalFullScreen';
 import Fieldset from '../../components/shares/Fieldset';
 import { ImageMulti } from '../../components/shares/FormUpload/ImageMulti'
 import { UploadImageCustomPathMultiple, DeleteImageCustomPathMultiple } from '../../components/shares/FormUpload/API'
+
+const { Text, Link } = Typography;
 
 const ChequeData = ({ title = null, callBack }) => {
 
@@ -125,7 +127,19 @@ const ChequeData = ({ title = null, callBack }) => {
                 key: 'check_no',
                 width: 100,
                 use: true,
-                render: (text, record) => text ?? "-",
+                render: (text, record) => {
+                    if (isFunction(callBack)) {
+                        return (
+                            <Link href="#" onClick={() => callBack(record)}>
+                                {text}
+                            </Link>
+                        )
+                    } else {
+                        return (
+                            <Text>{text}</Text>
+                        )
+                    }
+                },
             },
             {
                 title: () => GetIntlMessages("วันที่หน้าเช็ค"),
@@ -469,7 +483,7 @@ const ChequeData = ({ title = null, callBack }) => {
             let res
             if (configModal.mode === "add") {
                 res = await API.post(`/shopCheckCustomer/add`, _model)
-                
+
                 if (res.data.status === "success") {
                     let id = res.data.data.id
                     let details = res.data.data.details
