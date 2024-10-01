@@ -2200,8 +2200,8 @@ const RepairOrder = ({ docTypeId, view_doc_id, select_shop_ids, title = null, })
 
             if (!!list_service_product && isArray(list_service_product) && list_service_product.length > 0) {
                 price_discount_total = Number(summaryFromTable(list_service_product, "price_discount", true)) + Number(summaryFromTable(list_service_product, "price_discount_2", true)) + Number(summaryFromTable(list_service_product, "price_discount_3", true)) + (Number(price_discount_bill) ?? 0) + Number(summaryFromTable(list_service_product, "price_unit", true))
-                price_sub_total = summaryFromTable(list_service_product, "price_grand_total", false) + (price_discount_total - price_discount_bill)
-                price_amount_total = price_sub_total - price_discount_total
+                price_sub_total = summaryFromTable(list_service_product, "price_grand_total", false) + (MatchRound(price_discount_total) - price_discount_bill)
+                price_amount_total = MatchRound(price_sub_total) - MatchRound(price_discount_total)
 
                 const { detail } = taxTypes.find(where => where.id === tax_type_id)
 
