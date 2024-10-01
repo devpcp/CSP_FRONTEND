@@ -443,7 +443,7 @@ const FormTemporaryDeliveryOrderDoc = ({ mode, calculateResult, disabledWhenDeli
                             mode="multiple"
                             placeholder="เลือกข้อมูล"
                         >
-                            {salesManList.map((e, index) => <Select.Option value={e.id} key={`sales-man-${e.id}`}>{e?.name[locale.locale] ?? "-"}</Select.Option>)}
+                            {salesManList.map((e, index) => <Select.Option value={e.id} key={`sales-man-${e.id}`}>{e?.name[locale.locale] + (e?.UsersProfile?.details?.nickname ? ` (${e?.UsersProfile?.details?.nickname})` : "") ?? "-"}</Select.Option>)}
                         </Select>
                     </Form.Item>
                 </Col>

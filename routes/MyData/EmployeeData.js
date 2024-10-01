@@ -320,6 +320,7 @@ const EmployeeData = ({ title = null, callBack, filter_department_id = null }) =
                         _model.contact_name = _model.UsersProfile.details.contact_name ?? null
                         _model.contact_number = _model.UsersProfile.details.contact_number ?? null
                         _model.contact_relation = _model.UsersProfile.details.contact_relation ?? null
+                        _model.nickname = _model.UsersProfile.details.nickname ?? null
                     }
 
                     const urlImg = await CheckImage({
@@ -429,6 +430,7 @@ const EmployeeData = ({ title = null, callBack, filter_department_id = null }) =
                         contact_name: value.contact_name ?? null,
                         contact_number: value.contact_number ?? null,
                         contact_relation: value.contact_relation ?? null,
+                        nickname: value.nickname ?? null,
                     }
                 },
             }
@@ -904,6 +906,17 @@ const EmployeeData = ({ title = null, callBack, filter_department_id = null }) =
                                                 label={GetIntlMessages("surname")}
                                                 rules={[{
                                                     required: true,
+                                                    message: GetIntlMessages("please-fill-out")
+                                                }]}
+                                            >
+                                                <Input type={'text'} maxLength={200} disabled={configModal.mode == "view"} />
+                                            </Form.Item>
+
+                                            <Form.Item
+                                                name="nickname"
+                                                label={GetIntlMessages("ชื่อเล่น")}
+                                                rules={[{
+                                                    required: false,
                                                     message: GetIntlMessages("please-fill-out")
                                                 }]}
                                             >
