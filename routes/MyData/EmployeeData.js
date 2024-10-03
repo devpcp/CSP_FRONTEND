@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Button, message, Input, Modal, Select, Form, Switch, Row, Col, DatePicker, Image, Typography } from 'antd';
-import { KeyOutlined } from '@ant-design/icons';
+import { PlusOutlined, MinusCircleOutlined, SearchOutlined, } from '@ant-design/icons';
 import API from '../../util/Api'
 import { useSelector } from 'react-redux';
 import SearchInput from '../../components/shares/SearchInput'
@@ -127,7 +127,9 @@ const EmployeeData = ({ title = null, callBack, filter_department_id = null }) =
                 width: 200,
                 use: true,
                 align: "center",
-                render: (text, record) => `${get(text, `details.nickname`, "-")}`,
+                render: (text, record) => {
+                    return text.details.nickname ?? "-"
+                },
             },
             {
                 title: () => GetIntlMessages("tel-no"),
@@ -1198,6 +1200,18 @@ const EmployeeData = ({ title = null, callBack, filter_department_id = null }) =
                                         hidden={(configModal.mode == "edit" || configModal.mode == "view") && !resetPasswordFlag}
                                     >
                                         <Input type={`text`} disabled={configModal.mode == "view"} />
+                                    </Form.Item>
+
+                                    <Form.Item
+                                        name="line_register_date"
+                                        type="text"
+                                        label={"วันที่ลงทะเบียน LINE"}
+                                        rules={[{
+                                            required: false,
+                                            message: GetIntlMessages("please-fill-out"),
+                                        }]}
+                                    >
+                                        <Input disabled />
                                     </Form.Item>
                                 </Fieldset>
                             </Col>

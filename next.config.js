@@ -92,6 +92,8 @@ module.exports = {
       '/LineOA/InventoryBalanceSTT': { page: '/LineOA/InventoryBalanceSTT' },
       '/LineOA/Holiday': { page: '/LineOA/Holiday' },
 
+      '/LineOAInside/InventoryAll': { page: '/LineOAInside/InventoryAll' },
+
       '/Reports/ReportShopPartnerDebt': { page: '/Reports/ReportShopPartnerDebt' },
       '/Reports/ReportProductReturnReceipt': { page: '/Reports/ReportProductReturnReceipt' },
       '/Reports/ReportReceiveTranferInventoryDoc': { page: '/Reports/ReportReceiveTranferInventoryDoc' },
