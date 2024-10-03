@@ -4,14 +4,7 @@ import {
   Form,
   Tabs,
   Button,
-  Dropdown,
-  Menu,
-  Popover,
-  Modal,
-  Switch,
-  DatePicker,
 } from "antd";
-import { ConsoleSqlOutlined, ExportOutlined } from "@ant-design/icons";
 import API from "../../../util/Api";
 import { useSelector } from "react-redux";
 import SearchInput from "../../../components/shares/SearchInput";
@@ -27,8 +20,7 @@ import _, { get, isArray, isFunction, isPlainObject, isUndefined } from "lodash"
 import PaymentDocs from "../../../components/Routes/Sales/ServicePlans/Components.Routes.Modal.PaymentDocs";
 import Tab4Vehicle from "../../../components/Routes/Sales/ServicePlans/Components.Routes.Modal.Tab4.Vehicle";
 
-import ReactToPrint, { useReactToPrint } from "react-to-print";
-import ComponentToPrint from "../../../components/Routes/Sales/CreatePdf/index";
+import { useReactToPrint } from "react-to-print";
 import PrintOut from "../../../components/shares/PrintOut";
 
 const { TabPane } = Tabs;
@@ -115,6 +107,7 @@ const ReportSalesOut = ({ title = null, parent_search_id, parent_page }) => {
       bus_customer_id: parent_page === "business_customer" ? parent_search_id : "",
       vehicle_customer_id: parent_page === "vehicle_customer" ? parent_search_id : "",
       shop_product_id: parent_page === "shop_product" ? parent_search_id : "",
+      report_sales_out_type: "list"
     },
   };
 
@@ -155,7 +148,368 @@ const ReportSalesOut = ({ title = null, parent_search_id, parent_page }) => {
   };
 
   const setColumnsTable = (data) => {
-    const _column = [
+    console.log("modelsearch", modelSearch)
+    const _column = []
+    const _columnDoc = [
+      {
+        title: () => GetIntlMessages("ลำดับ"),
+        dataIndex: "num",
+        key: "num",
+        align: "center",
+        width: 100,
+        render: (text, record, index) => {
+          index += (configTable.page - 1) * configTable.limit;
+          return index + 1;
+        },
+      },
+      {
+        title: 'สาขา',
+        dataIndex: 'shop_id',
+        key: 'shop_id',
+        width: 150,
+        align: "center",
+        use: shopInCorporate.length > 1,
+        render: (text, render) => {
+          return shopInCorporate.length > 0 ?
+            shopInCorporate.find(x => x.id === text).shop_name?.shop_local_name === undefined ||
+              shopInCorporate.find(x => x.id === text).shop_name?.hop_local_name === null ||
+              shopInCorporate.find(x => x.id === text).shop_name?.shop_local_name === "" ? shopInCorporate.find(x => x.id === text).shop_name[locale.locale] : shopInCorporate.find(x => x.id === text).shop_name?.shop_local_name : ""
+        }
+      },
+      {
+        title: () => GetIntlMessages("เลขที่เอกสาร"),
+        dataIndex: "code_id",
+        key: "code_id",
+        width: 150,
+        align: "center",
+      },
+      {
+        title: () => GetIntlMessages("วันที่เอกสาร"),
+        dataIndex: "doc_date",
+        key: "doc_date",
+        width: 200,
+        align: "center",
+        render: (text, record) =>
+          text ? moment(text).format("DD/MM/YYYY") : "-",
+      },
+      {
+        title: () => GetIntlMessages("ชื่อลูกค้า"),
+        dataIndex: "customer_name",
+        key: "customer_name",
+        width: 250,
+        align: "center",
+        render: (text, record) => (
+          <div style={{ textAlign: "start" }}>
+            {get(
+              record.ShopServiceOrderDoc,
+              `customer_name`,
+              <div style={{ textAlign: "center" }}>{"-"}</div>
+            )}
+          </div>
+        ),
+      },
+      {
+        title: () => GetIntlMessages("เลขทะเบียน"),
+        dataIndex: "vehicle_registration",
+        key: "vehicle_registration",
+        width: 250,
+        align: "center",
+        render: (text, record) => (
+          <div style={{ textAlign: "start" }}>
+            {get(
+              text,
+              ``,
+              <div style={{ textAlign: "center" }}>{"-"}</div>
+            )}
+          </div>
+        ),
+      },
+      {
+        title: () => GetIntlMessages("ส่วนลดบาท"),
+        dataIndex: "price_discount",
+        key: "price_discount",
+        width: 100,
+        align: "center",
+        render: (text, record) => (
+          <div style={{ textAlign: "end" }}>
+            {(+get(
+              record,
+              `price_discount`,
+              <div style={{ textAlign: "center" }}>{"-"}</div>
+            )).toLocaleString()}
+          </div>
+        ),
+      },
+      {
+        title: () => GetIntlMessages("ส่วนลด %"),
+        dataIndex: "price_discount_percent",
+        key: "price_discount_percent",
+        width: 100,
+        align: "center",
+        render: (text, record) => (
+          <div style={{ textAlign: "end" }}>
+            {(+get(
+              record,
+              `price_discount_percent`,
+              <div style={{ textAlign: "center" }}>{"-"}</div>
+            )).toLocaleString()}
+          </div>
+        ),
+      },
+      {
+        title: () => GetIntlMessages("รวมเงิน"),
+        dataIndex: "price_grand_total",
+        key: "price_grand_total",
+        width: 150,
+        align: "center",
+        render: (text, record) => (
+          <div style={{ textAlign: "end" }}>
+            {(+get(
+              record,
+              `price_grand_total`,
+              <div style={{ textAlign: "center" }}>{"-"}</div>
+            )).toLocaleString()}
+          </div>
+        ),
+      },
+      {
+        title: () => GetIntlMessages("สถานะการชำระเงิน"),
+        dataIndex: "payment_paid_status",
+        key: "payment_paid_status",
+        width: 150,
+        align: "center",
+        render: (text, record) => {
+          switch (get(
+            record.ShopServiceOrderDoc,
+            `payment_paid_status`,
+            <div style={{ textAlign: "center" }}>{"-"}</div>
+          )) {
+            case 1:
+              return (
+                <span className='color-red font-16'>ยังไม่ชำระ</span>
+              )
+            case 2:
+              return (
+                <span style={{ color: "orange", fontSize: 16 }}>ค้างชำระ</span>
+              )
+            case 3:
+              return (
+                <span className='color-green font-16'>ชำระเงินแล้ว</span>
+              )
+            case 4:
+              return (
+                <span style={{ color: "#DFFF00", fontSize: 16 }}>ชําระเกิน</span>
+              )
+            case 5:
+              return (
+                <span style={{ color: "#993333	", fontSize: 16 }}>ลูกหนี้การค้า</span>
+              )
+
+            default:
+              return (
+                <span> - </span>
+              )
+          }
+        },
+      },
+      {
+        title: () => GetIntlMessages("ประเภทการชำระ"),
+        dataIndex: "payment_type",
+        key: "payment_type",
+        width: 150,
+        align: "center",
+        render: (text, record) => {
+          switch (get(
+            record.ShopServiceOrderDoc,
+            `payment_type`,
+            <div style={{ textAlign: "center" }}>{"-"}</div>
+          )) {
+            case 1:
+              return (
+                <span>เงินสด</span>
+              )
+            case 2:
+              return (
+                <span>บัตรเครดิต</span>
+              )
+            case 3:
+              return (
+                <span>เงินโอน</span>
+              )
+            case 4:
+              return (
+                <span>เช็ค</span>
+              )
+            case 5:
+              return (
+                <span>ลูกหนี้การค้า</span>
+              )
+
+            default:
+              return (
+                <span> - </span>
+              )
+          }
+        },
+      },
+      {
+        title: () => GetIntlMessages("เลขที่บัญชี"),
+        dataIndex: "ShopServiceOrderDoc",
+        key: "ShopServiceOrderDoc",
+        width: 150,
+        align: "center",
+        render: (text, record) => (
+          <>
+            {get(text, `BankAccount.account_no`, "-")}
+          </>
+        ),
+      },
+      {
+        title: () => GetIntlMessages("ชื่อบัญชี"),
+        dataIndex: "ShopServiceOrderDoc",
+        key: "ShopServiceOrderDoc",
+        width: 150,
+        align: "center",
+        render: (text, record) => (
+          <>
+            {get(text, `BankAccount.account_name.${locale.locale}`, "-")}
+          </>
+        ),
+      },
+      {
+        title: () => GetIntlMessages("วันที่รับชำระ"),
+        dataIndex: "ShopServiceOrderDoc",
+        key: "ShopServiceOrderDoc",
+        width: 150,
+        align: "center",
+        render: (text, record) => (
+          <>
+            {get(text, `payment_paid_date`, "-") ? moment(get(text, `payment_paid_date`, "-")).format("DD/MM/YYYY") : "-"}
+          </>
+        ),
+        // render: (text, record) => getCustomerDataTable(record, "type"),
+      },
+      {
+        title: () => GetIntlMessages("รวมเป็นเงิน"),
+        dataIndex: "price_sub_total",
+        key: "price_sub_total",
+        width: 150,
+        render: (text, record) => (
+          <div style={{ textAlign: "end" }}>
+            {get(record.ShopServiceOrderDoc, `price_sub_total`, "-").toLocaleString()}
+          </div>
+        ),
+      },
+      {
+        title: () => GetIntlMessages("ส่วนลดรวม"),
+        dataIndex: "price_discount_total",
+        key: "price_discount_total",
+        width: 150,
+        align: "center",
+        render: (text, record) => (
+          <div style={{ textAlign: "end" }}>
+            {get(record.ShopServiceOrderDoc, `price_discount_total`, "-").toLocaleString()}
+          </div>
+        ),
+      },
+      {
+        title: () => GetIntlMessages("ภาษีมูลค่าเพิ่ม 7 %"),
+        dataIndex: "price_vat",
+        key: "price_vat",
+        width: 150,
+        align: "center",
+        render: (text, record) => (
+          <div style={{ textAlign: "end" }}>
+            {get(record.ShopServiceOrderDoc, `price_vat`, "-").toLocaleString()}
+          </div>
+        ),
+      },
+      {
+        title: () => GetIntlMessages("จำนวนเงินรวมทั้งสิ้น"),
+        dataIndex: "price_grand_total",
+        key: "price_grand_total",
+        width: 150,
+        align: "center",
+        render: (text, record) => (
+          <div style={{ textAlign: "end" }}>
+            {get(record.ShopServiceOrderDoc, `price_grand_total`, "-").toLocaleString()}
+          </div>
+        ),
+      },
+      {
+        title: () => GetIntlMessages("เลขที่เอกสาร ใบส่งสินค้าชั่วคราว"),
+        dataIndex: "trn_code_id",
+        key: "trn_code_id",
+        width: 150,
+        align: "center",
+        render: (text, record) => {
+          if (record?.ShopServiceOrderDoc?.trn_code_id === "") {
+            return (
+              <div style={{ textAlign: "center" }}>{"-"}</div>
+            )
+          } else {
+            return (
+              <div style={{ textAlign: "center" }}>
+                {get(
+                  record.ShopServiceOrderDoc,
+                  `trn_code_id`,
+
+                )}
+              </div>
+            )
+          }
+        }
+      },
+      {
+        title: () => GetIntlMessages("เลขที่เอกสาร ใบกำกับภาษีอย่างย่อ"),
+        dataIndex: "abb_code_id",
+        key: "abb_code_id",
+        width: 150,
+        align: "center",
+        render: (text, record) => {
+          if (record?.ShopServiceOrderDoc?.abb_code_id === "") {
+            return (
+              <div style={{ textAlign: "center" }}>{"-"}</div>
+            )
+          } else {
+            return (
+              <div style={{ textAlign: "center" }}>
+                {get(
+                  record.ShopServiceOrderDoc,
+                  `abb_code_id`,
+
+                )}
+              </div>
+            )
+          }
+        }
+      },
+      {
+        title: () => GetIntlMessages("เลขที่เอกสาร ใบกำกับภาษีเต็มรูป"),
+        dataIndex: "inv_code_id",
+        key: "inv_code_id",
+        width: 150,
+        align: "center",
+        render: (text, record) => {
+          if (record?.ShopServiceOrderDoc?.inv_code_id === "") {
+            return (
+              <div style={{ textAlign: "center" }}>{"-"}</div>
+            )
+          } else {
+            return (
+              <div style={{ textAlign: "center" }}>
+                {get(
+                  record.ShopServiceOrderDoc,
+                  `inv_code_id`,
+
+                )}
+              </div>
+            )
+          }
+        }
+      },
+    ];
+    const _columnList = [
       {
         title: () => GetIntlMessages("ลำดับ"),
         dataIndex: "num",
@@ -522,7 +876,6 @@ const ReportSalesOut = ({ title = null, parent_search_id, parent_page }) => {
                 {get(
                   record.ShopServiceOrderDoc,
                   `trn_code_id`,
-
                 )}
               </div>
             )
@@ -546,7 +899,6 @@ const ReportSalesOut = ({ title = null, parent_search_id, parent_page }) => {
                 {get(
                   record.ShopServiceOrderDoc,
                   `abb_code_id`,
-
                 )}
               </div>
             )
@@ -570,7 +922,6 @@ const ReportSalesOut = ({ title = null, parent_search_id, parent_page }) => {
                 {get(
                   record.ShopServiceOrderDoc,
                   `inv_code_id`,
-
                 )}
               </div>
             )
@@ -578,6 +929,15 @@ const ReportSalesOut = ({ title = null, parent_search_id, parent_page }) => {
         }
       },
     ];
+    switch (modelSearch.report_sales_out_type) {
+      case "doc":
+        _column = _columnDoc
+        break;
+      default:
+        _column = _columnList
+        break;
+    }
+
     _column.map((x) => { x.use === undefined ? x.use = true : null })
     setColumns(_column.filter(x => x.use === true));
   };
@@ -633,9 +993,11 @@ const ReportSalesOut = ({ title = null, parent_search_id, parent_page }) => {
     bus_customer_id = parent_page === "business_customer" ? parent_search_id : "",
     vehicle_customer_id = parent_page === "vehicle_customer" ? parent_search_id : "",
     shop_product_id = parent_page === "shop_product" ? parent_search_id : "",
+    report_sales_out_type = modelSearch.report_sales_out_type ?? "list"
 
   }) => {
     try {
+      console.log(modelSearch)
       if (page === 1) setLoading(true);
 
       const dateFomat = "YYYY-MM-DD";
@@ -666,7 +1028,7 @@ const ReportSalesOut = ({ title = null, parent_search_id, parent_page }) => {
       setStartPaymentPaidDate(payment_paid_date_startDate);
       setEndPaymentPaidDate(payment_paid_date_endDate);
 
-      let url = `/shopReports/salesOut?limit=${limit}&report_sales_out_type=list&page=${page}&sort=${sort}&order=${order}${_status ? `&status=${_status}` : ""}${search ? `&search=${search}` : ""}${start_date ? `&start_date=${start_date}` : ""}${end_date ? `&end_date=${end_date}` : ""}${payment_paid_status ? `&payment_paid_status=${payment_paid_status}` : "&payment_paid_status="}${select_shop_ids !== "" ? `&select_shop_ids=${select_shop_ids}` : ""}${payment_paid_date_startDate !== "" ? `&payment_paid_date__startDate=${payment_paid_date_startDate}` : ""}${payment_paid_date_endDate !== "" ? `&payment_paid_date__endDate=${payment_paid_date_endDate}` : ""}${is_member !== "" ? `&is_member=${is_member}` : ""}`;
+      let url = `/shopReports/salesOut?limit=${limit}&report_sales_out_type=${report_sales_out_type}&page=${page}&sort=${sort}&order=${order}${_status ? `&status=${_status}` : ""}${search ? `&search=${search}` : ""}${start_date ? `&start_date=${start_date}` : ""}${end_date ? `&end_date=${end_date}` : ""}${payment_paid_status ? `&payment_paid_status=${payment_paid_status}` : "&payment_paid_status="}${select_shop_ids !== "" ? `&select_shop_ids=${select_shop_ids}` : ""}${payment_paid_date_startDate !== "" ? `&payment_paid_date__startDate=${payment_paid_date_startDate}` : ""}${payment_paid_date_endDate !== "" ? `&payment_paid_date__endDate=${payment_paid_date_endDate}` : ""}${is_member !== "" ? `&is_member=${is_member}` : ""}`;
       url += `${per_customer_id !== "" ? `&per_customer_id=${per_customer_id}` : ""}${bus_customer_id !== "" ? `&bus_customer_id=${bus_customer_id}` : ""}${vehicle_customer_id !== "" ? `&vehicle_customer_id=${vehicle_customer_id}` : ""}${shop_product_id !== "" ? `&shop_product_id=${shop_product_id}` : ""}`
       if (select_shop_ids.length === 0) {
         setModelSearch({ select_shop_ids: authUser.UsersProfile.ShopsProfile.id, })
@@ -699,7 +1061,7 @@ const ReportSalesOut = ({ title = null, parent_search_id, parent_page }) => {
           }
         });
 
-        setColumnsTable(data);
+        await setColumnsTable(data);
         setListSearchDataTable(data);
         // setTotal(totalCount);
         setConfigTable({
@@ -1025,9 +1387,10 @@ const ReportSalesOut = ({ title = null, parent_search_id, parent_page }) => {
   };
 
   /** กดปุ่มค้นหา */
-  const onFinishSearch = (value) => {
+  const onFinishSearch = async (value) => {
     value.select_shop_ids = isUndefined(value.select_shop_ids) ? modelSearch.select_shop_ids : value.select_shop_ids
-    setModelSearch(value);
+    await setModelSearch(() => value);
+    console.log("modd", modelSearch)
     getDataSearch({
       search: value.search,
       _status: value.status,
@@ -1037,7 +1400,8 @@ const ReportSalesOut = ({ title = null, parent_search_id, parent_page }) => {
       payment_paid_status: value.payment_paid_status,
       select_shop_ids: value.select_shop_ids,
       payment_paid_date: value.payment_paid_date,
-      is_member: value.is_member
+      is_member: value.is_member,
+      report_sales_out_type: value.report_sales_out_type,
     });
   };
 
@@ -1073,8 +1437,6 @@ const ReportSalesOut = ({ title = null, parent_search_id, parent_page }) => {
   const exportExcel = async () => {
     setLoading(true);
 
-
-
     let search = modelSearch.search ?? ""
     let _status = modelSearch.status
     let documentdate = modelSearch.documentdate
@@ -1083,6 +1445,7 @@ const ReportSalesOut = ({ title = null, parent_search_id, parent_page }) => {
     let select_shop_ids = modelSearch.select_shop_ids ?? authUser.UsersProfile.ShopsProfile.id
     let payment_paid_date = modelSearch.payment_paid_date
     let is_member = modelSearch.is_member ?? false
+    let report_sales_out_type = modelSearch.report_sales_out_type ?? "list"
 
     const dateFomat = "YYYY-MM-DD";
     let start_date = "";
@@ -1105,27 +1468,27 @@ const ReportSalesOut = ({ title = null, parent_search_id, parent_page }) => {
       payment_paid_date_endDate = "";
     }
 
-    let url = `/shopReports/salesOut?export_format=xlsx&report_sales_out_type=list${_status ? `&status=${_status}` : ""}${search ? `&search=${search}` : ""}${start_date ? `&start_date=${start_date}` : ""}${end_date ? `&end_date=${end_date}` : ""}${payment_paid_status ? `&payment_paid_status=${payment_paid_status}` : ""}${payment_paid_date_startDate !== "" ? `&payment_paid_date__startDate=${payment_paid_date_startDate}` : ""}${payment_paid_date_endDate !== "" ? `&payment_paid_date__endDate=${payment_paid_date_endDate}` : ""}${is_member !== "" ? `&is_member=${is_member}` : ""}`;
-
-    if (
-      isArray(document_type_id) &&
-      document_type_id.length > 0
-    ) {
-      if (document_type_id.length === 1) {
-        document_type_id.map((e) => {
-          if (e.value !== "default") {
-            url += `&doc_type_id=${e.value}`;
-          }
-        });
-      } else {
-        document_type_id.map((e) => {
-          if (e.value !== "default") url += `&doc_type_id=${e.value}`;
-        });
-      }
-    } else {
-      if (document_type_id !== "default")
-        url += `&doc_type_id=${document_type_id}`;
-    }
+    let url = `/shopReports/salesOut?export_format=xlsx&report_sales_out_type=${report_sales_out_type}${_status ? `&status=${_status}` : ""}${search ? `&search=${search}` : ""}${start_date ? `&start_date=${start_date}` : ""}${end_date ? `&end_date=${end_date}` : ""}${payment_paid_status ? `&payment_paid_status=${payment_paid_status}` : ""}${payment_paid_date_startDate !== "" ? `&payment_paid_date__startDate=${payment_paid_date_startDate}` : ""}${payment_paid_date_endDate !== "" ? `&payment_paid_date__endDate=${payment_paid_date_endDate}` : ""}${is_member !== "" ? `&is_member=${is_member}` : ""}${select_shop_ids !== "" ? `&select_shop_ids=${select_shop_ids}` : ""}${document_type_id !== "" ? `&doc_type_id=${document_type_id}` : ""}`;
+    // console.log("document_type_id",document_type_id)
+    // if (
+    //   isArray(document_type_id) &&
+    //   document_type_id.length > 0
+    // ) {
+    //   if (document_type_id.length === 1) {
+    //     document_type_id.map((e) => {
+    //       if (e !== "default") {
+    //         url += `&doc_type_id=${e}`;
+    //       }
+    //     });
+    //   } else {
+    //     document_type_id.map((e) => {
+    //       if (e !== "default") url += `&doc_type_id=${e}`;
+    //     });
+    //   }
+    // } else {
+    //   if (document_type_id !== "default")
+    //     url += `&doc_type_id=${document_type_id}`;
+    // }
 
     const res = await API.get(url);
     // const res = await API.get(`/shopReports/salesOut?export_format=xlsx&start_date=${startDate}&end_date=${endDate}`)
@@ -1258,6 +1621,24 @@ const ReportSalesOut = ({ title = null, parent_search_id, parent_page }) => {
           },
         ],
       },
+      // {
+      //   index: 1,
+      //   type: "select",
+      //   name: "report_sales_out_type",
+      //   showSearch: true,
+      //   label: GetIntlMessages("รูปแบบการแสดงผล"),
+      //   col_md: 6,
+      //   list: [
+      //     {
+      //       key: "หัวเอกสาร",
+      //       value: "doc"
+      //     },
+      //     {
+      //       key: "รายการ",
+      //       value: "list"
+      //     },
+      //   ],
+      // },
     ],
     col: 8,
     button: {

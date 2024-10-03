@@ -650,9 +650,10 @@ const TranferInventoryDoc = ({ docTypeId, title = null, callBack, filter_shop_id
             let product_arr = []
             product_list.map((e, index) => {
                 let find = product_arr.find(x => x.product_id === e.shop_product_id)
+                console.log("fff", e?.shop_product_id)
                 if (find === undefined) {
                     product_arr.push({
-                        product_id: configModal.mode === "add" ? e?.shop_product_id ?? null : e?.ShopProduct?.id ?? null,
+                        product_id: configModal.mode === "add" ? e?.shop_product_id ?? null : e?.ShopProduct?.id ?? e?.shop_product_id,
                         warehouse_detail: [{
                             warehouse: configModal.mode === "add" ? e?.warehouse_id ?? null : e?.warehouse_detail[0]?.warehouse ?? null,
                             shelf: {
@@ -940,7 +941,7 @@ const TranferInventoryDoc = ({ docTypeId, title = null, callBack, filter_shop_id
                             :
                             <div className="container-fluid">
                                 <div className='pr-5 pl-5 detail-before-table'>
-                                    <FormTranferInventoryDoc mode={configModal.mode} calculateResult={calculateResult} form={form} getStatusCarLoading={getStatusCarLoading} />
+                                    <FormTranferInventoryDoc mode={configModal.mode} calculateResult={calculateResult} form={form} getStatusCarLoading={getStatusCarLoading} callBack={callBack}/>
                                 </div>
                                 <div className='tab-detail'>
                                     <Tabs
