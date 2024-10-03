@@ -1440,7 +1440,7 @@ const ReportSalesOut = ({ title = null, parent_search_id, parent_page }) => {
     let search = modelSearch.search ?? ""
     let _status = modelSearch.status
     let documentdate = modelSearch.documentdate
-    let document_type_id = modelSearch.document_type_id ?? ["67c45df3-4f84-45a8-8efc-de22fef31978", "7ef3840f-3d7f-43de-89ea-dce215703c16"]
+    let document_type_id = modelSearch.document_type_id === "default" ? ["67c45df3-4f84-45a8-8efc-de22fef31978", "7ef3840f-3d7f-43de-89ea-dce215703c16"] : modelSearch.document_type_id
     let payment_paid_status = modelSearch.payment_paid_status ?? "1,2,3,4,5"
     let select_shop_ids = modelSearch.select_shop_ids ?? authUser.UsersProfile.ShopsProfile.id
     let payment_paid_date = modelSearch.payment_paid_date
