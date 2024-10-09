@@ -45,6 +45,7 @@ module.exports = {
       '/Inventory/ReceiveTranferInventoryDoc': { page: '/Inventory/ReceiveTranferInventoryDoc' },
       '/Inventory/ProductReturnDoc': { page: '/Inventory/ProductReturnDoc' },
       '/Inventory/ProductReturnReceiptDoc': { page: '/Inventory/ProductReturnReceiptDoc' },
+      '/Inventory/AdjustIncreaseDocuments': { page: '/Inventory/AdjustIncreaseDocuments' },
 
       '/MyData/MichelinSalesList': { page: '/MyData/MichelinSalesList' },
       '/MyData/MyPointMovementList': { page: '/MyData/MyPointMovementList' },

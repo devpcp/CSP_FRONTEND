@@ -158,7 +158,7 @@ const LineOAFormShopWholeSaleDoc = ({ mode, disabledWhenDeliveryDocActive = fals
         id: "1",
         title: 'ส่วนลด 500 บาท',
         description: "เมื่อซื้อสินค้า 4 เส้นขึ้นไป รับส่วนลด 500 บาท",
-        status: false,
+        status: true,
       },
     ];
     let couponList2 = [
@@ -166,7 +166,7 @@ const LineOAFormShopWholeSaleDoc = ({ mode, disabledWhenDeliveryDocActive = fals
         id: "1",
         title: 'ส่วนลด 500 บาท',
         description: "เมื่อซื้อสินค้า 4 เส้นขึ้นไป รับส่วนลด 500 บาท",
-        status: false,
+        status: true,
         // status: user_data.is_use_coupon_michelin_500,
       },
     ];

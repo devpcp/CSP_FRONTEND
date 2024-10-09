@@ -255,10 +255,10 @@ const ReportPurchaseTax = () => {
 
 
     /* ค้นหา */
-    const getDataSearch = async ({ search = modelSearch.search ?? "", limit = configTable.limit, page = configTable.page, sort = configSort.sort, order = (configSort.order === "descend" ? "desc" : "asc"), doc_date = modelSearch.doc_date, select_shop_ids = modelSearch.select_shop_ids ?? [], filter_zero = modelSearch.filter_zero ?? false, tax_period = modelSearch.tax_period ?? "" }) => {
+    const getDataSearch = async ({ search = modelSearch.search ?? "", limit = configTable.limit, page = configTable.page, sort = configSort.sort, order = (configSort.order === "descend" ? "desc" : "asc"), doc_date = modelSearch.doc_date, select_shop_ids = modelSearch.select_shop_ids ?? [], filter_zero = modelSearch.filter_zero ?? false, tax_period = modelSearch.tax_period }) => {
         try {
             if (page === 1) setLoading(true)
-
+            console.log("modelSearch", modelSearch)
             const dateFomat = "YYYY-MM-DD"
             let doc_date_startDate = ""
             let doc_date_endDate = ""
@@ -272,7 +272,7 @@ const ReportPurchaseTax = () => {
 
 
             if (select_shop_ids.length === 0) {
-                setModelSearch({ select_shop_ids: authUser.UsersProfile.ShopsProfile.id, })
+                setModelSearch({ ...modelSearch, select_shop_ids: authUser.UsersProfile.ShopsProfile.id, })
                 select_shop_ids = authUser.UsersProfile.ShopsProfile.id
             }
 
@@ -285,17 +285,13 @@ const ReportPurchaseTax = () => {
             let paymentStatusValue = paymentStatus.map((e) => {
                 return e.value;
             });
+            console.log("tax_perioddd", tax_period)
+            let new_tax_period = ""
+            if (tax_period !== null) {
+                new_tax_period = moment(tax_period).format("YYYY-MM")
+            }
 
-            setModelSearch({
-                search: search,
-                page: page,
-                doc_date: doc_date,
-                select_shop_ids: select_shop_ids,
-                filter_zero: filter_zero,
-                tax_period: tax_period ? moment(tax_period) : null
-            })
-
-            let url = `/shopReports/salesTax?bolFilter_show_zero_vat=${filter_zero}&report_tax_type=purchase_tax&arrStrFilter__status=0,1,2,3,4&arrStrFilter__payment_paid_status=${paymentStatusValue}&limit=${limit}&page=${page}&sort=${sort}&order=${order}&search=${search}${doc_date_startDate !== "" ? `&doc_date_startDate=${doc_date_startDate}` : ""}${doc_date_endDate !== "" ? `&doc_date_endDate=${doc_date_endDate}` : ""}${select_shop_ids !== "" ? `&select_shop_ids=${select_shop_ids}` : ""}${tax_period !== "" || tax_period !== undefined || tax_period !== null ? `&tax_period=${tax_period}` : ""}`
+            let url = `/shopReports/salesTax?bolFilter_show_zero_vat=${filter_zero}&report_tax_type=purchase_tax&arrStrFilter__status=0,1,2,3,4&arrStrFilter__payment_paid_status=${paymentStatusValue}&limit=${limit}&page=${page}&sort=${sort}&order=${order}&search=${search}${doc_date_startDate !== "" ? `&doc_date_startDate=${doc_date_startDate}` : ""}${doc_date_endDate !== "" ? `&doc_date_endDate=${doc_date_endDate}` : ""}${select_shop_ids !== "" ? `&select_shop_ids=${select_shop_ids}` : ""}${new_tax_period !== "" ? `&tax_period=${new_tax_period}` : ""}`
             const res = await API.get(url)
             if (res.data.status === "success") {
                 const { totalCount, data } = res.data.data;
@@ -362,14 +358,28 @@ const ReportPurchaseTax = () => {
     /** กดปุ่มค้นหา */
     const onFinishSearch = (value) => {
         try {
+
+            const searchModel = {
+                ...modelSearch,
+                search: value.search,
+                page: init.configTable.page,
+                doc_date: value.doc_date,
+                select_shop_ids: value.select_shop_ids,
+                filter_zero: value.filter_zero,
+                tax_period: value.tax_period
+            };
+
+            setModelSearch(searchModel);
+
             getDataSearch({
                 search: value.search,
                 page: init.configTable.page,
                 doc_date: value.doc_date,
                 select_shop_ids: value.select_shop_ids,
                 filter_zero: value.filter_zero,
-                tax_period: moment(value.tax_period).format("YYYY-MM")
+                tax_period: value.tax_period
             })
+
         } catch (error) {
 
         }
@@ -389,7 +399,8 @@ const ReportPurchaseTax = () => {
             page: init.configTable.page,
             sort: init.configSort.sort,
             order: (init.configSort.order === "descend" ? "desc" : "asc"),
-            filter_zero: init.modelSearch.filter_zero ?? true
+            filter_zero: init.modelSearch.filter_zero ?? true,
+            tax_period: null
         })
     }
 
@@ -407,7 +418,7 @@ const ReportPurchaseTax = () => {
             let search = modelSearch.search
             let select_shop_ids = modelSearch.select_shop_ids
             let filter_zero = modelSearch.filter_zero
-            let tax_period =  moment(modelSearch.tax_period).format("YYYY-MM")
+            let tax_period = moment(modelSearch.tax_period).format("YYYY-MM")
             const dateFomat = "YYYY-MM-DD"
             let doc_date_startDate = ""
             let doc_date_endDate = ""
