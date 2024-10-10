@@ -26,7 +26,7 @@ const { Text, Link } = Typography;
 const { Search } = Input;
 const cookies = new Cookies();
 
-const CustomersIndex = ({ status, pageId, title = null, callBack, listIndex, selectProductList }) => {
+const CustomersIndex = ({ status, pageId, title = null, callBack, listIndex, selectProductList, minStock }) => {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
 
@@ -187,7 +187,6 @@ const CustomersIndex = ({ status, pageId, title = null, callBack, listIndex, sel
                 align: "center",
                 sorter: true,
                 render: (text, record) => {
-                    console.log("isFunctioncallBack", isFunction(callBack))
                     if (isFunction(callBack)) {
                         if (selectProductList?.find(x => x.shop_product_id === text.id)) {
                             return (
@@ -266,22 +265,6 @@ const CustomersIndex = ({ status, pageId, title = null, callBack, listIndex, sel
                 },
             },
             {
-                title: 'ราคาขายปลีก/หน่วย',
-                dataIndex: 'ShopProduct',
-                key: 'ShopProduct',
-                width: 110,
-                align: "right",
-                render: (text, record) => (get(text, 'price.suggasted_re_sell_price.retail', "-") == 0) ? "-" : (+get(text, 'price.suggasted_re_sell_price.retail', "-"))?.toLocaleString() ?? "-"
-            },
-            {
-                title: 'ราคาขายส่ง/หน่วย',
-                dataIndex: 'ShopProduct',
-                key: 'ShopProduct',
-                width: 110,
-                align: "right",
-                render: (text, record) => (get(text, 'price.suggasted_re_sell_price.wholesale', "-") == 0) ? "-" : (+get(text, 'price.suggasted_re_sell_price.wholesale', "-"))?.toLocaleString() ?? "-"
-            },
-            {
                 title: 'จำนวนสินค้าคงเหลือ (QTY)',
                 dataIndex: 'balance',
                 key: 'balance',
@@ -306,6 +289,22 @@ const CustomersIndex = ({ status, pageId, title = null, callBack, listIndex, sel
                         </>
                     )
                 },
+            },
+            {
+                title: 'ราคาขายปลีก/หน่วย',
+                dataIndex: 'ShopProduct',
+                key: 'ShopProduct',
+                width: 110,
+                align: "right",
+                render: (text, record) => (get(text, 'price.suggasted_re_sell_price.retail', "-") == 0) ? "-" : (+get(text, 'price.suggasted_re_sell_price.retail', "-"))?.toLocaleString() ?? "-"
+            },
+            {
+                title: 'ราคาขายส่ง/หน่วย',
+                dataIndex: 'ShopProduct',
+                key: 'ShopProduct',
+                width: 110,
+                align: "right",
+                render: (text, record) => (get(text, 'price.suggasted_re_sell_price.wholesale', "-") == 0) ? "-" : (+get(text, 'price.suggasted_re_sell_price.wholesale', "-"))?.toLocaleString() ?? "-"
             },
         ];
 
@@ -334,7 +333,6 @@ const CustomersIndex = ({ status, pageId, title = null, callBack, listIndex, sel
                 width: 100,
                 render: (text, record) => {
                     let check = text.price_arr ? text?.price_arr.filter(x => x.price_name === e.price_name) : []
-                    console.log("check", check)
                     if (text.price_arr) {
                         if (check.length > 0) {
                             return (+check[0].price_value).toLocaleString()
@@ -707,7 +705,7 @@ const CustomersIndex = ({ status, pageId, title = null, callBack, listIndex, sel
             search: "",
             status: "active",
             // filter_available_balance: true
-            filter_balance: [0, maximunBalance],
+            filter_balance: [minStock ?? 0, maximunBalance],
             type_group_id: null,
             product_type_id: null,
             product_brand_id: null,

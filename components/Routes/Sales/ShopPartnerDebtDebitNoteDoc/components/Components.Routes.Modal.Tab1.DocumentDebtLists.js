@@ -528,7 +528,16 @@ const ComponentsRoutesDocumentDebtLists = ({ onFinish, calculateResult, mode }) 
                     <Col lg={12} md={12} xs={24}>
                         <Row gutter={[20, 10]}>
                             <Col span={12}>
-                                <Form.Item label={GetIntlMessages("หมายเหตุ")} name="remark">
+                                <Form.Item
+                                    label={GetIntlMessages("หมายเหตุ")}
+                                    name="remark"
+                                    rules={[
+                                        {
+                                            required: true,
+                                            message: "กรุณาเลือกผู้จำหน่าย"
+                                        },
+                                    ]}
+                                >
                                     <Input.TextArea rows={16} disabled={mode === "view"} />
                                 </Form.Item>
 

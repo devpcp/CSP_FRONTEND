@@ -1,11 +1,13 @@
 import { InfoCircleTwoTone, PlusOutlined } from '@ant-design/icons'
-import { Form, Input, Row, Col, Select, DatePicker, InputNumber, Divider, Space, Tooltip } from 'antd'
+import { Form, Input, Row, Col, Select, DatePicker, InputNumber, Divider, Space, Tooltip, Button, Modal } from 'antd'
 import { debounce, get, isArray, isEmpty, isFunction, isPlainObject } from 'lodash'
 import moment from 'moment'
 import React, { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 import API from '../../../../../util/Api'
 import GetIntlMessages from '../../../../../util/GetIntlMessages'
+import BusinessPartnersData from "../../../../../routes/MyData/BusinessPartnersData"
+
 const FormTemporaryDeliveryOrderDoc = ({ mode, calculateResult, disabledWhenDeliveryDocActive = false, getStatusCarLoading }) => {
 
     const form = Form.useFormInstance();
@@ -17,6 +19,8 @@ const FormTemporaryDeliveryOrderDoc = ({ mode, calculateResult, disabledWhenDeli
     const [userList, setUserList] = useState([])
     const [repairManList, setRepairManList] = useState([])
     // const partnerPhoneList = Form.useWatch("partner_phone_list", { form, preserve: true })
+    const [isBusinessPartnersDataModalVisible, setIsBusinessPartnersDataModalVisible] = useState(false);
+    const [shopBusinessPartners, setShopBusinessPartners] = useState([])
 
     useEffect(() => {
         // getMasterData()
@@ -212,6 +216,62 @@ const FormTemporaryDeliveryOrderDoc = ({ mode, calculateResult, disabledWhenDeli
         }
     }
 
+    const callBackPickBusinessPartners = async (data) => {
+        try {
+            let partner_credit_debt_unpaid_balance = 0, partner_credit_debt_current_balance = 0
+            console.log("data", data)
+            let businessPartnerData = await getShopBusinessPartnersDataListAll()
+            const newData = businessPartnerData.map(e => {
+                const partner_name = !!e ? e.partner_name[locale.locale] : "-";
+
+                return {
+                    ...e,
+                    partner_name,
+                    bus_partner_id: e.id
+                }
+            })
+
+            if (isPlainObject(data)) {
+                partner_credit_debt_unpaid_balance = data?.other_details?.debt_amount ?? null
+                partner_credit_debt_current_balance = (Number(data?.other_details?.credit_limit) - Number(data?.other_details?.debt_amount)) ?? null
+            }
+
+            let _model = {
+                bus_partner_id: data.id,
+                partner_list: newData,
+                partner_credit_debt_unpaid_balance,
+                partner_credit_debt_current_balance,
+                partner_credit_debt_approval_balance: data?.other_details?.credit_limit ?? null,
+                partner_credit_debt_payment_period: data?.other_details?.credit_term ?? null,
+            }
+            await form.setFieldsValue(_model)
+            handleCancelBusinessPartnersDataModal()
+        } catch (error) {
+            console.log("callBackPickBusinessPartners", error)
+        }
+    }
+
+    const handleOpenBusinessPartnersDataModal = () => {
+        try {
+            setIsBusinessPartnersDataModalVisible(true)
+        } catch (error) {
+
+        }
+    }
+    const handleCancelBusinessPartnersDataModal = () => {
+        try {
+            setIsBusinessPartnersDataModalVisible(false)
+        } catch (error) {
+
+        }
+    }
+
+    const getShopBusinessPartnersDataListAll = async (search = "") => {
+        const { data } = await API.get(`/shopBusinessPartners/all?${search != "" ? `search=${search}&` : ""}limit=9999&page=1&sort=partner_name.th&order=asc&status=default`)
+        // console.log('data.data shopBusinessCustomers', data.data.data)
+        return data.data.data
+    }
+
     return (
         <>
             <Row gutter={[20, 0]}>
@@ -251,33 +311,49 @@ const FormTemporaryDeliveryOrderDoc = ({ mode, calculateResult, disabledWhenDeli
                     : null}
 
                 <Col lg={8} md={12} sm={12} xs={24}>
-                    <Form.Item
-                        name="bus_partner_id"
-                        label="ชื่อผู้จำหน่าย"
-                        rules={[
-                            {
-                                required: true,
-                                message: "กรุณาเลือกผู้จำหน่าย"
-                            },
-                        ]}
-                    >
-                        <Select
-                            showSearch
-                            showArrow={false}
-                            filterOption={false}
-                            notFoundContent={loadingEasySearch ? "กำลังค้นหาข้อมูล...กรุณารอสักครู่..." : "ไม่พบข้อมูล"}
-                            placeholder="กรุณาพิมพ์อย่าง 1 ตัวเพื่อค้นหา"
-                            style={{ width: "100%" }}
-                            disabled={mode === "view"}
-                            loading={loadingEasySearch}
-                            onSearch={(value) => debounceSearchPartner(value, "search")}
-                            onSelect={(value) => handleSearchPartner(value, "select")}
+                    <Row>
+                        <Col lg={20} md={20} sm={18} xs={18}>
+                            <Form.Item
+                                name="bus_partner_id"
+                                label="ชื่อผู้จำหน่าย"
+                                rules={[
+                                    {
+                                        required: true,
+                                        message: "กรุณาเลือกผู้จำหน่าย"
+                                    },
+                                ]}
+                            >
+                                <Select
+                                    showSearch
+                                    showArrow={false}
+                                    filterOption={false}
+                                    notFoundContent={loadingEasySearch ? "กำลังค้นหาข้อมูล...กรุณารอสักครู่..." : "ไม่พบข้อมูล"}
+                                    placeholder="กรุณาพิมพ์อย่าง 1 ตัวเพื่อค้นหา"
+                                    style={{ width: "98%" }}
+                                    disabled={mode === "view"}
+                                    loading={loadingEasySearch}
+                                    onSearch={(value) => debounceSearchPartner(value, "search")}
+                                    onSelect={(value) => handleSearchPartner(value, "select")}
 
-                        >
-                            {getArrValue("partner_list").map(e => <Select.Option value={e.id} key={`partner-id-${e.id}`}>{e.partner_name}</Select.Option>)}
+                                >
+                                    {getArrValue("partner_list").map(e => <Select.Option value={e.id} key={`partner-id-${e.id}`}>{e.partner_name}</Select.Option>)}
 
-                        </Select>
-                    </Form.Item>
+                                </Select>
+                            </Form.Item>
+                        </Col>
+
+                        <Col lg={4} md={4} sm={6} xs={6} style={{ paddingTop: "30.8px", justifyContent: "end" }}>
+                            <Form.Item >
+                                <Button
+                                    type='primary'
+                                    style={{ width: "100%", borderRadius: "10px" }}
+                                    onClick={() => handleOpenBusinessPartnersDataModal()}
+                                >
+                                    เลือก
+                                </Button>
+                            </Form.Item>
+                        </Col>
+                    </Row>
                 </Col>
 
                 {/* <Col lg={8} md={12} sm={12} xs={24} hidden>
@@ -505,8 +581,36 @@ const FormTemporaryDeliveryOrderDoc = ({ mode, calculateResult, disabledWhenDeli
                         <Input />
                     </Form.Item>
                 </Col>
+                <Col lg={8} md={12} sm={12} xs={24}>
+                    <Form.Item
+                        validateTrigger={['onChange', 'onBlur']}
+                        name="tax_period"
+                        label={GetIntlMessages("ยื่นภาษีรวมในงวดที่")}
+                        rules={[
+                            {
+                                required: true,
+                                message: "กรุณากรอกข้อมูล",
+                            },
+                        ]}
+                    >
+                        <DatePicker picker="month" disabled={mode == "view"} format={"MM/YYYY"} style={{ width: "100%" }} />
+                    </Form.Item>
+                </Col>
             </Row>
-
+            <Modal
+                maskClosable={false}
+                open={isBusinessPartnersDataModalVisible}
+                onCancel={handleCancelBusinessPartnersDataModal}
+                width="90vw"
+                style={{ top: 5 }}
+                footer={(
+                    <>
+                        <Button onClick={() => handleCancelBusinessPartnersDataModal()}>{GetIntlMessages("กลับ")}</Button>
+                    </>
+                )}
+            >
+                {<BusinessPartnersData title="จัดการข้อมูลผู้จำหน่าย" callBack={callBackPickBusinessPartners} />}
+            </Modal>
         </>
 
     )

@@ -475,9 +475,9 @@ const DebtorDoc = ({ docTypeId }) => {
                     vehicles_partners_list: [],
                     partner_list: [],
                     partner_phone_list: [],
-                    // repair_man_list : [],
                     easy_search_list: [],
-                    debtor_billing_list: []
+                    debtor_billing_list: [],
+                    tax_period: moment(new Date()),
                 })
             }
             // setActiveKeyTab("1")
@@ -518,7 +518,8 @@ const DebtorDoc = ({ docTypeId }) => {
                 partner_id: bus_partner_id,
                 remark: details.remark ?? null,
                 remark_inside: details.remark_inside ?? null,
-                ref_doc: details.ref_doc ?? null
+                ref_doc: details.ref_doc ?? null,
+                tax_period :moment(details.tax_period) ?? null
             }
 
             form.setFieldsValue({ ...model })
@@ -781,6 +782,7 @@ const DebtorDoc = ({ docTypeId }) => {
                     ref_doc,
                     remark,
                     remark_inside,
+                    tax_period: moment(values.tax_period).format("YYYY-MM")
                 },
                 shopPartnerDebtDebitNoteLists: !!arr_debt_list && arr_debt_list.length > 0 ?
                     arr_debt_list.map((e, index) => {
