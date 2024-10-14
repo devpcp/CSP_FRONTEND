@@ -663,7 +663,7 @@ const ImportDocuments = ({ view_doc_id, select_shop_ids, title = null, }) => {
 
 
             }
-
+            console.log("model", _model)
             const totalCurrentAmount = amountSummary(product_list, "eachCurrentAmountTotal")
             const totalAmount = amountSummary(product_list, "eachAmountTotal")
             let res
@@ -680,10 +680,10 @@ const ImportDocuments = ({ view_doc_id, select_shop_ids, title = null, }) => {
                     res = await API.post(`/shopInventoryTransaction/add`, _model)
                 } else if (configModal.mode === "edit") {
                     _model.status = 2
-                    _model.ShopInventory_Put = {
-                        product_list,
-                        import_date: moment(value?.doc_date).format("YYYY-MM-DD")
-                    }
+                    // _model.ShopInventory_Put = {
+                    //     product_list,
+                    //     import_date: moment(value?.doc_date).format("YYYY-MM-DD")
+                    // }
                     res = await API.put(`/shopInventoryTransaction/put/${idEdit}`, _model)
                 }
 
@@ -1160,7 +1160,7 @@ const ImportDocuments = ({ view_doc_id, select_shop_ids, title = null, }) => {
                                 name="References_doc"
                                 label={GetIntlMessages("เอกสารอ้างอิง")}
                             >
-                                <Input disabled={configModal.mode === "view"} />
+                                <Input disabled={configModal.mode !== "add"} />
                             </Form.Item>
                         </Col>
                         <Col xs={24} lg={8} xxl={8}>
@@ -1171,7 +1171,7 @@ const ImportDocuments = ({ view_doc_id, select_shop_ids, title = null, }) => {
                                 label={GetIntlMessages("วันที่เอกสาร")}
 
                             >
-                                <DatePicker disabled={configModal.mode === "view"} format={'DD/MM/YYYY'} style={{ width: "100%" }} />
+                                <DatePicker disabled={configModal.mode !== "add"} format={'DD/MM/YYYY'} style={{ width: "100%" }} />
                             </Form.Item>
                         </Col>
                         <Col xs={24} lg={8} xxl={8} >
@@ -1203,7 +1203,7 @@ const ImportDocuments = ({ view_doc_id, select_shop_ids, title = null, }) => {
                                 label={GetIntlMessages("ผู้อนุมัติ")}
 
                             >
-                                <Input disabled={configModal.mode === "view"} />
+                                <Input disabled={configModal.mode !== "add"} />
                                 {/* <DatePicker disabled={configModal.mode == "view" || expireEditTimeDisable == true} format={'YYYY-MM-DD'} style={{ width: "100%" }} /> */}
                             </Form.Item>
                         </Col>
@@ -1215,7 +1215,7 @@ const ImportDocuments = ({ view_doc_id, select_shop_ids, title = null, }) => {
                                 label={GetIntlMessages("วันเวลาที่อนุมัติ")}
 
                             >
-                                <DatePicker showTime={{ format: 'HH:mm' }} disabled={configModal.mode == "view" || expireEditTimeDisable == true} format={'DD/MM/YYYY HH:mm'} style={{ width: "100%" }} />
+                                <DatePicker showTime={{ format: 'HH:mm' }} disabled={configModal.mode !== "add" || expireEditTimeDisable == true} format={'DD/MM/YYYY HH:mm'} style={{ width: "100%" }} />
                             </Form.Item>
                         </Col>
                         <Col xs={24} lg={8} xxl={8} hidden>
@@ -1226,7 +1226,7 @@ const ImportDocuments = ({ view_doc_id, select_shop_ids, title = null, }) => {
                                 label={GetIntlMessages("วันที่จัดทำเอกสาร")}
 
                             >
-                                <DatePicker disabled={configModal.mode == "view" || expireEditTimeDisable == true} format={'DD/MM/YYYY'} style={{ width: "100%" }} />
+                                <DatePicker disabled={configModal.mode !== "add" || expireEditTimeDisable == true} format={'DD/MM/YYYY'} style={{ width: "100%" }} />
                             </Form.Item>
                         </Col>
                         <Col xs={24} lg={8} xxl={8} hidden>
@@ -1236,7 +1236,7 @@ const ImportDocuments = ({ view_doc_id, select_shop_ids, title = null, }) => {
                                 // name="doc_status"
                                 label={GetIntlMessages("สถานะเอกสาร")}
                             >
-                                <Switch checkedChildren={GetIntlMessages("ปรับเพิ่ม")} unCheckedChildren={GetIntlMessages("ปรับลด")} checked={checkedDocStatus} onChange={(bool) => onChangeDocStatus(bool)} disabled={configModal.mode === "view"} />
+                                <Switch checkedChildren={GetIntlMessages("ปรับเพิ่ม")} unCheckedChildren={GetIntlMessages("ปรับลด")} checked={checkedDocStatus} onChange={(bool) => onChangeDocStatus(bool)} disabled={configModal.mode !== "add"} />
                             </Form.Item>
                         </Col>
 
@@ -1256,7 +1256,7 @@ const ImportDocuments = ({ view_doc_id, select_shop_ids, title = null, }) => {
                         {configModal.mode !== "view" && isArray(formModal.getFieldValue().product_list) && formModal.getFieldValue().product_list.length > 0 && !!formModal.getFieldValue().product_list[index]?.product_id ?
                             <div className="pb-3" id="add-plus-outlined">
                                 <div style={{ textAlign: "end" }}>
-                                    <Button onClick={() => addTableWarehouse(add, index)} icon={<PlusOutlined />}>
+                                    <Button onClick={() => addTableWarehouse(add, index)} icon={<PlusOutlined />} disabled={configModal.mode !== "add"}>
                                         เพิ่มรายการ
                                     </Button>
                                 </div>
@@ -1304,7 +1304,7 @@ const ImportDocuments = ({ view_doc_id, select_shop_ids, title = null, }) => {
                                                                     placeholder="เลือกข้อมูล"
                                                                     optionFilterProp="children"
                                                                     // disabled
-                                                                    disabled={configModal.mode === "view" || formModal.getFieldValue().product_list[index]?.warehouse_detail[i]?.new_data_status === false}
+                                                                    disabled={configModal.mode !== "add" || formModal.getFieldValue().product_list[index]?.warehouse_detail[i]?.new_data_status === false}
                                                                     onChange={(value) => onChangeWarehouse(index, i, value)}
                                                                 >
 
@@ -1330,7 +1330,7 @@ const ImportDocuments = ({ view_doc_id, select_shop_ids, title = null, }) => {
                                                                     placeholder="เลือกข้อมูล"
                                                                     optionFilterProp="children"
                                                                     // disabled
-                                                                    disabled={configModal.mode === "view" || formModal.getFieldValue().product_list[index]?.warehouse_detail[i]?.new_data_status === false}
+                                                                    disabled={configModal.mode !== "add" || formModal.getFieldValue().product_list[index]?.warehouse_detail[i]?.new_data_status === false}
                                                                 //  onChange={(value)=>onChangeWareHouse(index,index2,value)}
                                                                 >
                                                                     {getArrWarehouse(index, i).map(e => <Select.Option value={e.code}>{e.name[locale.locale]}</Select.Option>)}
@@ -1339,7 +1339,7 @@ const ImportDocuments = ({ view_doc_id, select_shop_ids, title = null, }) => {
                                                             </Form.Item>
                                                         </td>
                                                         <td>
-                                                            <FormSelectDot name={[field.name, "dot_mfd"]} fieldKey={[field.fieldKey, "dot_mfd"]} isNoStyle docTypeId={"40501ce1-c7f0-4f6a-96a0-7cd804a2f531"} importedComponentsLayouts={tailformItemLayout} disabled={configModal.mode === "view" || formModal.getFieldValue().product_list[index]?.warehouse_detail[i]?.new_data_status === false} form={formModal} index={index} field={field} />
+                                                            <FormSelectDot name={[field.name, "dot_mfd"]} fieldKey={[field.fieldKey, "dot_mfd"]} isNoStyle docTypeId={"40501ce1-c7f0-4f6a-96a0-7cd804a2f531"} importedComponentsLayouts={tailformItemLayout} disabled={configModal.mode !== "add" || formModal.getFieldValue().product_list[index]?.warehouse_detail[i]?.new_data_status === false} form={formModal} index={index} field={field} />
                                                         </td>
                                                         <td>
                                                             <Form.Item
@@ -1351,7 +1351,7 @@ const ImportDocuments = ({ view_doc_id, select_shop_ids, title = null, }) => {
                                                             >
                                                                 <Select
                                                                     optionFilterProp="children"
-                                                                    showSearch disabled={configModal.mode === "view" || formModal.getFieldValue().product_list[index]?.warehouse_detail[i]?.new_data_status === false} showArrow={false} placeholder={GetIntlMessages("เลือกข้อมูล")}>
+                                                                    showSearch disabled={configModal.mode !== "add" || formModal.getFieldValue().product_list[index]?.warehouse_detail[i]?.new_data_status === false} showArrow={false} placeholder={GetIntlMessages("เลือกข้อมูล")}>
                                                                     {formModal.getFieldValue().product_list[index].purchase_unit_list?.map((e, index) => (
                                                                         <Select.Option value={e.id} key={index}>
                                                                             {e?.type_name[locale.locale]}
@@ -1383,12 +1383,12 @@ const ImportDocuments = ({ view_doc_id, select_shop_ids, title = null, }) => {
                                                                     },
                                                                 ]}
                                                                     buttonStyle="solid"
-                                                                    disabled={configModal.mode === "view"}
+                                                                    disabled={configModal.mode !== "add"}
                                                                     onChange={(val) => onChangeEachProductStatus(val, index, i)}
                                                                     // checked={formModal.getFieldValue()?.product_list[index]?.warehouse_detail[i]?.status}
                                                                     value={formModal.getFieldValue()?.product_list[index]?.warehouse_detail[i]?.status}
                                                                 />
-                                                                {/* <Switch style={{width : "100%"}} checkedChildren={GetIntlMessages("ปรับเพิ่ม")} unCheckedChildren={GetIntlMessages("ปรับลด")} checked={formModal.getFieldValue()?.product_list[index]?.warehouse_detail[i]?.status ?? true} onChange={(bool) => onChangeEachProductStatus(bool, index, i)} disabled={configModal.mode === "view"} /> */}
+                                                                {/* <Switch style={{width : "100%"}} checkedChildren={GetIntlMessages("ปรับเพิ่ม")} unCheckedChildren={GetIntlMessages("ปรับลด")} checked={formModal.getFieldValue()?.product_list[index]?.warehouse_detail[i]?.status ?? true} onChange={(bool) => onChangeEachProductStatus(bool, index, i)} disabled={configModal.mode !== "add"} /> */}
                                                             </Form.Item>
                                                             {/* </Col> */}
                                                         </td>
@@ -1423,7 +1423,7 @@ const ImportDocuments = ({ view_doc_id, select_shop_ids, title = null, }) => {
                                                                     ]}
                                                                     showArrow
                                                                     filterOption={(input, option) => option.value.toLowerCase().indexOf(input.toLowerCase()) >= 0}
-                                                                    disabled={configModal.mode === "view"}
+                                                                    disabled={configModal.mode !== "add"}
                                                                     placeholder={GetIntlMessages("เลือกข้อมูลหรือเพิ่มข้อมูลใหม่")}
                                                                 />
                                                             </Form.Item>
@@ -1471,7 +1471,7 @@ const ImportDocuments = ({ view_doc_id, select_shop_ids, title = null, }) => {
                                                                 // label={GetIntlMessages("จำนวนคงเหลือ")}
                                                                 noStyle
                                                             >
-                                                                <Input type={`number`} disabled={configModal.mode === "view"} min={0} placeholder="จำนวน" onChange={(value) => debounceEachProductAmount(index, i, value.target.value)} />
+                                                                <Input type={`number`} disabled={configModal.mode !== "add"} min={0} placeholder="จำนวน" onChange={(value) => debounceEachProductAmount(index, i, value.target.value)} />
                                                             </Form.Item>
                                                         </td>
                                                         <td>
@@ -1602,19 +1602,19 @@ const ImportDocuments = ({ view_doc_id, select_shop_ids, title = null, }) => {
             {/* add */}
             <ModalFullScreen
                 maskClosable={false}
-                title={`${configModal.mode == "view" ? "ดูข้อมูล" : configModal.mode == "edit" ? "แก้ไขข้อมูล" : "เพิ่มข้อมูล"}ใบปรับลดปรับเพิ่มสินค้า`}
+                title={`${configModal.mode === "view" ? "ดูข้อมูล" : configModal.mode === "edit" ? "แก้ไขข้อมูล" : "เพิ่มข้อมูล"}ใบปรับลดปรับเพิ่มสินค้า`}
                 visible={isModalVisible}
                 onOk={handleOkModal}
                 onCancel={handleCancelModal}
                 // okButtonProps={{ disabled: configModal.mode == "view" || expireEditTimeDisable == true }}
-                hideSubmitButton={configModal.mode === "view"}
+                hideSubmitButton={configModal.mode !== "add"}
                 mode={configModal.mode}
                 CustomsButton={() => {
                     return (
                         <div style={{ width: "100%", display: "flex", justifyContent: "end" }}>
                             <Row gutter={[10, 10]} justify="end" style={{ width: "100%" }}>
                                 <Col xxl={{ span: 4, offset: 8 }} lg={6} md={12} xs={24} >
-                                    <Button loading={loading} style={{ width: "100%" }} onClick={() => handleCancelModal()}>{configModal.mode === "view" ? GetIntlMessages("ปิด") : GetIntlMessages("cancel")}</Button>
+                                    <Button loading={loading} style={{ width: "100%" }} onClick={() => handleCancelModal()}>{configModal.mode !== "add" ? GetIntlMessages("ปิด") : GetIntlMessages("ปิด")}</Button>
                                 </Col>
                                 <Col xxl={4} lg={6} md={12} xs={24} hidden={configModal.mode === "view"} >
                                     <Button loading={loading || loadingPage} onClick={() => handleOkModal()} style={{ width: "100%" }} type='primary'>{GetIntlMessages("บันทึก")}</Button>
@@ -1636,7 +1636,7 @@ const ImportDocuments = ({ view_doc_id, select_shop_ids, title = null, }) => {
                 >
                     <IncomeProduct form={formModal} />
 
-                    <div className="head-line-text pt-3">{GetIntlMessages("คลังสินค้า")}{loadingPage === false ? "FALSE" : "TRUE"}</div>
+                    <div className="head-line-text pt-3">{GetIntlMessages("คลังสินค้า")}{configModal.mode}</div>
                     <div className="detail-before-table">
                         <Form.Item
                             labelCol={24}
@@ -1668,7 +1668,7 @@ const ImportDocuments = ({ view_doc_id, select_shop_ids, title = null, }) => {
                                                                     showSearch
                                                                     placeholder="เลือกข้อมูล"
                                                                     optionFilterProp="children"
-                                                                    disabled={configModal.mode == "view" || expireEditTimeDisable == true || !!formModal.getFieldValue()?.References_import_doc}
+                                                                    disabled={configModal.mode !== "add" || expireEditTimeDisable == true || !!formModal.getFieldValue()?.References_import_doc}
                                                                     onChange={(value) => onChangeProductId(index, value)}
                                                                     onSearch={(value) => debounceOnSearch(index, value)}
                                                                     filterOption={false}
@@ -1694,7 +1694,7 @@ const ImportDocuments = ({ view_doc_id, select_shop_ids, title = null, }) => {
                                                                     showSearch
                                                                     placeholder="เลือกข้อมูล"
                                                                     optionFilterProp="children"
-                                                                    disabled={configModal.mode == "view" || expireEditTimeDisable == true || !!formModal.getFieldValue()?.References_import_doc}
+                                                                    disabled={configModal.mode !== "add" || expireEditTimeDisable == true || !!formModal.getFieldValue()?.References_import_doc}
                                                                     onChange={(value) => onChangeProductId(index, value)}
                                                                     onSearch={(value) => debounceOnSearch(index, value)}
                                                                     // onSearch={(value) => handleSearchProduct(index, value)}
@@ -1730,8 +1730,9 @@ const ImportDocuments = ({ view_doc_id, select_shop_ids, title = null, }) => {
                                                                 fieldKey={[field.fieldKey, "price"]}
                                                                 label={GetIntlMessages("ราคา/หน่วย")}
                                                                 rules={[RegexMultiPattern("4", GetIntlMessages("only-number"))]}
+                                                                disabled={configModal.mode !== "add"}
                                                             >
-                                                                <InputNumber stringMode min={0} precision={2} onBlur={(value) => addDecimal(index, value.target.value)} placeholder="1000" disabled={configModal.mode == "view" || expireEditTimeDisable == true} addonAfter="บาท" />
+                                                                <InputNumber stringMode min={0} precision={2} onBlur={(value) => addDecimal(index, value.target.value)} placeholder="1000" disabled={configModal.mode !== "add" || expireEditTimeDisable == true} addonAfter="บาท" />
 
                                                             </Form.Item>
                                                         </Col>
@@ -1767,6 +1768,7 @@ const ImportDocuments = ({ view_doc_id, select_shop_ids, title = null, }) => {
                                                             type="dashed"
                                                             onClick={() => addNewProductList(add)}
                                                             // onClick={() => add(addWarehouse)}
+                                                            disabled={configModal.mode !== "add"}
                                                             block
                                                             icon={<PlusOutlined />}
                                                         >
@@ -1785,12 +1787,13 @@ const ImportDocuments = ({ view_doc_id, select_shop_ids, title = null, }) => {
 
                     <Fieldset legend={GetIntlMessages("สรุปรายการ")}>
                         <Row>
-                            <Col span={8}>
+                            <Col span={12}>
                                 <Form.Item
                                     name="note"
                                     label="หมายเหตุ"
+                                    rules={[{ required: true }]}
                                 >
-                                    <Input.TextArea disabled={configModal.mode == "view" || expireEditTimeDisable} rows={9} />
+                                    <Input.TextArea disabled={configModal.mode === "view"} rows={9} />
                                 </Form.Item>
                             </Col>
                             <Col span={10} />

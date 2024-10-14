@@ -111,6 +111,7 @@ const SettingShop = () => {
                                 _model.enable_sale_warehouse_show = _model.shop_config.enable_sale_warehouse_show
                                 _model.enable_warehouse_cost_show = _model.shop_config.enable_warehouse_cost_show
                                 _model.enable_sale_tax_type = _model.shop_config.enable_sale_tax_type
+                                _model.enable_sale_price_overwrite = _model.shop_config.enable_sale_price_overwrite
                                 _model.business_hours = _model.shop_config.business_hours ?? business_hours
                                 _model.holidays = _model.shop_config.holidays
                             }
@@ -191,6 +192,7 @@ const SettingShop = () => {
                     enable_sale_warehouse_show: value.enable_sale_warehouse_show,
                     enable_warehouse_cost_show: value.enable_warehouse_cost_show,
                     enable_sale_tax_type: value.enable_sale_tax_type,
+                    enable_sale_price_overwrite: value.enable_sale_price_overwrite,
                     business_hours: value.business_hours,
                     holidays: value.holidays,
                 }
@@ -565,6 +567,24 @@ const SettingShop = () => {
                                                 />
                                             </Form.Item>
                                         </Col>
+                                        <Col span={20}>
+                                            เปิดใช้งานการ การแก้ไขราคา ใบสั่งซ่อม/ใบสั่งขาย ใบส่งสินค้าชั่วคราว
+                                            <br></br>
+                                            <Label className='second'>จะไม่สามารถแก้ไขราคาขายได้ จะต้องเลือกจากราคาที่ กำหนดไว้เท่านั้น</Label>
+                                        </Col>
+                                        <Col span={4}>
+                                            <Form.Item
+                                                name="enable_sale_price_overwrite"
+                                            >
+                                                <Select
+                                                    style={{ width: 120 }}
+                                                    options={[
+                                                        { value: true, label: 'ใช้งาน' },
+                                                        { value: false, label: 'ไม่ใช้งาน' },
+                                                    ]}
+                                                />
+                                            </Form.Item>
+                                        </Col>
                                     </Row>,
                             },
                             {
@@ -751,6 +771,7 @@ const SettingShop = () => {
                     <Form.Item name="enable_ShopSalesTransaction_legacyStyle" hidden />
                     <Form.Item name="enable_sale_cost_show" hidden />
                     <Form.Item name="enable_sale_tax_type" hidden />
+                    <Form.Item name="enable_sale_price_overwrite" hidden />
                     <Form.Item name="enable_warehouse_cost_show" hidden />
                     <Form.Item name="business_hours" hidden />
                     <Form.Item name="holidays" hidden />

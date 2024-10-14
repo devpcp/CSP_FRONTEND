@@ -44,6 +44,7 @@ const LineOAShopWholeSaleDoc = ({ title = null, callBack, productWarehousePick, 
 
         e.warehouse_detail.map((el, i) => {
           console.log("amount", amount)
+          console.log("el", el)
           if (amount >= 0) {
             let new_amount = (amount - el.shelf.balance) <= 0 ? amount : el.shelf.balance
             console.log("new_amount", new_amount)

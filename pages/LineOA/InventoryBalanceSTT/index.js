@@ -124,32 +124,30 @@ const LineOAInventoryBalance = ({ callBack }) => {
             ew.shelf.balance_show = ew.shelf.balance >= 20 ? 20 : ew.shelf.balance
             ew.shelf.Shelf = ew?.ShopWarehouse?.shelf?.find(x => x?.code === ew?.shelf?.item)
             ew.price_show = getPriceShow(e, ew)
-            ew.shelf.dot_show = ew.shelf.dot_mfd ? ew.shelf.dot_mfd.split("")[2] + ew.shelf.dot_mfd.split("")[3] === yearNow ? ew.shelf.dot_mfd.split("")[0] + "X" + ew.shelf.dot_mfd.split("")[2] + ew.shelf.dot_mfd.split("")[3] : ew.shelf.dot_mfd : ""
-
+            // ew.shelf.dot_show = ew.shelf.dot_mfd ? ew.shelf.dot_mfd.split("")[2] + ew.shelf.dot_mfd.split("")[3] === yearNow ? ew.shelf.dot_mfd.split("")[0] + "X" + ew.shelf.dot_mfd.split("")[2] + ew.shelf.dot_mfd.split("")[3] : ew.shelf.dot_mfd : ""
+            ew.shelf.dot_show = ew.shelf.dot_mfd ? ew.shelf.dot_mfd.split("")[0] + "X" + ew.shelf.dot_mfd.split("")[2] + ew.shelf.dot_mfd.split("")[3] : ""
           })
-
-          e.warehouse_detail.sort((a, b) => a.price_show - b.price_show)
+          console.log("e", e.warehouse_detail)
+          e.warehouse_detail.sort((a, b) => a?.shelf?.dot_mfd === undefined || b?.shelf?.dot_mfd === undefined ? -1 : Number(b?.shelf?.dot_mfd.slice(-2)) - Number(a?.shelf?.dot_mfd.slice(-2)))
+          // e.warehouse_detail.sort((a, b) => a.price_show - b.price_show)
 
         })
 
         data?.map((e, i) => {
           try {
-            console.log("warehouse_detail", e.warehouse_detail)
             e.warehouse_detail?.map((ew, ei) => {
               if (ew.shelf.dot_mfd) {
-                if (ew.shelf.dot_mfd.split("")[2] + ew.shelf.dot_mfd.split("")[3] === yearNow) {
-                  if (e.warehouse_show.findIndex(x => x.price_show === ew.price_show && x.shelf.dot_show.split("")[2] + x.shelf.dot_show.split("")[3] === yearNow) === -1) {
+                if (e.warehouse_show.find(x => x.shelf.dot_show.split("")[2] + x.shelf.dot_show.split("")[3] === ew.shelf.dot_mfd.split("")[2] + ew.shelf.dot_mfd.split("")[3])) {
+                  // if (ew.shelf.dot_mfd.split("")[2] + ew.shelf.dot_mfd.split("")[3] === yearNow) {
+                  if (e.warehouse_show.findIndex(x => x.price_show === ew.price_show) === -1) {
                     e.warehouse_show.push(ew)
                   } else {
                     try {
-                      console.log("find", find)
-                      let find = e.warehouse_show.find(x => x.price_show === ew.price_show && x.shelf.dot_show.split("")[2] + x.shelf.dot_show.split("")[3] === yearNow)
-                      let findIndex = e.warehouse_show.findIndex(x => x.price_show === ew.price_show && x.shelf.dot_show.split("")[2] + x.shelf.dot_show.split("")[3] === yearNow)
-                      console.log("find", find)
-                      console.log("findIndex", findIndex)
+                      let find = e.warehouse_show.find(x => x.price_show === ew.price_show)
+                      let findIndex = e.warehouse_show.findIndex(x => x.price_show === ew.price_show)
                       let balance = e.warehouse_show[findIndex].shelf.new_balance !== undefined ? (+e.warehouse_show[findIndex].shelf.new_balance) : (+find.shelf.balance)
                       let balance_show = e.warehouse_show[findIndex].shelf.new_balance_show !== undefined ? (+e.warehouse_show[findIndex].shelf.new_balance_show) : (+find.shelf.balance_show)
-                      e.warehouse_show[findIndex].shelf.new_balance_show = balance_show + (+ew.shelf.balance_show) > 20 ? "20" : (balance_show + (+ew.shelf.balance_show)).toLocaleString()
+                      e.warehouse_show[findIndex].shelf.new_balance_show = balance_show + (+ew.shelf.balance_show) > 20 ? "20>" : (balance_show + (+ew.shelf.balance_show)).toLocaleString()
                       e.warehouse_show[findIndex].shelf.new_balance = balance + (+ew.shelf.balance) > 20 ? "20" : (balance + (+ew.shelf.balance)).toLocaleString()
                     } catch (error) {
                       console.log("error", error)
@@ -383,7 +381,8 @@ const LineOAInventoryBalance = ({ callBack }) => {
 
   const addEditViewAddToCartModal = async (e, ew) => {
     try {
-      console.log("ew", ew.shelf.dot_mfd)
+      console.log("ew", ew.shelf.dot_show)
+      console.log("ewssss", e.warehouse_detail)
       let yearNow = moment(Date.now()).format("YY")
       const model = {
         list_code: e.ShopProduct.Product.master_path_code_id,
@@ -407,7 +406,7 @@ const LineOAInventoryBalance = ({ callBack }) => {
         price_discount_percent: 0,
         price_grand_total: 0,
         is_discount: false,
-        warehouse_detail: e.warehouse_detail.filter(x => x.shelf.dot_show === ew.shelf.dot_show),
+        warehouse_detail: e.warehouse_detail.filter(x => x.shelf.dot_show.split("")[2] + x.shelf.dot_show.split("")[3] === ew.shelf.dot_show.split("")[2] + ew.shelf.dot_show.split("")[3]),
         // warehouse_detail: yearNow === ew.shelf.dot_mfd.split("")[2] + ew.shelf.dot_mfd.split("")[3] ? e.warehouse_detail.filter(x => x.shelf.dot_mfd ? x.price_show === ew.price_show && yearNow === x.shelf.dot_mfd.split("")[2] + x.shelf.dot_mfd.split("")[3] : x.price_show === ew.price_show) : e.warehouse_detail.filter(x => x.shelf.dot_show === ew.shelf.dot_show),
         product_brand_name: e?.ShopProduct?.Product?.ProductBrand?.brand_name[locale.locale] ?? null,
       }

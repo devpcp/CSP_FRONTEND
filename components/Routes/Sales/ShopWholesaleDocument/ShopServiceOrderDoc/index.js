@@ -574,6 +574,7 @@ const RepairOrder = ({ docTypeId, view_doc_id, select_shop_ids, title = null, })
                 key: 'doc_date',
                 width: 100,
                 align: "center",
+                sorter: true,
                 render: (text, record) => text ? moment(text).format("DD/MM/YYYY") : "-",
             },
             {

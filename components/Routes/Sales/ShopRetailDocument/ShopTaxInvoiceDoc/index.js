@@ -425,6 +425,7 @@ const TemporaryDeliveryOrderDoc = ({ docTypeId }) => {
                         key: 'abb_doc_date',
                         width: 150,
                         align: "center",
+                        sorter: true,
                         render: (text, record) => text ? moment(text).format("DD/MM/YYYY") : "-"
                     },
 
@@ -461,6 +462,7 @@ const TemporaryDeliveryOrderDoc = ({ docTypeId }) => {
                         key: 'inv_doc_date',
                         width: 150,
                         align: "center",
+                        sorter: true,
                         render: (text, record) => text ? moment(text).format("DD/MM/YYYY") : "-"
                     },
 

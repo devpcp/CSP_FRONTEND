@@ -497,6 +497,7 @@ const TemporaryDeliveryOrderDoc = ({ docTypeId, title = null, callBack, }) => {
                 key: 'doc_date',
                 width: 150,
                 align: "center",
+                sorter: true,
                 render: (text, record) => text ? moment(text).format("DD/MM/YYYY") : "-",
             },
             {
@@ -1332,6 +1333,7 @@ const TemporaryDeliveryOrderDoc = ({ docTypeId, title = null, callBack, }) => {
                         doc_date_startDate: isArray(modelSearch.select_date) ? modelSearch.select_date[0] ?? null : null,
                         doc_date_endDate: isArray(modelSearch.select_date) ? modelSearch.select_date[1] ?? null : null,
                         payment_paid_status: modelSearch.payment_paid_status,
+                        limit: configTable.limit
                     })
                 } else {
                     Swal.fire({ title: 'มีบางอย่างผิดพลาดกรุณาติอต่อเจ้าหน้าที่ !!', icon: 'error', confirmButtonText: GetIntlMessages("submit"), confirmButtonColor: mainColor })
@@ -1342,6 +1344,7 @@ const TemporaryDeliveryOrderDoc = ({ docTypeId, title = null, callBack, }) => {
                         doc_date_startDate: isArray(modelSearch.select_date) ? modelSearch.select_date[0] ?? null : null,
                         doc_date_endDate: isArray(modelSearch.select_date) ? modelSearch.select_date[1] ?? null : null,
                         payment_paid_status: modelSearch.payment_paid_status,
+                        limit: configTable.limit
                     })
                 }
             } else {
