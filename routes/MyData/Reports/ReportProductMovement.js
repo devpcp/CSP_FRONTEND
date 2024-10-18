@@ -334,45 +334,36 @@ const ReportProductMovement = () => {
 
     /* ค้นหา */
     // const getDataSearch = async ({ _search = "", _limit = limit, _page = 1, _sort = "balance_date", _order = sortOrder !== "descend" ? "desc" : "asc", _which = (status === "management") ? "michelin data" : "my data" }) => {
-    const getDataSearch = async ({ search = modelSearch.search ?? "", filter_balance = modelSearch.filter_balance ?? "", limit = configTable.limit, page = configTable.page, sort = configSort.sort, order = (configSort.order === "descend" ? "desc" : "asc"), product_group_id = modelSearch.product_group_id ?? "", product_type_id = modelSearch.product_type_id ?? "", product_brand_id = modelSearch.product_brand_id ?? "", product_model_id = modelSearch.product_model_id ?? "", start_date = modelSearch.select_date[0] ?? "", end_date = modelSearch.select_date[1] ?? "", complete_size_id = modelSearch.complete_size_id ?? "",warehouse_id = modelSearch.warehouse_id ?? "" ,warehouse_item_id = modelSearch.warehouse_item_id ?? "" }) => {
+    const getDataSearch = async ({ search = modelSearch.search ?? "", filter_balance = modelSearch.filter_balance ?? "", limit = configTable.limit, page = configTable.page, sort = configSort.sort, order = (configSort.order === "descend" ? "desc" : "asc"), product_group_id = modelSearch.product_group_id ?? "", product_type_id = modelSearch.product_type_id ?? "", product_brand_id = modelSearch.product_brand_id ?? "", product_model_id = modelSearch.product_model_id ?? "", start_date = modelSearch.select_date[0] ?? "", end_date = modelSearch.select_date[1] ?? "", complete_size_id = modelSearch.complete_size_id ?? "", warehouse_id = modelSearch.warehouse_id ?? "", warehouse_item_id = modelSearch.warehouse_item_id ?? "" }) => {
         try {
             if (page === 1) setLoading(true)
             const res = await API.get(
-              `/shopReports/inventoryMovements/v2?limit=${limit}&page=${page}${
-                !!product_group_id
-                  ? `&product_group_id=${product_group_id}`
-                  : ""
-              }${
-                !!product_type_id ? `&product_type_id=${product_type_id}` : ""
-              }${
-                !!product_brand_id
-                  ? `&product_brand_id=${product_brand_id}`
-                  : ""
-              }${
-                !!product_model_id
-                  ? `&product_model_id=${product_model_id}`
-                  : ""
-              }${
-                !!complete_size_id
-                  ? `&complete_size_id=${complete_size_id}`
-                  : ""
-              }${
-                !!warehouse_id
-                  ? `&warehouse_id=${warehouse_id}`
-                  : ""
-              }${
-                !!warehouse_item_id
-                  ? `&warehouse_item_id=${warehouse_item_id}`
-                  : ""
-              }${
-                start_date
-                  ? `&start_date=${moment(start_date).format("YYYY-MM-DD")}`
-                  : ""
-              }${
-                end_date
-                  ? `&end_date=${moment(end_date).format("YYYY-MM-DD")}`
-                  : ""
-              }`
+                `/shopReports/inventoryMovements/v2?limit=${limit}&page=${page}${!!product_group_id
+                    ? `&product_group_id=${product_group_id}`
+                    : ""
+                }${!!product_type_id ? `&product_type_id=${product_type_id}` : ""
+                }${!!product_brand_id
+                    ? `&product_brand_id=${product_brand_id}`
+                    : ""
+                }${!!product_model_id
+                    ? `&product_model_id=${product_model_id}`
+                    : ""
+                }${!!complete_size_id
+                    ? `&complete_size_id=${complete_size_id}`
+                    : ""
+                }${!!warehouse_id
+                    ? `&warehouse_id=${warehouse_id}`
+                    : ""
+                }${!!warehouse_item_id
+                    ? `&warehouse_item_id=${warehouse_item_id}`
+                    : ""
+                }${start_date
+                    ? `&start_date=${moment(start_date).format("YYYY-MM-DD")}`
+                    : ""
+                }${end_date
+                    ? `&end_date=${moment(end_date).format("YYYY-MM-DD")}`
+                    : ""
+                }`
             );
             // const resShopStock = await API.get(`/shopStock/all?limit=${limit}&page=${page}&sort=${sort}&order=${order}&search=${search}&status=active&min_balance=0&max_balance=0${!!type_group_id ? `&type_group_id=${type_group_id}` : ""}${!!product_type_id ? `&product_type_id=${product_type_id}` : ""}${!!product_brand_id ? `&product_brand_id=${product_brand_id}` : ""}${!!product_model_id ? `&product_model_id=${product_model_id}` : ""}`)
             if (res.data.status === "success") {
@@ -578,15 +569,42 @@ const ReportProductMovement = () => {
     const onFinishExport = async () => {
         try {
             setLoadingExport(true)
-            const { product_group_id, product_type_id, product_brand_id, product_model_id, filter_balance } = modelSearch
-            const res = await API.get(`/shopStock/report/allStock?dot=${isIncludeDot === true ? 1 : 0}&filter_available_balance=${isIncludeZero === true ? 1 : 0}&min_balance=${filter_balance[0]}&max_balance=${filter_balance[1]}&export_format=xlsx&search=${modelSearch.search ?? ""}${!!product_group_id ? `&product_group_id=${product_group_id ?? ""}` : ""}${!!product_type_id ? `&product_type_id=${product_type_id ?? ""}` : ""}${!!product_brand_id ? `&product_brand_id=${product_brand_id ?? ""}` : ""}${!!product_model_id ? `&product_model_id=${product_model_id ?? ""}` : ""}`)
+            const { product_group_id, product_type_id, product_brand_id, product_model_id, complete_size_id, warehouse_id, warehouse_item_id, start_date, end_date } = modelSearch
+            const res = await API.get(
+                `/shopReports/inventoryMovements/v2?export_format=xlsx&limit=99999&page=1${!!product_group_id
+                    ? `&product_group_id=${product_group_id}`
+                    : ""
+                }${!!product_type_id ? `&product_type_id=${product_type_id}` : ""
+                }${!!product_brand_id
+                    ? `&product_brand_id=${product_brand_id}`
+                    : ""
+                }${!!product_model_id
+                    ? `&product_model_id=${product_model_id}`
+                    : ""
+                }${!!complete_size_id
+                    ? `&complete_size_id=${complete_size_id}`
+                    : ""
+                }${!!warehouse_id
+                    ? `&warehouse_id=${warehouse_id}`
+                    : ""
+                }${!!warehouse_item_id
+                    ? `&warehouse_item_id=${warehouse_item_id}`
+                    : ""
+                }${start_date
+                    ? `&start_date=${moment(start_date).format("YYYY-MM-DD")}`
+                    : ""
+                }${end_date
+                    ? `&end_date=${moment(end_date).format("YYYY-MM-DD")}`
+                    : ""
+                }`
+            );
             // const res = await API.get(`/shopStock/report/allStock?dot=${isIncludeDot === true ? 1 : 0}&filter_available_balance=${isIncludeZero === true ? 1 : 0}&export_format=xlsx&search=${modelSearch.search ?? ""}`)
 
             if (res.data.status === "success") window.open(`${process.env.NEXT_PUBLIC_DIRECTORY}/assets/${res.data.data}`), setIsIncludeDot((prevValue) => false), setIsIncludeZero((prevValue) => false)
             else message.warn('มีบางอย่างผิดพลาดกรุณาติดต่อเจ้าหน้าที่ !!');
             setLoadingExport(false)
         } catch (error) {
-            // console.log('error :>> ', error);
+            console.log('error :>> ', error);
         }
     }
     const onFinishExportFailed = async () => {
@@ -625,8 +643,8 @@ const ReportProductMovement = () => {
             product_brand_id: null,
             product_model_id: null,
             complete_size_id: null,
-            warehouse_id : null,
-            warehouse_item_id : null,
+            warehouse_id: null,
+            warehouse_item_id: null,
             select_date: [],
         }
     }
@@ -669,7 +687,7 @@ const ReportProductMovement = () => {
         try {
             // console.log('value :>> ', value);
 
-            const { product_group_id, product_type_id, product_brand_id, product_model_id, select_date, complete_size_id, warehouse_id, warehouse_item_id} = value
+            const { product_group_id, product_type_id, product_brand_id, product_model_id, select_date, complete_size_id, warehouse_id, warehouse_item_id } = value
 
             if (product_group_id !== oldTypeGroupId) product_type_id = null, product_brand_id = null, product_model_id = null, complete_size_id = null
             if (warehouse_id !== oldWarehouseId) warehouse_item_id = null
@@ -985,7 +1003,7 @@ const ReportProductMovement = () => {
         button: {
             download: false,
             import: false,
-            export: false,
+            export: true,
         },
         onFinishSearch,
         onFinishError,

@@ -168,9 +168,10 @@ const CustomersIndex = ({ status, pageId }) => {
             {
                 title: 'รหัส',
                 dataIndex: 'Product',
-                key: 'Product',
+                key: 'master_path_code_id',
                 width: 150,
                 align: "center",
+                sorter: true,
                 render: (text, record) => _.get(text, 'master_path_code_id', "-")
                 // render: (text, record) => text ? text.master_path_code_id : "-",
             },
