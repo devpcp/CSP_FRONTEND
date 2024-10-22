@@ -368,7 +368,12 @@ const ComponentsRoutesModalFormRepairOrder = ({ mode, calculateResult, disabledW
                 address,
                 tags,
                 tags_obj,
-                sales_man: newData[0]?.other_details?.employee_sales_man_id ? [newData[0]?.other_details?.employee_sales_man_id] : []
+                sales_man: newData[0]?.other_details?.employee_sales_man_id ? [newData[0]?.other_details?.employee_sales_man_id] : [],
+                vehicle_customer_id: null,
+                vehicles_registration: null,
+                vehicles_customers_list: [],
+                previous_mileage: null,
+                current_mileage: null
             }
             setCustomerType(customer_type)
             setCustomerPickToCreateINV(customer_type === "person" ? data : data)

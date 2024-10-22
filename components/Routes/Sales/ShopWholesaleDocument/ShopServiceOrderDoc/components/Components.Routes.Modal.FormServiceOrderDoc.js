@@ -364,6 +364,7 @@ const FormServiceOrderDoc = ({ mode, calculateResult, disabledWhenDeliveryDocAct
 
         }
     }
+
     return (
         <>
             <Row gutter={[20, 0]}>
@@ -424,7 +425,7 @@ const FormServiceOrderDoc = ({ mode, calculateResult, disabledWhenDeliveryDocAct
 
                 <Col xs={24} lg={8} xxl={8} style={{ width: "100%" }}>
                     <Row>
-                        <Col lg={20} md={20} sm={18} xs={18}>
+                        <Col span={mode === "view" ? 24 : 20}>
                             <Form.Item
                                 name="customer_id"
                                 label="ชื่อลูกค้า"
@@ -467,11 +468,12 @@ const FormServiceOrderDoc = ({ mode, calculateResult, disabledWhenDeliveryDocAct
                                 </Select>
                             </Form.Item>
                         </Col>
-                        <Col lg={4} md={4} sm={6} xs={6} style={{ paddingTop: "30px", justifyContent: "end" }}>
-                            <Form.Item >
+                        <Col span={mode === "view" ? 0 : 4} style={{ justifyContent: "end" }}>
+                            <Form.Item label={" "}>
                                 <Button
                                     type='primary'
                                     style={{ width: "100%", borderRadius: "10px" }}
+                                    disabled={mode === "view" || disabledWhenDeliveryDocActive}
                                     onClick={() => handleOpenCustomerDataModal()}
                                 >
                                     เลือก

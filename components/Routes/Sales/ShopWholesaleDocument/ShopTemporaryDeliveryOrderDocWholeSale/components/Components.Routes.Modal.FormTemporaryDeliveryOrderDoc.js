@@ -1,5 +1,5 @@
 import { PlusOutlined } from '@ant-design/icons'
-import { Form, Input, Row, Col, Select, DatePicker, InputNumber, Divider, Space } from 'antd'
+import { Form, Input, Row, Col, Select, DatePicker, InputNumber, Divider, Space, Button, Modal } from 'antd'
 import { debounce, get, isArray, isEmpty, isPlainObject } from 'lodash'
 import React, { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
@@ -8,8 +8,11 @@ import GetIntlMessages from '../../../../../../util/GetIntlMessages'
 import ModalBothCustomersAndCar from '../../../../Modal/Components.Add.Modal.BothCustomersAndCar'
 import ModalBusinessCustomers from '../../../../Modal/Components.Select.Modal.BusinessCustomers'
 import ModalPersonalCustomers from '../../../../Modal/Components.Select.Modal.PersonalCustomers'
+import BusinessCustomersData from '../../../../../../routes/MyData/BusinessCustomersData'
+import PersonalCustomersData from '../../../../../../routes/MyData/PersonalCustomersData'
+import { takeOutComma } from "../../../../../shares/ConvertToCurrency";
 
-const FormTemporaryDeliveryOrderDoc = ({ mode, calculateResult, disabledWhenDeliveryDocActive = false }) => {
+const FormTemporaryDeliveryOrderDoc = ({ mode, calculateResult, disabledWhenDeliveryDocActive = false, setCustomerType, setCustomerPickToCreateINV, setCustomerPickToCreateINVName }) => {
 
     const form = Form.useFormInstance()
 
@@ -20,6 +23,8 @@ const FormTemporaryDeliveryOrderDoc = ({ mode, calculateResult, disabledWhenDeli
     const [userList, setUserList] = useState([])
     const [salesManList, setSalesManList] = useState([])
     const customerPhoneList = Form.useWatch("customer_phone_list", { form, preserve: true })
+    const customerList = Form.useWatch("customer_list", { form, preserve: true })
+    const [isCustomerDataModalVisible, setIsCustomerDataModalVisible] = useState(false);
 
     useEffect(() => {
         getMasterData()
@@ -209,6 +214,86 @@ const FormTemporaryDeliveryOrderDoc = ({ mode, calculateResult, disabledWhenDeli
         }
     }
 
+    const callBackPickCustomer = async (data) => {
+        try {
+            const { customer_type } = form.getFieldValue();
+            console.log("customer_type", customer_type)
+            console.log("data", data)
+            let array = [{ ...data }]
+            const newData = array.map(e => {
+                const customer_full_name = customer_type === "person" ?
+                    `${e.customer_name.first_name[locale.locale] ?? "-"} ${e.customer_name.last_name[locale.locale] ?? ""}` :
+                    `${e.customer_name[locale.locale] ?? "-"}`;
+
+                return {
+                    ...e,
+                    customer_type,
+                    customer_full_name,
+                    customer_id: e.id,
+                    customer_code: e.master_customer_code_id,
+                    customer_branch: e.other_details.branch === "office" ? "(สำนักงานใหญ่)" : "(" + e.other_details.branch_code + " " + e.other_details.branch_name + ")",
+                }
+            })
+
+            const customer_phone_list = Object.entries(data.mobile_no).map((x) => x[1]).filter(where => where !== null);
+            let address = `${data?.address?.[locale.locale] ?? ""} ${data?.Province?.[`prov_name_${locale.locale}`] ?? ""} ${data?.District?.[`name_${locale.locale}`] ?? ""} ${data?.SubDistrict?.[`name_${locale.locale}`] ?? ""} ${data?.SubDistrict?.zip_code ?? ""}`
+            let tags = data?.tags.map((e) => (e.id)) ?? []
+            let tags_obj = data?.tags ?? []
+            let tax_id = data?.tax_id ?? null
+            let credit_term = data?.other_details?.credit_term ? data?.other_details?.credit_term : null
+            let credit_limit = data?.other_details?.credit_limit ? (+data?.other_details?.credit_limit).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : null
+            let debt_amount = data?.other_details?.debt_amount ? (data?.other_details?.debt_amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : null
+            let credit_remaining = ((+data?.other_details?.credit_limit ?? 0) - (+data?.other_details?.debt_amount ?? 0)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+
+            if ((+takeOutComma(data?.other_details?.credit_limit) ?? 0) !== 0) {
+                if (+takeOutComma(data?.other_details?.debt_amount) > +takeOutComma(data?.other_details?.credit_limit)) {
+                    Modal.warning({
+                        content: 'จำนวนวงเงินที่ใช้ไป เกินกว่าจำนวนเงินเครดิต !!',
+                    });
+                }
+            }
+
+            let _model = {
+                customer_list: newData,
+                customer_id: newData[0].id,
+                customer_phone_list,
+                customer_phone: customer_phone_list[0],
+                address,
+                tags,
+                tags_obj,
+                sales_man: newData[0]?.other_details?.employee_sales_man_id ? [newData[0]?.other_details?.employee_sales_man_id] : [],
+                tax_id,
+                credit_limit,
+                credit_term,
+                debt_amount,
+                credit_remaining
+            }
+            console.log("_model", _model)
+            setCustomerType(customer_type)
+            setCustomerPickToCreateINV(customer_type === "person" ? data : data)
+            setCustomerPickToCreateINVName(customer_type === "person" ? `${data.customer_name?.first_name[locale.locale] ?? null} ${data.customer_name?.last_name[locale.locale] ?? null}` : data.customer_name[locale.locale])
+            await form.setFieldsValue(_model)
+            handleCancelCustomerDataModal()
+        } catch (error) {
+            console.log("callBackPickCustomer", error)
+        }
+    }
+
+    const handleOpenCustomerDataModal = () => {
+        try {
+            setIsCustomerDataModalVisible(true)
+        } catch (error) {
+
+        }
+    }
+    const handleCancelCustomerDataModal = () => {
+        try {
+            setIsCustomerDataModalVisible(false)
+        } catch (error) {
+
+        }
+    }
+
     return (
         <>
             <Row gutter={[20, 0]}>
@@ -262,46 +347,63 @@ const FormTemporaryDeliveryOrderDoc = ({ mode, calculateResult, disabledWhenDeli
                     </Form.Item>
                 </Col>
 
-                <Col lg={8} md={12} sm={12} xs={24}>
-                    <Form.Item
-                        name="customer_id"
-                        label="ชื่อลูกค้า"
-                        rules={[
-                            {
-                                required: true,
-                                message: "กรุณาเลือกลูกค้า"
-                            },
-                        ]}
-                    >
-                        <Select
-                            showSearch
-                            showArrow={false}
-                            filterOption={false}
-                            style={{ width: "100%" }}
-                            open={open}
-                            onDropdownVisibleChange={(visible) => controlOpen(visible)}
-                            disabled={mode === "view"}
-                            loading={loadingEasySearch}
-                            onSearch={(value) => debounceEasySearch(value, "search")}
-                            onSelect={(value) => handleEasySearch(value, "select")}
-                            dropdownRender={menu => (
-                                <>
-                                    {menu}
-                                    <Divider style={{ margin: '8px 0' }} />
-                                    <Space align="center" style={{ padding: '0 8px 4px' }}>
-                                        {
-                                            checkValueCustomerType() === "business" ?
-                                                <ModalBusinessCustomers controlOpen={controlOpen} textButton={GetIntlMessages(`เพิ่มข้อมูลลูกค้าธุรกิจ`)} icon={<PlusOutlined />} callback={callbackCustomers} /> :
-                                                <ModalPersonalCustomers controlOpen={controlOpen} textButton={GetIntlMessages(`เพิ่มข้อมูลลูกค้าบุคคลธรรมดา`)} icon={<PlusOutlined />} callback={callbackCustomers} />
-                                        }
-                                    </Space>
-                                </>
-                            )}
-                        >
-                            {getArrValue("customer_list").map(e => <Select.Option value={e.id} key={`customer-id-${e.id}`}>{e.customer_full_name}</Select.Option>)}
+                <Col xs={24} lg={8} xxl={8} style={{ width: "100%" }}>
+                    <Row>
+                        <Col lg={20} md={20} sm={18} xs={18}>
+                            <Form.Item
+                                name="customer_id"
+                                label="ชื่อลูกค้า"
+                                rules={[
+                                    {
+                                        required: true,
+                                        message: "กรุณาเลือกลูกค้า"
+                                    },
+                                ]}
+                            >
 
-                        </Select>
-                    </Form.Item>
+                                <Select
+                                    showSearch
+                                    showArrow={false}
+                                    filterOption={false}
+                                    open={open}
+                                    onDropdownVisibleChange={(visible) => controlOpen(visible)}
+                                    disabled={mode === "view"}
+                                    style={{ width: "98%" }}
+                                    loading={loadingEasySearch}
+                                    onSearch={(value) => debounceEasySearch(value, "search")}
+                                    onSelect={(value) => handleEasySearch(value, "select")}
+                                    placeholder="ค้นหาจากชื่อลูกค้า"
+                                    dropdownRender={menu => (
+                                        <>
+                                            {menu}
+                                            <Divider style={{ margin: '8px 0' }} />
+                                            <Space align="center" style={{ padding: '0 8px 4px' }}>
+                                                {
+                                                    checkValueCustomerType() === "business" ?
+                                                        <ModalBusinessCustomers controlOpen={controlOpen} textButton={GetIntlMessages(`เพิ่มข้อมูลลูกค้าธุรกิจ`)} icon={<PlusOutlined />} callback={callbackCustomers} /> :
+                                                        <ModalPersonalCustomers controlOpen={controlOpen} textButton={GetIntlMessages(`เพิ่มข้อมูลลูกค้าบุคคลธรรมดา`)} icon={<PlusOutlined />} callback={callbackCustomers} />
+                                                }
+                                            </Space>
+                                        </>
+                                    )}
+                                >
+                                    {!!customerList ? customerList.map((e, index) => (<Select.Option value={e.id} key={`customer-id-${e.id}`}>{`${e.customer_code}  ->  ${e.customer_full_name} ${e.customer_type !== "person" ? "-> " + e.customer_branch : ""}`}</Select.Option>)) ?? [] : []}
+
+                                </Select>
+                            </Form.Item>
+                        </Col>
+                        <Col lg={4} md={4} sm={6} xs={6} style={{ paddingTop: "30px", justifyContent: "end" }}>
+                            <Form.Item >
+                                <Button
+                                    type='primary'
+                                    style={{ width: "100%", borderRadius: "10px" }}
+                                    onClick={() => handleOpenCustomerDataModal()}
+                                >
+                                    เลือก
+                                </Button>
+                            </Form.Item>
+                        </Col>
+                    </Row>
                 </Col>
 
                 <Col lg={4} md={6} sm={6} xs={12}>
@@ -469,7 +571,20 @@ const FormTemporaryDeliveryOrderDoc = ({ mode, calculateResult, disabledWhenDeli
                 </Col>
 
             </Row>
-
+            <Modal
+                maskClosable={false}
+                open={isCustomerDataModalVisible}
+                onCancel={handleCancelCustomerDataModal}
+                width="90vw"
+                style={{ top: 5 }}
+                footer={(
+                    <>
+                        <Button onClick={() => handleCancelCustomerDataModal()}>{GetIntlMessages("กลับ")}</Button>
+                    </>
+                )}
+            >
+                {form.getFieldValue().customer_type === "person" ? <PersonalCustomersData title="จัดการข้อมูลลูกค้าบุคคลธรรมดา" callBack={callBackPickCustomer} /> : <BusinessCustomersData title="จัดการข้อมูลลูกค้าธุรกิจ" callBack={callBackPickCustomer} />}
+            </Modal>
         </>
 
     )

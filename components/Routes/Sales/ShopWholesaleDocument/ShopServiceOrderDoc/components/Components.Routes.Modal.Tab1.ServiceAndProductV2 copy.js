@@ -25,7 +25,6 @@ const ComponentsRoutesModalTab1ServiceAndProductV2 = ({ onFinish, calculateResul
     const [loadingSearch, setLoadingSearch] = useState(false)
 
     const checkTaxId = Form.useWatch("tax_type_id", form)
-    // console.log("checkTaxId",checkTaxId)
     const isModalVisible = Form.useWatch("isModalVisible", { form, preserve: true })
 
     const [priceArr, setPriceArr] = useState([])
@@ -35,10 +34,11 @@ const ComponentsRoutesModalTab1ServiceAndProductV2 = ({ onFinish, calculateResul
     const [activeKeyTab, setActiveKeyTab] = useState("1");
     const [listIndex, setListIndex] = useState(0);
     const [listData, setListData] = useState([]);
-    
+
     const setting_enable_sale_price_overwrite = authUser?.UsersProfile?.ShopsProfile?.shop_config?.enable_sale_price_overwrite
     const setting_enable_sale_cost_show = authUser?.UsersProfile?.ShopsProfile?.shop_config?.enable_sale_cost_show
     const setting_enable_sale_warehouse_show = authUser?.UsersProfile?.ShopsProfile?.shop_config?.enable_sale_warehouse_show
+
     useEffect(() => {
         setIsFieldEditing(false);
     }, [isModalVisible])
@@ -89,6 +89,7 @@ const ComponentsRoutesModalTab1ServiceAndProductV2 = ({ onFinish, calculateResul
                     break;
             }
         }
+
     }, [isFieldEditing.status])
 
     const takeOutDuplicateValue = (arr, key) => {
@@ -131,10 +132,9 @@ const ComponentsRoutesModalTab1ServiceAndProductV2 = ({ onFinish, calculateResul
             // console.log("เข้าปะ");
             setIsFieldEditing((prevValue) => ({ status: !prevValue.status, index, type }))
         } catch (error) {
-            console.log("error", error)
+
         }
     }
-
 
     const setColumnsTable = () => {
         const _column = [
@@ -160,6 +160,7 @@ const ComponentsRoutesModalTab1ServiceAndProductV2 = ({ onFinish, calculateResul
                         <>
                             <Form.Item style={{ margin: 0 }} name={[index, "shop_stock_id"]}>
                                 <Select size="large" ref={refShopStockIdCode} showSearch onBlur={() => toggleEdit(null)}
+                                    // onSearch={handleSearchShopStock}
                                     dropdownMatchSelectWidth={false}
                                     notFoundContent={loadingSearch ? GetIntlMessages("กำลังโหลดข้อมูล...กรุณารอสักครู่...") : GetIntlMessages("ไม่พบข้อมูล")}
                                     onSearch={(value) => debounceSearchShopStock(value, index, "search")}
@@ -229,6 +230,7 @@ const ComponentsRoutesModalTab1ServiceAndProductV2 = ({ onFinish, calculateResul
                                             <Input disabled={mode === "view" || disabledWhenDeliveryDocActive} onChange={(value) => debounceChangedName(value.target.value, index)} />
                                         </Form.Item>
                                     }
+
                                 </>
                             }
                         </Col>
@@ -262,6 +264,7 @@ const ComponentsRoutesModalTab1ServiceAndProductV2 = ({ onFinish, calculateResul
                 use: true,
                 render: (text, record, index) => (<ModalViewShopStock mode={mode} shopStockId={record.shop_stock_id} rowIndex={index} callbackSelectProduct={callbackSelectProduct} disabledWhenDeliveryDocActive={disabledWhenDeliveryDocActive} />)
             },
+
             {
                 title: () => "ราคาทุน",
                 dataIndex: 'product_cost',
@@ -269,6 +272,7 @@ const ComponentsRoutesModalTab1ServiceAndProductV2 = ({ onFinish, calculateResul
                 width: "6%",
                 // width: 100,
                 align: "center",
+                use: true,
                 // render: (text, record, index) => console.log('text :>> ', text)
                 use: setting_enable_sale_cost_show,
                 render: (text, record, index) => !!text && text !== "null" ? <div style={{ textAlign: "end" }}>{RoundingNumber(get(record, `product_cost`, 0)) ?? "-"}</div> : "-"
@@ -313,7 +317,7 @@ const ComponentsRoutesModalTab1ServiceAndProductV2 = ({ onFinish, calculateResul
                         dataIndex: 'dot_mfd',
                         // key: '',
                         width: "6%",
-                        // width: 20,
+                        // width: 100,
                         align: "center",
                         use: true,
                         render: (text, record, index) => (
@@ -382,6 +386,8 @@ const ComponentsRoutesModalTab1ServiceAndProductV2 = ({ onFinish, calculateResul
                                 </Form.Item>
                             </Col>
                         </Row>
+
+
                     </>
                 )
             },
@@ -472,6 +478,7 @@ const ComponentsRoutesModalTab1ServiceAndProductV2 = ({ onFinish, calculateResul
                 width: "6%",
                 dataIndex: "price_grand_total",
                 use: true,
+                // render: (record, text, index) =>console.log('record :>> ', record)
                 render: (text, record, index) => <div style={{ textAlign: "end", fontSize: "1rem" }}>{RoundingNumber(text) ?? "-"}</div>
             },
             {
@@ -480,6 +487,7 @@ const ComponentsRoutesModalTab1ServiceAndProductV2 = ({ onFinish, calculateResul
                 width: "2%",
                 align: "center",
                 use: true,
+                // render: (record, index) => console.log(`record remark ${index}:>> `, record )
                 render: (text, record, index) => (
                     <>
                         <Popover content={
@@ -490,6 +498,7 @@ const ComponentsRoutesModalTab1ServiceAndProductV2 = ({ onFinish, calculateResul
                             </>
                         } trigger="click">
                             <Badge dot={!!form.getFieldValue("list_service_product")[index]?.remark ? `show` : null}>
+                                {/* <Badge dot={!!form.getFieldValue("list_service_product")[index]?.remark ? `show` : null}> */}
                                 <Button icon={<FormOutlined style={{ fontSize: 20 }} />} style={{ width: "100%" }} />
                             </Badge>
                         </Popover>
@@ -510,7 +519,6 @@ const ComponentsRoutesModalTab1ServiceAndProductV2 = ({ onFinish, calculateResul
                 )
             },
         ];
-
         _column.map((e) => {
             e.children = e.children !== undefined ? e.children.filter(x => x.use === true) : null
         })
@@ -582,7 +590,9 @@ const ComponentsRoutesModalTab1ServiceAndProductV2 = ({ onFinish, calculateResul
                                     formatter={(value) => !!value && value.length > 0 ? `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',') : ""}
                                     parser={(value) => value.replace(/\$\s?|(,*)/g, '')}
                                     onBlur={(value) => calculateTable(takeOutComma(value.target.value), index, "price_discount_3")}
-                                    addonAfter={`฿`}
+                                    addonAfter={
+                                        <PopOverDiscount index={index} label={"฿"} />
+                                    }
                                     className='ant-input-number-after-addon-20-percent'
                                 />
                             </Form.Item>
@@ -594,7 +604,9 @@ const ComponentsRoutesModalTab1ServiceAndProductV2 = ({ onFinish, calculateResul
                                     formatter={(value) => !!value && value.length > 0 ? `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',') : ""}
                                     parser={(value) => value.replace(/\$\s?|(,*)/g, '')}
                                     onBlur={(value) => calculateTable(takeOutComma(value.target.value), index, "price_discount_percent_3")}
-                                    addonAfter={`%`}
+                                    addonAfter={
+                                        <PopOverDiscount index={index} label={"%"} />
+                                    }
                                     className='ant-input-number-after-addon-20-percent'
                                 />
                             </Form.Item>
@@ -726,8 +738,11 @@ const ComponentsRoutesModalTab1ServiceAndProductV2 = ({ onFinish, calculateResul
     const handleListProductRemark = (value, index) => {
         try {
             // console.log('value :>> ', value);
+            // console.log('form.getFieldValue() handleListProductRemark:>> ', form.getFieldValue());
             const { list_service_product } = form.getFieldValue()
+            // console.log('list_service_product :>> ', list_service_product);
             const remark = !!value ? value : null
+            // console.log('remark :>> ', remark);
             list_service_product[index].remark = remark
             form.setFieldsValue({ list_service_product })
         } catch (error) {
@@ -741,6 +756,7 @@ const ComponentsRoutesModalTab1ServiceAndProductV2 = ({ onFinish, calculateResul
             const { list_service_product } = form.getFieldValue()
             list_service_product[index].changed_name = value
             form.setFieldsValue({ list_service_product })
+            // form.setFieldsValue({ list_service_product , [index] : {changed_name} })
         } catch (error) {
             // console.log('error handleChangeName:>> ', error);
         }
@@ -748,6 +764,8 @@ const ComponentsRoutesModalTab1ServiceAndProductV2 = ({ onFinish, calculateResul
 
     const handleCheckChangeName = (val, index, record) => {
         try {
+            // console.log('val :>> ', val);
+            // console.log('record :>> ', record);
             const { list_service_product } = form.getFieldValue()
             const changed_name = displayData(record, "product_name")
             list_service_product[index].changed_name = val ? changed_name : null
@@ -763,7 +781,7 @@ const ComponentsRoutesModalTab1ServiceAndProductV2 = ({ onFinish, calculateResul
         try {
             setLoadingSearch(true)
             const { list_service_product } = form.getFieldValue()
-            console.log("isFieldEditing", isFieldEditing)
+
             switch (type) {
                 case "search":
                     const { data } = await API.get(`/shopStock/all?search=${value}&limit=10&page=1&sort=balance_date&order=asc&status=active&filter_wyz_code=false&filter_available_balance=true&min_balance=1`)
@@ -813,6 +831,8 @@ const ComponentsRoutesModalTab1ServiceAndProductV2 = ({ onFinish, calculateResul
                                 })
                         }
                     }
+
+
                     toggleEdit()
                     break;
 
@@ -829,6 +849,7 @@ const ComponentsRoutesModalTab1ServiceAndProductV2 = ({ onFinish, calculateResul
 
     const callbackSelectProduct = (value, index1, index2, amount, rowIndex) => {
         try {
+            console.log('value callbackSelectProduct:>> ', value);
             let product_cost
             const { list_service_product, tags_obj } = form.getFieldValue(),
                 shop_stock_id = list_service_product[rowIndex]["shop_stock_id"],
@@ -836,7 +857,6 @@ const ComponentsRoutesModalTab1ServiceAndProductV2 = ({ onFinish, calculateResul
                 selectedProduct = product_list[index1].warehouse_detail[index2];
             const suggestedPrice = list_service_product[rowIndex]["shop_stock_list"]?.find(where => where.id === shop_stock_id)?.ShopProduct?.price?.suggasted_re_sell_price?.retail ?? null;
             const suggestedPriceWholeSale = list_service_product[rowIndex]["shop_stock_list"]?.find(where => where.id === shop_stock_id)?.ShopProduct?.price?.suggasted_re_sell_price?.wholesale ?? null;
-
             if (!!selectedProduct["dot_mfd"]) {
                 product_cost = !!product_cost_product_stocks ? product_cost_product_stocks.find(where => selectedProduct["warehouse"] === where.shop_warehouse_id && selectedProduct["shelf"] === where.shop_warehouse_shelf_item_id && selectedProduct["dot_mfd"] === where.dot_mfd && selectedProduct["purchase_unit_id"] === where.purchase_unit_id)?.product_cost_latest ?? null : null
             } else {
@@ -852,12 +872,12 @@ const ComponentsRoutesModalTab1ServiceAndProductV2 = ({ onFinish, calculateResul
             let base_price = [{
                 price_name: "ขายปลีก",
                 price_value: (suggestedPrice ?? 0).toString(),
-                selected: true
+                selected: false
             },
             {
                 price_name: "ขายส่ง",
                 price_value: (suggestedPriceWholeSale ?? 0).toString(),
-                selected: false
+                selected: true
             }]
             price_arr = price_arr.concat(base_price)
             setPriceArr(price_arr)
@@ -871,7 +891,6 @@ const ComponentsRoutesModalTab1ServiceAndProductV2 = ({ onFinish, calculateResul
                     }
                 })
             }
-
             find_price.sort((a, b) => +a.price_value - +b.price_value)
 
             if (find_price.length !== 0) {
@@ -880,8 +899,8 @@ const ComponentsRoutesModalTab1ServiceAndProductV2 = ({ onFinish, calculateResul
                 selectPrice.selected = true
                 price_arr[indexPrice] = selectPrice
 
-                let indexRetailPrice = price_arr.findIndex(x => x.price_name === "ขายปลีก")
-                let retailPrice = price_arr.find(x => x.price_name === "ขายปลีก")
+                let indexRetailPrice = price_arr.findIndex(x => x.price_name === "ขายส่ง")
+                let retailPrice = price_arr.find(x => x.price_name === "ขายส่ง")
                 retailPrice.selected = false
                 price_arr[indexRetailPrice] = retailPrice
             }
@@ -917,7 +936,6 @@ const ComponentsRoutesModalTab1ServiceAndProductV2 = ({ onFinish, calculateResul
                     shelf: selectedProduct["shelf"]
                 }
             })
-            console.log("list_service_product", list_service_product)
             calculateTable()
             // setTimeout(() => {
             //     calculateResult()
@@ -930,6 +948,7 @@ const ComponentsRoutesModalTab1ServiceAndProductV2 = ({ onFinish, calculateResul
 
     const calculateVatPerItem = (val) => {
         const { detail } = taxTypes.find(where => where.id === checkTaxId)
+        console.log("detail", detail)
         let taxRate = 0, price_vat = 0
         if (Number(detail.tax_rate_percent) > 9) {
             taxRate = Number(`1${detail.tax_rate_percent}`)
@@ -2407,6 +2426,10 @@ const ComponentsRoutesModalTab1ServiceAndProductV2 = ({ onFinish, calculateResul
             delete form.getFieldValue()[list_service_product.length]
             form.setFieldsValue({ list_service_product })
 
+            // const { list_service_product } = form.getFieldValue()
+            // const newData = [...list_service_product]
+            // newData.splice(index, 1)
+            // form.setFieldsValue({ list_service_product: newData })
             calculateTable()
             setLoadingSearch(false)
         } catch (error) {
@@ -2446,19 +2469,14 @@ const ComponentsRoutesModalTab1ServiceAndProductV2 = ({ onFinish, calculateResul
     const [indexCalVatPrice, setIndexCalVatPrice] = useState(0);
     const [exVatPrice, setExVatPrice] = useState(0);
 
-    const showModalCalVat = (index, value) => {
-        try {
-            const { list_service_product } = form.getFieldValue()
-            let price_unit = list_service_product[index].price_unit
-            setInVatPrice(price_unit)
-            calculateInExVat(price_unit, "include")
+    const showModalCalVat = (index) => {
+        const { list_service_product } = form.getFieldValue()
+        let price_unit = list_service_product[index].price_unit
+        setInVatPrice(price_unit)
+        calculateInExVat(price_unit, "include")
 
-            setIndexCalVatPrice(index)
-            setIsModalCalVatOpen(true);
-        } catch (error) {
-            console.log("error", error)
-        }
-
+        setIndexCalVatPrice(index)
+        setIsModalCalVatOpen(true);
     };
     const handleModalCalVatOk = () => {
         setIsModalCalVatOpen(false);
@@ -2499,21 +2517,16 @@ const ComponentsRoutesModalTab1ServiceAndProductV2 = ({ onFinish, calculateResul
     }
 
     const handleModalPriceCancel = async (record) => {
-        try {
-            const { list_service_product } = form.getFieldValue()
-            console.log("list_service_productlist_service_product", list_service_product)
-            let newPirce_arr = list_service_product[priceIndexSelect].price_arr
-            newPirce_arr.map((e) => {
-                e.selected = e.price_name === record.price_name ? true : false
-            })
-            list_service_product[priceIndexSelect].price_arr = newPirce_arr
-            form.setFieldsValue({ list_service_product })
+        const { list_service_product } = form.getFieldValue()
+        let newPirce_arr = list_service_product[priceIndexSelect].price_arr
+        newPirce_arr.map((e) => {
+            e.selected = e.price_name === record.price_name ? true : false
+        })
+        list_service_product[priceIndexSelect].price_arr = newPirce_arr
+        form.setFieldsValue({ list_service_product })
 
-            calculateTable(await record.price_value, indexCalVatPrice, "price_unit")
-            setIsModalCalVatOpen(false);
-        } catch (error) {
-            console.log("error", error)
-        }
+        calculateTable(await record.price_value, indexCalVatPrice, "price_unit")
+        setIsModalCalVatOpen(false);
     };
 
     const columnsPrice = [
@@ -2701,14 +2714,18 @@ const ComponentsRoutesModalTab1ServiceAndProductV2 = ({ onFinish, calculateResul
     const callbackInventoryBalance = (data, indexCallBack, from = "") => {
         try {
             const { list_service_product } = form.getFieldValue();
+
             setListData(data.warehouse_detail)
             list_service_product[indexCallBack] = {
+                list_id: data.ShopProduct.Product.master_path_code_id,
+                list_name: data.ShopProduct.Product.product_name[locale.locale],
                 product_id: data.ShopProduct.Product.id,
                 shop_product_id: data.ShopProduct.id,
+                price_unit: +data.ShopProduct.product_cost,
                 warehouse_detail: data.warehouse_detail,
                 shop_stock_id: data.id,
                 shop_stock_list: [data],
-                change_name_status: false,
+                change_name_status: false
             }
             form.setFieldsValue({
                 list_service_product,
@@ -2764,12 +2781,20 @@ const ComponentsRoutesModalTab1ServiceAndProductV2 = ({ onFinish, calculateResul
                     rowKey="id"
                     columns={setColumnsTable()}
                     dataSource={Form.useWatch("list_service_product", form)}
+                    // dataSource={Form.useWatch("list_service_product", { form, preserve: true })}
+                    // dataSource={dataSource}
+                    // dataSource={tableData}
                     pagination={false}
                     rowClassName={() => 'editable-row'}
                     bordered
                     scroll={{ x: 1600 }}
                     loading={loadingSearch}
                 />
+                {/* <div className="action-btn">
+                        <Button type="primary" onClick={onConfirm}>
+                            Confirm Changes
+                        </Button>
+                    </div> */}
             </div>
 
             <Row justify={"end"} hidden={mode === "view"}>
@@ -2814,8 +2839,6 @@ const ComponentsRoutesModalTab1ServiceAndProductV2 = ({ onFinish, calculateResul
                                         parser={(value) => value.replace(/\$\s?|(,*)/g, '')}
                                         onBlur={() => onChangeDiscountBillBath()}
                                         disabled={mode === "view" || disabledWhenDeliveryDocActive}
-                                        addonAfter={`฿`}
-                                        className='ant-input-number-after-addon-20-percent'
                                     />
                                 </Form.Item>
                             </Col>
@@ -2966,6 +2989,7 @@ const ComponentsRoutesModalTab1ServiceAndProductV2 = ({ onFinish, calculateResul
                             ),
                         },
                     ]} />;
+
             </Modal>
 
             <Modal
@@ -3009,35 +3033,6 @@ const ComponentsRoutesModalTab1ServiceAndProductV2 = ({ onFinish, calculateResul
                     `
                 }
             </style>
-
-            {/* <style jsx global>
-                {`
-                 .editable-cell {
-                    position: relative;
-                  }
-                  
-                  .editable-cell-value-wrap {
-                    padding: 5px 12px;
-                    cursor: pointer;
-                  }
-                  
-                  .editable-row:hover .editable-cell-value-wrap {
-                    padding: 4px 11px;
-                    border: 1px solid #d9d9d9;
-                    border-radius: 6px;
-                    border-color : ${mainColor}
-                  }
-
-                `}
-            </style> */}
-            {/* .ant-select-show-search.ant-select:not(.ant-select-customize-input)
-                   .ant-select-selector {
-                   height: auto;
-                 }
-                 .ant-select-single.ant-select-show-arrow .ant-select-selection-item {
-                   white-space: normal;
-                   word-break: break-all;
-                 } */}
         </>
 
     );

@@ -158,8 +158,6 @@ const ComponentsRoutesModalTab1ServiceAndProductV2 = ({ onFinish, calculateResul
                                     autoFocus
                                     disabled={mode === "view" || disabledWhenDeliveryDocActive}
                                 >
-                                    {/* {isPlainObject(shopStockList) ? shopStockList[index].map((e, i) => (<Select.Option key={i} value={e.id}>{e?.ShopProduct.Product.master_path_code_id ?? "-"}</Select.Option>)) : []} */}
-                                    {/* {isArray(dataSource) && dataSource.length > 0 ? dataSource[index]["shop_stock_list"].map((e, i) => (<Select.Option key={i} value={e.id}>{e?.ShopProduct.Product.master_path_code_id ?? "-"}</Select.Option>)) : []} */}
                                     {getArrValue(index, "shop_stock_list").map((e, i) => (<Select.Option key={i} value={e.id}>{e?.ShopProduct.Product.master_path_code_id ?? "-"}</Select.Option>))}
                                 </Select>
                             </Form.Item>
@@ -170,13 +168,9 @@ const ComponentsRoutesModalTab1ServiceAndProductV2 = ({ onFinish, calculateResul
                                 className={mode !== "view" ? "editable-cell-value-wrap" : null}
                                 style={{
                                     paddingRight: 24,
-                                    // height : "38px",
-                                    //   height : 40,
                                     textAlign: "start"
                                 }}
                             >
-                                {/* {text ?? "ค้นหา"} */}
-                                {/* {console.log('record :>> ', record)} */}
                                 {displayData(record, "master_path_code_id") ?? "ค้นหา"}
                             </div>
                         </>
@@ -187,7 +181,6 @@ const ComponentsRoutesModalTab1ServiceAndProductV2 = ({ onFinish, calculateResul
                 title: "ชื่อสินค้า",
                 width: "20%",
                 use: true,
-                // render: (text, record, index) => console.log('record :>> ', record)
                 render: (text, record, index) => (
                     isFieldEditing.status && isFieldEditing.index === index && isFieldEditing.type === "name" ?
                         <>
@@ -201,8 +194,6 @@ const ComponentsRoutesModalTab1ServiceAndProductV2 = ({ onFinish, calculateResul
                                     dropdownMatchSelectWidth={false}
                                     disabled={mode === "view" || disabledWhenDeliveryDocActive}
                                 >
-                                    {/* {isArray(dataSource) && dataSource.length > 0 ? dataSource[index]["shop_stock_list"].map((e, i) => (<Select.Option key={i} value={e.id}>{e?.ShopProduct.Product.product_name[locale.locale] ?? "-"}</Select.Option>)) : []} */}
-                                    {/* {isPlainObject(shopStockList) ? shopStockList[index].map((e, i) => (<Select.Option key={i} value={e.id}>{e?.ShopProduct.Product.product_name[locale.locale] ?? "-"}</Select.Option>)) : []} */}
                                     {getArrValue(index, "shop_stock_list").map((e, i) => (<Select.Option key={i} value={e.id}>{e?.ShopProduct.Product.product_name[locale.locale] ?? "-"}</Select.Option>))}
                                 </Select>
                             </Form.Item>
@@ -214,11 +205,9 @@ const ComponentsRoutesModalTab1ServiceAndProductV2 = ({ onFinish, calculateResul
                                     className={mode !== "view" ? "editable-cell-value-wrap" : null}
                                     style={{
                                         paddingRight: 24,
-                                        //   height : 40,
                                         textAlign: "start"
                                     }}
                                 >
-                                    {/* {text ?? "ค้นหา"} */}
                                     {displayData(record, "product_name") ?? "ค้นหา"}
                                 </div>
                                 :

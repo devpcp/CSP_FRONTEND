@@ -14,7 +14,7 @@ import SearchInput from '../../../../shares/SearchInput'
 import TableList from '../../../../shares/TableList'
 import CarPreloader from '../../../../_App/CarPreloader'
 import FormTemporaryDeliveryOrderDoc from './components/Components.Routes.Modal.FormTemporaryDeliveryOrderDoc'
-import Tab1ServiceAndProductV2 from './components/Components.Routes.Modal.Tab1.ServiceAndProductV2'
+import Tab1ServiceAndProductV2 from './components/Components.Routes.Modal.Tab1.ServiceAndProductV2 copy'
 import Tab2CustomerInfo from './components/Components.Routes.Modal.Tab2.CustomerInfoV2'
 // import Tab3VehicleInfo from './components/Components.Routes.Modal.Tab3.VehicleInfo'
 import PaymentDocs from './components/Components.Routes.Modal.PaymentDocsV2'
@@ -899,6 +899,9 @@ const ShopTemporaryDeliveryOrderDocWholeSale = ({ docTypeId, title = null, callB
                     if (!isEmpty(e?.mobile_no)) customer_phone_list.push(e?.mobile_no[`mobile_no_${index + 1}`])
                     return {
                         ...e,
+                        customer_code: e.master_customer_code_id,
+                        customer_type: isPersonal ? "person" : "business",
+                        customer_branch: e.other_details.branch === "office" ? "(สำนักงานใหญ่)" : "(" + e.other_details.branch_code + e.other_details.branch_name + ")",
                         customer_full_name: isPersonal ? `${e?.customer_name?.first_name[locale.locale] ?? null} ${e?.customer_name?.last_name[locale.locale] ?? null}` : e?.customer_name[locale.locale]
                     }
                 }),
@@ -2205,7 +2208,14 @@ const ShopTemporaryDeliveryOrderDocWholeSale = ({ docTypeId, title = null, callB
                             <div className="container-fluid">
                                 <div className='pr-5 pl-5 detail-before-table'>
                                     {/* <div className="head-line-text">สร้างใบสั่งซ่อม</div> */}
-                                    <FormTemporaryDeliveryOrderDoc mode={configModal.mode} calculateResult={calculateResult} disabledWhenDeliveryDocActive={disabledWhenDeliveryDocActive} />
+                                    <FormTemporaryDeliveryOrderDoc
+                                        mode={configModal.mode}
+                                        calculateResult={calculateResult}
+                                        disabledWhenDeliveryDocActive={disabledWhenDeliveryDocActive}
+                                        setCustomerType={setCustomerType}
+                                        setCustomerPickToCreateINV={setCustomerPickToCreateINV}
+                                        setCustomerPickToCreateINVName={setCustomerPickToCreateINVName}
+                                    />
                                 </div>
                                 <div className='tab-detail'>
                                     <Tabs

@@ -13,7 +13,7 @@ import PrintOut from '../../../../shares/PrintOut'
 import SearchInput from '../../../../shares/SearchInput'
 import TableList from '../../../../shares/TableList'
 import FormTemporaryDeliveryOrderDoc from './components/Components.Routes.Modal.FormTemporaryDeliveryOrderDoc'
-import Tab1ServiceAndProductV2 from './components/Components.Routes.Modal.Tab1.ServiceAndProductV2'
+import Tab1ServiceAndProductV2 from './components/Components.Routes.Modal.Tab1.ServiceAndProductV2 copy'
 import Tab2CustomerInfo from './components/Components.Routes.Modal.Tab2.CustomerInfoV2'
 import Tab3VehicleInfo from './components/Components.Routes.Modal.Tab3.VehicleInfo'
 import PaymentDocs from './components/Components.Routes.Modal.PaymentDocsV2'
@@ -2288,7 +2288,13 @@ const TemporaryDeliveryOrderDoc = ({ docTypeId, title = null, callBack, }) => {
                             <div className="container-fluid">
                                 <div className='pr-5 pl-5 detail-before-table'>
                                     {/* <div className="head-line-text">สร้างใบสั่งซ่อม</div> */}
-                                    <FormTemporaryDeliveryOrderDoc mode={configModal.mode} calculateResult={calculateResult} />
+                                    <FormTemporaryDeliveryOrderDoc
+                                        mode={configModal.mode}
+                                        calculateResult={calculateResult}
+                                        setCustomerType={setCustomerType}
+                                        setCustomerPickToCreateINV={setCustomerPickToCreateINV}
+                                        setCustomerPickToCreateINVName={setCustomerPickToCreateINVName}
+                                    />
                                 </div>
                                 <div className='tab-detail'>
                                     <Tabs

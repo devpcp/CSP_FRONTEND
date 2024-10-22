@@ -1,12 +1,15 @@
-import { Form, Input, Row, Col, Select, DatePicker, InputNumber } from 'antd'
+import { Form, Input, Row, Col, Select, DatePicker, InputNumber, Button, Modal } from 'antd'
 import { debounce, get, isArray, isEmpty, isPlainObject } from 'lodash'
 import React, { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 import API from '../../../../../../util/Api'
 import GetIntlMessages from '../../../../../../util/GetIntlMessages'
 import ModalBothCustomersAndCar from '../../../../Modal/Components.Add.Modal.BothCustomersAndCar'
+import VehicleRegistrationData from '../../../../../../routes/MyData/VehicleRegistrationData'
+import BusinessCustomersData from '../../../../../../routes/MyData/BusinessCustomersData'
+import PersonalCustomersData from '../../../../../../routes/MyData/PersonalCustomersData'
 
-const ComponentsRoutesModalFormRepairOrder = ({ mode, calculateResult }) => {
+const ComponentsRoutesModalFormRepairOrder = ({ mode, calculateResult, setCustomerType, setCustomerPickToCreateINV, setCustomerPickToCreateINVName }) => {
     const form = Form.useFormInstance()
 
     const { locale, mainColor, subColor } = useSelector(({ settings }) => settings);
@@ -16,6 +19,8 @@ const ComponentsRoutesModalFormRepairOrder = ({ mode, calculateResult }) => {
     const [userList, setUserList] = useState([])
     const [repairManList, setRepairManList] = useState([])
     const [salesManList, setSalesManList] = useState([])
+    const [isCustomerDataModalVisible, setIsCustomerDataModalVisible] = useState(false);
+    const [isVehicleRegistrationDataModalVisible, setIsVehicleRegistrationDataModalVisible] = useState(false);
 
     useEffect(() => {
         getMasterData()
@@ -206,6 +211,130 @@ const ComponentsRoutesModalFormRepairOrder = ({ mode, calculateResult }) => {
             // console.log('error handleEasySearch:>> ', error);
         }
     }
+
+    const callBackPickVehicleRegistration = async (data) => {
+        try {
+            console.log('val :>> ', data);
+            handleCancelVehicleRegistrationDataModal()
+            let customer_type = data.bus_customer_id === null ? "person" : "business"
+            let customer_list = []
+            let customer_phone_list = []
+            customer_list = (customer_type === "person" ? [data.ShopPersonalCustomer] : [data.ShopBusinessCustomer]).map((e, index) => {
+                if (!isEmpty(e?.mobile_no)) customer_phone_list.push(e?.mobile_no[`mobile_no_${index + 1}`])
+                return {
+                    ...e,
+                    customer_name: customer_type === "person" ? `${e?.customer_name?.first_name[locale.locale] ?? null} ${e?.customer_name?.last_name[locale.locale] ?? null}` : e?.customer_name[locale.locale]
+                }
+            })
+            setCustomerType(customer_type)
+            setCustomerPickToCreateINV(customer_type === "person" ? data.ShopPersonalCustomer : data.ShopBusinessCustomer)
+            setCustomerPickToCreateINVName(customer_type === "person" ? `${data?.ShopPersonalCustomer.customer_name?.first_name[locale.locale] ?? null} ${data?.ShopPersonalCustomer.customer_name?.last_name[locale.locale] ?? null}` : data?.ShopBusinessCustomer.customer_name[locale.locale])
+            let _model = {
+                customer_type: customer_type,
+                customer_id: customer_type === "person" ? data?.ShopPersonalCustomer?.id : data?.ShopBusinessCustomer?.id,
+                customer_list: customer_list,
+                customer_phone: customer_phone_list[0],
+                customer_phone_list: customer_phone_list,
+                vehicle_customer_id: data.id,
+                vehicles_registration: data?.details?.registration,
+                vehicles_customers_list: [data],
+                previous_mileage: data?.details?.mileage === "" || data?.details?.mileage === null ? 0 : data?.details?.mileage,
+                current_mileage: data?.details?.mileage === "" || data?.details?.mileage === null ? data?.details?.mileage_first : "",
+                address: customer_type === "person" ? data?.ShopPersonalCustomer?.address ? data?.ShopPersonalCustomer?.address[locale.locale] : null : data?.ShopBusinessCustomer?.address ? data?.ShopBusinessCustomer?.address[locale.locale] : null,
+                tags: customer_type === "person" ? data?.ShopPersonalCustomer?.tags ?? [].map((e) => (e.id)) ?? [] : data?.ShopBusinessCustomer?.tags ?? [].map((e) => (e.id)) ?? [],
+                tags_obj: customer_type === "person" ? data?.ShopPersonalCustomer?.tags ?? [] : data?.ShopBusinessCustomer?.tags ?? [],
+                sales_man: customer_list[0]?.other_details?.employee_sales_man_id ? [customer_list[0]?.other_details?.employee_sales_man_id] : []
+            }
+            console.log("_model", _model)
+            form.setFieldsValue(_model)
+        } catch (error) {
+            console.log("error callBackPickVehicleRegistration ", error)
+        }
+    }
+
+    const handleOpenVehicleRegistrationDataModal = () => {
+        try {
+            console.log("test")
+            setIsVehicleRegistrationDataModalVisible(true)
+        } catch (error) {
+
+        }
+    }
+    const handleCancelVehicleRegistrationDataModal = () => {
+        try {
+            setIsVehicleRegistrationDataModalVisible(false)
+        } catch (error) {
+
+        }
+    }
+
+    const callBackPickCustomer = async (data) => {
+        try {
+            const { customer_type } = form.getFieldValue();
+            console.log("customer_type", customer_type)
+            console.log("data", data)
+            let array = [{ ...data }]
+            const newData = array.map(e => {
+                const customer_full_name = customer_type === "person" ?
+                    `${e.customer_name.first_name[locale.locale] ?? "-"} ${e.customer_name.last_name[locale.locale] ?? ""}` :
+                    `${e.customer_name[locale.locale] ?? "-"}`;
+
+                return {
+                    ...e,
+                    customer_type,
+                    customer_name: customer_full_name,
+                    customer_id: e.id,
+                    customer_code: e.master_customer_code_id,
+                    customer_branch: e.other_details.branch === "office" ? "(สำนักงานใหญ่)" : "(" + e.other_details.branch_code + " " + e.other_details.branch_name + ")",
+                }
+            })
+
+            const customer_phone_list = Object.entries(data.mobile_no).map((x) => x[1]).filter(where => where !== null);
+            let address = `${data?.address?.[locale.locale] ?? ""} ${data?.Province?.[`prov_name_${locale.locale}`] ?? ""} ${data?.District?.[`name_${locale.locale}`] ?? ""} ${data?.SubDistrict?.[`name_${locale.locale}`] ?? ""} ${data?.SubDistrict?.zip_code ?? ""}`
+            let tags = data?.tags.map((e) => (e.id)) ?? []
+            let tags_obj = data?.tags ?? []
+            let _model = {
+                customer_list: newData,
+                customer_id: newData[0].id,
+                customer_phone_list,
+                customer_phone: customer_phone_list[0],
+                address,
+                tags,
+                tags_obj,
+                sales_man: newData[0]?.other_details?.employee_sales_man_id ? [newData[0]?.other_details?.employee_sales_man_id] : [],
+                vehicle_customer_id: null,
+                vehicles_registration: null,
+                vehicles_customers_list: [],
+                previous_mileage: null,
+                current_mileage: null
+            }
+            setCustomerType(customer_type)
+            setCustomerPickToCreateINV(customer_type === "person" ? data : data)
+            setCustomerPickToCreateINVName(customer_type === "person" ? `${data.customer_name?.first_name[locale.locale] ?? null} ${data.customer_name?.last_name[locale.locale] ?? null}` : data.customer_name[locale.locale])
+
+            console.log("_model", _model)
+            await form.setFieldsValue(_model)
+            handleCancelCustomerDataModal()
+        } catch (error) {
+            console.log("callBackPickCustomer", error)
+        }
+    }
+
+    const handleOpenCustomerDataModal = () => {
+        try {
+            setIsCustomerDataModalVisible(true)
+        } catch (error) {
+
+        }
+    }
+    const handleCancelCustomerDataModal = () => {
+        try {
+            setIsCustomerDataModalVisible(false)
+        } catch (error) {
+
+        }
+    }
+
     return (
         <>
             <Row gutter={[20, 0]}>
@@ -260,7 +389,7 @@ const ComponentsRoutesModalFormRepairOrder = ({ mode, calculateResult }) => {
                         name="customer_type"
                         label="ประเภทลูกค้า"
                     >
-                        <Select style={{ width: "100%" }} disabled showArrow={false}>
+                        <Select style={{ width: "100%" }} disabled={mode === "view"} showArrow={false}>
                             <Select.Option value="person">บุคคลธรรมดา</Select.Option>
                             <Select.Option value="business">ธุรกิจ</Select.Option>
                         </Select>
@@ -270,24 +399,36 @@ const ComponentsRoutesModalFormRepairOrder = ({ mode, calculateResult }) => {
                 {/* <Form.Item name="customer_list" hidden /> */}
 
                 <Col lg={8} md={12} sm={12} xs={24}>
-                    <Form.Item
-                        name="customer_id"
-                        label="ชื่อลูกค้า"
-                    >
-                        <Select
-                            showSearch
-                            showArrow={false}
-                            filterOption={false}
-                            // notFoundContent={loadingEasySearch ? "กำลังค้นหาข้อมูล...กรุณารอสักครู่..." : "ไม่พบข้อมูล"}
-                            style={{ width: "100%" }}
-                            disabled
-                            loading={loadingEasySearch}
-                        >
-                            {getArrValue("customer_list").map(e => <Select.Option value={e.id} key={`customer-id-${e.id}`}>{e.customer_name}</Select.Option>)}
-                            {/* {easySearchList.map(e => <Select.Option value={e.id} key={`easy-search-${e.id}`}>{e.value_name}</Select.Option>)} */}
-
-                        </Select>
-                    </Form.Item>
+                    <Row gutter={8}>
+                        <Col span={mode === "view" ? 24 : 20}>
+                            <Form.Item
+                                name="customer_id"
+                                label="ชื่อลูกค้า"
+                            >
+                                <Select
+                                    showSearch
+                                    showArrow={false}
+                                    filterOption={false}
+                                    style={{ width: "100%" }}
+                                    disabled
+                                    loading={loadingEasySearch}
+                                >
+                                    {getArrValue("customer_list").map(e => <Select.Option value={e.id} key={`customer-id-${e.id}`}>{e.customer_name}</Select.Option>)}
+                                </Select>
+                            </Form.Item>
+                        </Col>
+                        <Col span={mode === "view" ? 0 : 4} style={{ justifyContent: "end" }}>
+                            <Form.Item label={" "}>
+                                <Button
+                                    type='primary'
+                                    style={{ width: "100%", borderRadius: "10px" }}
+                                    onClick={() => handleOpenCustomerDataModal()}
+                                >
+                                    เลือก
+                                </Button>
+                            </Form.Item>
+                        </Col>
+                    </Row>
                 </Col>
 
                 {/* <Form.Item name="customer_phone_list" hidden /> */}
@@ -313,21 +454,36 @@ const ComponentsRoutesModalFormRepairOrder = ({ mode, calculateResult }) => {
                 {/* <Form.Item name="vehicles_customers_list" hidden /> */}
 
                 <Col lg={8} md={12} sm={12} xs={24}>
-                    <Form.Item
-                        name="vehicle_customer_id"
-                        label="ทะเบียนรถ"
-                    >
-                        <Select
-                            showSearch
-                            showArrow={false}
-                            filterOption={false}
-                            style={{ width: "100%" }}
-                            disabled
-                            loading={loadingEasySearch}
-                        >
-                            {getArrValue("vehicles_customers_list").map((e, index) => <Select.Option value={e?.id} key={`vehicles-customers-${index}`}>{e?.details?.registration ?? "-"}</Select.Option>)}
-                        </Select>
-                    </Form.Item>
+                    <Row gutter={8}>
+                        <Col span={mode === "view" ? 24 : 20}>
+                            <Form.Item
+                                name="vehicle_customer_id"
+                                label="ทะเบียนรถ"
+                            >
+                                <Select
+                                    showSearch
+                                    showArrow={false}
+                                    filterOption={false}
+                                    style={{ width: "100%" }}
+                                    disabled
+                                    loading={loadingEasySearch}
+                                >
+                                    {getArrValue("vehicles_customers_list").map((e, index) => <Select.Option value={e?.id} key={`vehicles-customers-${index}`}>{e?.details?.registration ?? "-"}</Select.Option>)}
+                                </Select>
+                            </Form.Item>
+                        </Col>
+                        <Col span={mode === "view" ? 0 : 4} style={{ justifyContent: "end" }}>
+                            <Form.Item label={" "}>
+                                <Button
+                                    type='primary'
+                                    style={{ width: "100%", borderRadius: "10px" }}
+                                    onClick={() => handleOpenVehicleRegistrationDataModal()}
+                                >
+                                    เลือก
+                                </Button>
+                            </Form.Item>
+                        </Col>
+                    </Row>
                 </Col>
 
                 <Col lg={4} md={6} sm={6} xs={12}>
@@ -439,7 +595,7 @@ const ComponentsRoutesModalFormRepairOrder = ({ mode, calculateResult }) => {
                             placeholder="เลือกข้อมูล"
                         >
                             {salesManList.map((e, index) => <Select.Option value={e.id} key={`sales-man-${e.id}`}>{e?.name[locale.locale] + (e?.UsersProfile?.details?.nickname ? ` (${e?.UsersProfile?.details?.nickname})` : "") ?? "-"}</Select.Option>)}
-                            </Select>
+                        </Select>
                     </Form.Item>
                 </Col>
 
@@ -594,6 +750,34 @@ const ComponentsRoutesModalFormRepairOrder = ({ mode, calculateResult }) => {
                 </Col>
 
             </Row>
+            <Modal
+                maskClosable={false}
+                open={isVehicleRegistrationDataModalVisible}
+                onCancel={handleCancelVehicleRegistrationDataModal}
+                width="90vw"
+                style={{ top: 5 }}
+                footer={(
+                    <>
+                        <Button onClick={() => handleCancelVehicleRegistrationDataModal()}>{GetIntlMessages("กลับ")}</Button>
+                    </>
+                )}
+            >
+                <VehicleRegistrationData title="จัดการข้อมูลรถ" callBack={callBackPickVehicleRegistration} />
+            </Modal>
+            <Modal
+                maskClosable={false}
+                open={isCustomerDataModalVisible}
+                onCancel={handleCancelCustomerDataModal}
+                width="90vw"
+                style={{ top: 5 }}
+                footer={(
+                    <>
+                        <Button onClick={() => handleCancelCustomerDataModal()}>{GetIntlMessages("กลับ")}</Button>
+                    </>
+                )}
+            >
+                {form.getFieldValue().customer_type === "person" ? <PersonalCustomersData title="จัดการข้อมูลลูกค้าบุคคลธรรมดา" callBack={callBackPickCustomer} /> : <BusinessCustomersData title="จัดการข้อมูลลูกค้าธุรกิจ" callBack={callBackPickCustomer} />}
+            </Modal>
 
         </>
 
