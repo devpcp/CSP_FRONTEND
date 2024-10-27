@@ -8,7 +8,7 @@ import TableList from '../../components//shares/TableList'
 import FormProvinceDistrictSubdistrict from '../../components/shares/FormProvinceDistrictSubdistrict';
 import FormProvinceDistrictSubdistrictSecond from '../../components/shares/FormProvinceDistrictSubdistrictSecond';
 import { FormInputLanguage, FormSelectLanguage } from '../../components/shares/FormLanguage';
-import { RoundingNumber, NoRoundingNumber } from '../../components/shares/ConvertToCurrency';
+import { RoundingNumber, NoRoundingNumber,takeOutComma } from '../../components/shares/ConvertToCurrency';
 import { get, isPlainObject, isFunction, isArray } from "lodash";
 import GetIntlMessages from '../../util/GetIntlMessages';
 import { Cookies } from "react-cookie";
@@ -555,6 +555,8 @@ const BusinessCustomersData = ({ title = null, callBack }) => {
     }
 
     const onFinish = async (value) => {
+        console.log("value", value)
+        console.log("getfrm", form.getFieldsValue())
         try {
             let new_model = []
             const { target } = value
@@ -694,7 +696,7 @@ const BusinessCustomersData = ({ title = null, callBack }) => {
                     },
                     is_member: value.is_member ?? false,
                     other_member: value.other_member ?? null,
-                    debt_amount: value.debt_amount === "NaN" ? "0.00" : !!value.debt_amount ? MatchRound(+value.debt_amount) ?? "0.00" : "0.00",
+                    debt_amount: MatchRound(+takeOutComma(value.debt_amount)) ?? null,
                     debt_min_active_doc_date: value.debt_min_active_doc_date ?? null,
                     debt_due_date: value.debt_due_date ?? null,
                     line_mobile_number: value.line_mobile_number ?? null,
@@ -2193,6 +2195,7 @@ const BusinessCustomersData = ({ title = null, callBack }) => {
                         />
                         <Form.Item name="credit_limit" hidden />
                         <Form.Item name="credit_term" hidden />
+                        <Form.Item name="debt_amount" hidden />
 
                         <Form.Item name="longitude" hidden />
                         <Form.Item name="latitude" hidden />

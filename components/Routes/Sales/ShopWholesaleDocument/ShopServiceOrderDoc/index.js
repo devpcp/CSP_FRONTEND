@@ -949,9 +949,9 @@ const RepairOrder = ({ docTypeId, view_doc_id, select_shop_ids, title = null, })
                 tags_obj: isPersonal ? value.ShopPersonalCustomer?.tags ?? [] : value.ShopBusinessCustomer?.tags ?? [],
 
                 tax_id: isPersonal ? value?.ShopPersonalCustomer?.id_card_number ?? null : value?.ShopBusinessCustomer?.tax_id ?? null,
-                credit_limit: isPersonal ? (+value?.ShopPersonalCustomer?.other_details?.credit_limit).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) ?? null : (+value?.ShopBusinessCustomer?.other_details?.credit_limit).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) ?? null,
-                credit_term: isPersonal ? (+value?.ShopPersonalCustomer?.other_details?.credit_term).toLocaleString() ?? null : (+value?.ShopBusinessCustomer?.other_details?.credit_term).toLocaleString() ?? null,
-
+                credit_limit: isPersonal ? (+value?.ShopPersonalCustomer?.other_details?.credit_limit).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) ?? "0.00" : (+value?.ShopBusinessCustomer?.other_details?.credit_limit).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) ?? "0.00",
+                credit_term: isPersonal ? (+value?.ShopPersonalCustomer?.other_details?.credit_term).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) ?? "0.00" : (+value?.ShopBusinessCustomer?.other_details?.credit_term).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) ?? "0.00",
+                debt_amount: isPersonal ? (+value?.ShopPersonalCustomer?.other_details?.debt_amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) ?? "0.00" : (+value?.ShopBusinessCustomer?.other_details?.debt_amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) ?? "0.00",
             }
             // console.log('model :>> ', model);
             if (isArray(filterPayment) && filterPayment.length > 0) {
@@ -1386,8 +1386,26 @@ const RepairOrder = ({ docTypeId, view_doc_id, select_shop_ids, title = null, })
 
     const handleOk = (modeKey) => {
         try {
-
-            checkform()
+            const { credit_limit, debt_amount, price_grand_total } = form.getFieldsValue()
+            if ((+takeOutComma(credit_limit) ?? 0) !== 0) {
+                let cal1 = MatchRound((+takeOutComma(debt_amount)) + price_grand_total)
+                let cal2 = MatchRound(+takeOutComma(credit_limit))
+                if (cal1 > cal2) {
+                    Modal.confirm({
+                        cancelText: "ปิด",
+                        okText: "ยืนยัน",
+                        content: <>ยอดรวมทั้งสิ้นรวมหนี้สินทั้งหมด เกินเครดิตคงเหลือ <br></br>ทั้งหมด {(cal1 - cal2).toLocaleString()} บาท ต้องการดำเนินการต่อหรือไม่ ?</>,
+                        onOk: () => {
+                            checkform()
+                        },
+                    });
+                } else {
+                    checkform()
+                }
+            } else {
+                checkform()
+            }
+            // checkform()
             async function checkform() {
                 try {
                     await form.validateFields()
@@ -1765,10 +1783,14 @@ const RepairOrder = ({ docTypeId, view_doc_id, select_shop_ids, title = null, })
 
     const onFinish = async (values, isConfirmedDoc = false) => {
         try {
+
+
+
+
             console.log('values :>> ', values);
             // console.log('authUser :>> ', authUser);
-            setLoading(true)
-            setCarPreLoading(true)
+            // setLoading(true)
+            // setCarPreLoading(true)
             const { price_discount_bill, price_discount_before_pay, price_sub_total, price_discount_total, price_amount_total, price_before_vat, price_vat, price_grand_total } = values
 
             let shopId = authUser?.UsersProfile?.shop_id
@@ -1990,6 +2012,8 @@ const RepairOrder = ({ docTypeId, view_doc_id, select_shop_ids, title = null, })
             }
             setCarPreLoading(false)
             setLoading(false)
+            // }
+
 
         } catch (error) {
             setLoading(false)
@@ -2387,10 +2411,10 @@ const RepairOrder = ({ docTypeId, view_doc_id, select_shop_ids, title = null, })
                                             <PrintOut textButton={"พิมพ์ใบสั่งขาย"} loading={loading} documentId={form.getFieldValue("id")} style={{ width: "100%", display: "flex", justifyContent: "center", alignItems: "center" }} morePrintOuts={configButtonPrintOut} customPriceUse={true} docTypeId={docTypeId} />
                                         </Col>
                                         <Col xxl={4} lg={6} md={12} xs={24} hidden={configModal.mode !== "edit" || form.getFieldValue("is_draft") === false || form.getFieldValue("status") != 1} >
-                                            <Button loading={loading} onClick={() => confirmOrder()} type="text" style={{ width: "100%", borderColor: "black" }}>{GetIntlMessages("ยืนยันใบสั่งขาย")}</Button>
+                                            <Button loading={loading} onClick={() => handleOk(1)} type="text" style={{ width: "100%", borderColor: "black" }}>{GetIntlMessages("ยืนยันใบสั่งขาย")}</Button>
                                         </Col>
                                         <Col xxl={4} lg={6} md={12} xs={24} hidden={configModal.mode === "view" || form.getFieldValue("is_draft") !== false || disabledWhenDeliveryDocActive || form.getFieldValue("status") != 1}>
-                                            <Button loading={loading} onClick={() => createDeliveryOrderDoc()} type="text" style={{ overflow: "hidden", width: "100%", borderColor: "black", padding: 2 }}>{GetIntlMessages("สร้างใบส่งของชั่วคราว")}</Button>
+                                            <Button loading={loading} onClick={() => handleOk(2)} type="text" style={{ overflow: "hidden", width: "100%", borderColor: "black", padding: 2 }}>{GetIntlMessages("สร้างใบส่งของชั่วคราว")}</Button>
                                         </Col>
                                         {/* <Col xxl={4} lg={6} md={12} xs={24} hidden={configModal.mode === "add" || form.getFieldValue("is_draft") === true || form.getFieldValue("status") != 1 || (taxInvoiceTypeAbbActive && taxInvoiceTypeInvActive)}> */}
                                         {/* <Col xxl={4} lg={6} md={12} xs={24} hidden={configModal.mode !== "edit" || form.getFieldValue("is_draft") === true}> */}

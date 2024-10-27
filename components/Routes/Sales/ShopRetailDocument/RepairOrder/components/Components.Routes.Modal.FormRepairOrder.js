@@ -296,6 +296,12 @@ const ComponentsRoutesModalFormRepairOrder = ({ mode, calculateResult, disabledW
             setCustomerType(customer_type)
             setCustomerPickToCreateINV(customer_type === "person" ? data.ShopPersonalCustomer : data.ShopBusinessCustomer)
             setCustomerPickToCreateINVName(customer_type === "person" ? `${data?.ShopPersonalCustomer.customer_name?.first_name[locale.locale] ?? null} ${data?.ShopPersonalCustomer.customer_name?.last_name[locale.locale] ?? null}` : data?.ShopBusinessCustomer.customer_name[locale.locale])
+
+            let credit_term = customer_type === "person" ? data?.ShopPersonalCustomer?.other_details?.credit_term ?? 0 : data?.ShopBusinessCustomer?.other_details?.credit_term ?? 0
+            let credit_limit = customer_type === "person" ? (+data?.ShopPersonalCustomer?.other_details?.credit_limit ?? "0.00").toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : (+data?.ShopBusinessCustomer?.other_details?.credit_limit ?? "0.00").toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+            let debt_amount = customer_type === "person" ? (+data?.ShopPersonalCustomer?.other_details?.debt_amount ?? "0.00").toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : (+data?.ShopBusinessCustomer?.other_details?.debt_amount ?? "0.00").toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+            let credit_remaining = ((+credit_limit ?? 0) - (+debt_amount ?? 0)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+
             let _model = {
                 customer_type: customer_type,
                 customer_id: customer_type === "person" ? data?.ShopPersonalCustomer?.id : data?.ShopBusinessCustomer?.id,
@@ -310,9 +316,13 @@ const ComponentsRoutesModalFormRepairOrder = ({ mode, calculateResult, disabledW
                 address: customer_type === "person" ? data?.ShopPersonalCustomer?.address ? data?.ShopPersonalCustomer?.address[locale.locale] : null : data?.ShopBusinessCustomer?.address ? data?.ShopBusinessCustomer?.address[locale.locale] : null,
                 tags: customer_type === "person" ? data?.ShopPersonalCustomer?.tags ?? [].map((e) => (e.id)) ?? [] : data?.ShopBusinessCustomer?.tags ?? [].map((e) => (e.id)) ?? [],
                 tags_obj: customer_type === "person" ? data?.ShopPersonalCustomer?.tags ?? [] : data?.ShopBusinessCustomer?.tags ?? [],
-                sales_man: customer_list[0]?.other_details?.employee_sales_man_id ? [customer_list[0]?.other_details?.employee_sales_man_id] : []
+                sales_man: customer_list[0]?.other_details?.employee_sales_man_id ? [customer_list[0]?.other_details?.employee_sales_man_id] : [],
+                credit_limit,
+                credit_term,
+                debt_amount,
+                credit_remaining
             }
-            console.log("_model", _model)
+            console.log("_model callBackPickVehicleRegistration", _model)
             form.setFieldsValue(_model)
         } catch (error) {
             console.log("error callBackPickVehicleRegistration ", error)
@@ -360,6 +370,10 @@ const ComponentsRoutesModalFormRepairOrder = ({ mode, calculateResult, disabledW
             let address = `${data?.address?.[locale.locale] ?? ""} ${data?.Province?.[`prov_name_${locale.locale}`] ?? ""} ${data?.District?.[`name_${locale.locale}`] ?? ""} ${data?.SubDistrict?.[`name_${locale.locale}`] ?? ""} ${data?.SubDistrict?.zip_code ?? ""}`
             let tags = data?.tags.map((e) => (e.id)) ?? []
             let tags_obj = data?.tags ?? []
+            let credit_term = data?.other_details?.credit_term ? data?.other_details?.credit_term : null
+            let credit_limit = data?.other_details?.credit_limit ? (+data?.other_details?.credit_limit).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "0.00"
+            let debt_amount = data?.other_details?.debt_amount ? (data?.other_details?.debt_amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "0.00"
+            let credit_remaining = ((+data?.other_details?.credit_limit ?? 0) - (+data?.other_details?.debt_amount ?? 0)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
             let _model = {
                 customer_list: newData,
                 customer_id: newData[0].id,
@@ -373,7 +387,11 @@ const ComponentsRoutesModalFormRepairOrder = ({ mode, calculateResult, disabledW
                 vehicles_registration: null,
                 vehicles_customers_list: [],
                 previous_mileage: null,
-                current_mileage: null
+                current_mileage: null,
+                credit_limit,
+                credit_term,
+                debt_amount,
+                credit_remaining
             }
             setCustomerType(customer_type)
             setCustomerPickToCreateINV(customer_type === "person" ? data : data)
@@ -725,7 +743,41 @@ const ComponentsRoutesModalFormRepairOrder = ({ mode, calculateResult, disabledW
                     </Form.Item>
                 </Col>
 
+                <Col lg={4} md={6} sm={6} xs={12} hidden>
+                    <Form.Item
+                        name="credit_term"
+                        label="จำนวนวันเครดิต"
+                    >
+                        <InputNumber disabled={true} style={{ width: "100%" }} />
+                    </Form.Item>
+                </Col>
 
+                <Col lg={4} md={6} sm={6} xs={12} hidden>
+                    <Form.Item
+                        name="credit_limit"
+                        label="วงเงินเครดิต"
+                    >
+                        <InputNumber disabled={true} style={{ width: "100%" }} />
+                    </Form.Item>
+                </Col>
+
+                <Col lg={4} md={6} sm={6} xs={12} hidden>
+                    <Form.Item
+                        name="debt_amount"
+                        label="วงเงินที่ใช้ไป"
+                    >
+                        <InputNumber disabled={true} style={{ width: "100%" }} />
+                    </Form.Item>
+                </Col>
+
+                <Col lg={4} md={6} sm={6} xs={12} hidden>
+                    <Form.Item
+                        name="credit_remaining"
+                        label="วงเงินเครดิตคงเหลือ"
+                    >
+                        <InputNumber disabled={true} style={{ width: "100%" }} />
+                    </Form.Item>
+                </Col>
 
                 <Col lg={8} md={12} sm={12} xs={24} hidden>
                     <Form.Item

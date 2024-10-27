@@ -1,5 +1,5 @@
 import { CarOutlined, FileAddOutlined, UserOutlined, DownOutlined } from '@ant-design/icons'
-import { Button, Col, Form, message, Row, Tabs, Dropdown, Space, Menu } from 'antd'
+import { Button, Col, Form, message, Row, Tabs, Dropdown, Space, Menu, Tooltip } from 'antd'
 import { forEach, get, isArray, isEmpty, isPlainObject } from 'lodash'
 import moment from 'moment'
 import React, { useEffect, useState } from 'react'
@@ -333,6 +333,35 @@ const DebtorBillingDoc = ({ docTypeId }) => {
                 width: 150,
                 align: "center",
                 render: (text, record) => text ? moment(text).format("DD/MM/YYYY") : "-",
+            },
+            {
+                title: () => GetIntlMessages("วันที่ครบกำหนด"),
+                dataIndex: 'debt_due_date',
+                key: 'debt_due_date',
+                width: 150,
+                align: "center",
+                render: (text, record) => {
+                    let a = text ? moment(text).format("DD/MM/YYYY") : "-"
+                    return `${a}`
+                }
+            },
+            {
+                title: () => GetIntlMessages("สถานะครบกำหนด"),
+                dataIndex: 'debt_due_date',
+                key: 'debt_due_date',
+                width: 150,
+                align: "center",
+                render: (text, record) => {
+
+                    let a = moment(text).diff(moment(Date.now()), 'days')
+                    if (a === 0) {
+                        return "ครบกำหนดวันนี้"
+                    } else if (a < 0) {
+                        return <Tooltip title={moment(text).diff(moment(Date.now()), 'days') + " วัน"}><span className='color-red font-16'>เลยกำหนด</span></Tooltip>
+                    } else {
+                        return "ครบภายใน " +(moment(text).diff(moment(Date.now()), 'days')+1) + " วัน"
+                    }
+                }
             },
             // {
             //     title: () => GetIntlMessages("เลขทะเบียน"),
