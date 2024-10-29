@@ -1,17 +1,19 @@
-import { Col, DatePicker, Form, Input, Row, Select } from 'antd'
+import { Col, DatePicker, Form, Input, Row, Select, Button, Modal } from 'antd'
 import useFormInstance from 'antd/lib/form/hooks/useFormInstance'
 import { get, isArray, debounce, isFunction, isPlainObject } from 'lodash'
 import { useState } from 'react'
 import { useSelector } from 'react-redux'
 import API from '../../../../../util/Api'
 import GetIntlMessages from '../../../../../util/GetIntlMessages'
+import BusinessPartnersData from "../../../../../routes/MyData/BusinessPartnersData"
 
 const ComponentsRoutesModalFormPurchaseDoc = ({ mode, configModal, docTypeId, onFinish, onFinishFailed, calculateResult }) => {
     const [loadingSearch, setLoadingSearch] = useState(false)
     const form = Form.useFormInstance()
-
+    const [shopBusinessPartners, setShopBusinessPartners] = useState([])
     const { taxTypes, documentTypes } = useSelector(({ master }) => master);
     const { locale, mainColor } = useSelector(({ settings }) => settings);
+    const [isBusinessPartnersDataModalVisible, setIsBusinessPartnersDataModalVisible] = useState(false);
 
     /**
  * Get the value of the array field at the specified index
@@ -28,33 +30,64 @@ const ComponentsRoutesModalFormPurchaseDoc = ({ mode, configModal, docTypeId, on
         }
     }
 
-    const debounceOnSearch = debounce((value, type) => searchSelectClear(value, type), 800)
-    const searchSelectClear = async (value, type) => {
+    const getShopBusinessPartnersDataListAll = async (value = "") => {
+        const { data } = await API.get(`/shopBusinessPartners/all?search=${value}&limit=10&page=1&sort=partner_name.th&order=desc&status=active`);
+        return data.data.data ?? []
+    }
+
+    const callBackPickBusinessPartners = async (data, type = "modal") => {
         try {
-            setLoadingSearch(() => true)
-            const { business_partners_list } = form.getFieldValue()
+            let businessPartnerData = await getShopBusinessPartnersDataListAll(data.partner_name[locale.locale])
+            businessPartnerData?.map((e) => {
+                e.partner_branch = e.other_details.branch ? e.other_details.branch === "office" ? "(สำนักงานใหญ่)" : "(" + e.other_details.branch_code + " " + e.other_details.branch_name + ")" : ""
+            })
             switch (type) {
-                case "search":
-                    if (!!value) {
-                        const { data } = await API.get(`/shopBusinessPartners/all?search=${value}&limit=50&page=1&sort=partner_name.th&order=desc&status=active`);
-                        if (data.status === "success") {
-                            // setBussinessPartnerList(() => data.data.data)
-                            business_partners_list = data.data.data ?? []
-
-                        }
-                    }
-
+                case "bar":
                     break;
-
                 default:
+                    setShopBusinessPartners(businessPartnerData)
                     break;
             }
 
-            form.setFieldsValue({ business_partners_list })
-            setLoadingSearch(() => false)
+            let _model = {
+                business_partner_id: data.id,
+                tax_type_id: data?.other_details?.tax_type_id ?? "fafa3667-55d8-49d1-b06c-759c6e9ab064"
+            }
+            await form.setFieldsValue(_model)
+            handleCancelBusinessPartnersDataModal()
         } catch (error) {
-            // console.log('error :>> ', error);
+            console.log("callBackPickBusinessPartners", error)
         }
+    }
+
+    const handleOpenBusinessPartnersDataModal = () => {
+        try {
+            setIsBusinessPartnersDataModalVisible(true)
+        } catch (error) {
+
+        }
+    }
+    const handleCancelBusinessPartnersDataModal = () => {
+        try {
+            setIsBusinessPartnersDataModalVisible(false)
+        } catch (error) {
+
+        }
+    }
+
+    const onSelectPartner = (e) => {
+        let find = shopBusinessPartners.find(x => x.id === e)
+        callBackPickBusinessPartners(find, "bar")
+    }
+
+    const debounceOnSearch = debounce((value, type) => onSearchBusinessPartnerData(value, type), 1000)
+
+    const onSearchBusinessPartnerData = async (e) => {
+        const data = await getShopBusinessPartnersDataListAll(e)
+        data?.map((e) => {
+            e.partner_branch = e.other_details.branch ? e.other_details.branch === "office" ? "(สำนักงานใหญ่)" : "(" + e.other_details.branch_code + " " + e.other_details.branch_name + ")" : ""
+        })
+        setShopBusinessPartners(data)
     }
 
     return (
@@ -79,40 +112,52 @@ const ComponentsRoutesModalFormPurchaseDoc = ({ mode, configModal, docTypeId, on
                         help={loadingSearch ? "กำลังโหลดข้อมูล..กรุณารอสักครู่" : null}
                         extra="พิมพ์อย่างน้อย 1 ตัวเพื่อค้นหาผู้จำหน่าย"
                     >
-                        <Select showSearch allowClear disabled={mode === "view"}
+                        <Select
+                            showSearch
+                            allowClear
+                            disabled={mode === "view"}
+                            onSelect={(e) => onSelectPartner(e)}
                             onSearch={(value) => debounceOnSearch(value, "search")}
                             filterOption={(input, option) => option.children.toLowerCase().includes(input.toLowerCase())}
-                        // filterOption={false}
                         >
-                            {getArrListValue("business_partners_list").map((e, i) => <Select.Option value={e.id} key={`bussiness-partner-code-${i}-${e.id}`}>{get(e, `code_id`, "-")}</Select.Option>)}
-                            {/* {
-                                    isArray(bussinessPartnerList) && bussinessPartnerList.length > 0 ?
-                                        bussinessPartnerList.map((e, index) => <Select.Option value={e.id} key={`tax-type-${index}`}>{get(e, `code_id`, "-")}</Select.Option>)
-                                        : []
-                                } */}
+                            {shopBusinessPartners?.map((e, i) => <Select.Option value={e.id} key={`bussiness-partner-code-${i}-${e.id}`}>{get(e, `code_id`, "-")}</Select.Option>)}
                         </Select>
                     </Form.Item>
                 </Col>
                 <Col lg={8} md={12} sm={12} xs={24}>
-                    <Form.Item
-                        name="business_partner_id"
-                        label={GetIntlMessages("ชื่อผู้จำหน่าย")}
-                        help={loadingSearch ? "กำลังโหลดข้อมูล..กรุณารอสักครู่" : null}
-                        extra="พิมพ์อย่างน้อย 1 ตัวเพื่อค้นหาผู้จำหน่าย"
-                    >
-                        <Select showSearch allowClear disabled={mode === "view"}
-                            onSearch={(value) => debounceOnSearch(value, "search")}
-                            // filterOption={false}
-                            filterOption={(input, option) => option.children.toLowerCase().includes(input.toLowerCase())}
-                        >
-                            {getArrListValue("business_partners_list").map((e, i) => <Select.Option value={e.id} key={`bussiness-partner-name-${i}-${e.id}`}>{get(e, `partner_name.${locale.locale}`, "-")}</Select.Option>)}
-                            {/* {
-                                    isArray(bussinessPartnerList) && bussinessPartnerList.length > 0 ?
-                                        bussinessPartnerList.map((e, index) => <Select.Option value={e.id} key={`tax-type-${index}`}>{get(e, `partner_name.${locale.locale}`, "-")}</Select.Option>)
-                                        : []
-                                } */}
-                        </Select>
-                    </Form.Item>
+                    <Row>
+                        <Col lg={20} md={20} sm={18} xs={18}>
+                            <Form.Item
+                                name="business_partner_id"
+                                label={GetIntlMessages("ชื่อผู้จำหน่าย")}
+                                help={loadingSearch ? "กำลังโหลดข้อมูล..กรุณารอสักครู่" : null}
+                                extra="พิมพ์อย่างน้อย 1 ตัวเพื่อค้นหาผู้จำหน่าย"
+                            >
+                                <Select
+                                    showSearch
+                                    allowClear
+                                    disabled={mode === "view"}
+                                    style={{ width: "98%" }}
+                                    onSearch={(value) => debounceOnSearch(value, "search")}
+                                    onSelect={(e) => onSelectPartner(e)}
+                                    optionFilterProp="children"
+                                >
+                                    {shopBusinessPartners?.map((e, i) => <Select.Option value={e.id} key={`bussiness-partner-name-${i}-${e.id}`}> {e.partner_name[locale.locale] + " " + e.partner_branch}</Select.Option>)}
+                                </Select>
+                            </Form.Item>
+                        </Col>
+                        <Col lg={4} md={4} sm={6} xs={6} style={{ paddingTop: "30.8px", justifyContent: "end" }}>
+                            <Form.Item >
+                                <Button
+                                    type='primary'
+                                    style={{ width: "100%", borderRadius: "10px" }}
+                                    onClick={() => handleOpenBusinessPartnersDataModal()}
+                                >
+                                    เลือก
+                                </Button>
+                            </Form.Item>
+                        </Col>
+                    </Row>
                 </Col>
                 <Col lg={8} md={12} sm={12} xs={24}>
                     <Form.Item
@@ -120,7 +165,7 @@ const ComponentsRoutesModalFormPurchaseDoc = ({ mode, configModal, docTypeId, on
                         label={GetIntlMessages("ประเภทธุรกิจ")}
                     >
                         <Select disabled showArrow={false}>
-                            {getArrListValue("business_partners_list").map((e, i) => <Select.Option value={e.id} key={`bussiness-partner-type-${i}-${e.id}`}>{get(e, `BusinessType.business_type_name.${locale.locale}`, "-")}</Select.Option>)}
+                            {shopBusinessPartners?.map((e, i) => <Select.Option value={e.id} key={`bussiness-partner-type-${i}-${e.id}`}>{get(e, `BusinessType.business_type_name.${locale.locale}`, "-")}</Select.Option>)}
                             {/* {
                                     isArray(bussinessPartnerList) && bussinessPartnerList.length > 0 ?
                                         bussinessPartnerList.map((e, index) => <Select.Option value={e.id} key={`tax-type-${index}`}>{get(e, `BusinessType.business_type_name.${locale.locale}`, "-")}</Select.Option>)
@@ -195,6 +240,20 @@ const ComponentsRoutesModalFormPurchaseDoc = ({ mode, configModal, docTypeId, on
                 </Col>
             </Row>
             {/* </Form> */}
+            <Modal
+                maskClosable={false}
+                open={isBusinessPartnersDataModalVisible}
+                onCancel={handleCancelBusinessPartnersDataModal}
+                width="90vw"
+                style={{ top: 5 }}
+                footer={(
+                    <>
+                        <Button onClick={() => handleCancelBusinessPartnersDataModal()}>{GetIntlMessages("กลับ")}</Button>
+                    </>
+                )}
+            >
+                {<BusinessPartnersData title="จัดการข้อมูลผู้จำหน่าย" callBack={callBackPickBusinessPartners} />}
+            </Modal>
 
         </>
     )

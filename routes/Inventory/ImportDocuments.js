@@ -33,32 +33,10 @@ const ImportDocuments = ({ view_doc_id, select_shop_ids, title = null, callBack,
     const [columns, setColumns] = useState([])
     const { permission_obj } = useSelector(({ permission }) => permission);
     const { authUser } = useSelector(({ auth }) => auth);
-    const { taxTypes } = useSelector(({ master }) => master);
     const { locale, mainColor } = useSelector(({ settings }) => settings);
 
     const twoDigits = { minimumFractionDigits: 2, maximumFractionDigits: 2 }
-    const [shopBusinessPartnersList, setShopBusinessPartners] = useState([])
 
-    useEffect(() => {
-        getMasterData()
-    }, [])
-
-
-    const getMasterData = async () => {
-        try {
-            const [value1, value2] = await Promise.all([getTaxTypes(), getShopBusinessPartnersDataListAll()])
-            // setLengthShelfData(value1.length)
-            if (isArray(value1)) setTaxTypesList(() => value1);
-            if (isArray(value2)) setShopBusinessPartners(() => value2);
-        } catch (error) {
-            console.log("getMasterData error : ", error)
-        }
-    }
-
-    const getShopBusinessPartnersDataListAll = async () => {
-        const { data } = await API.get(`/shopBusinessPartners/all?limit=9999&page=1&sort=partner_name.th&order=asc&status=active`)
-        return data.status === "success" ? data.data.data ?? [] : []
-    }
 
     const setColumnsTable = () => {
         const _column = [
@@ -121,6 +99,28 @@ const ImportDocuments = ({ view_doc_id, select_shop_ids, title = null, callBack,
                 width: 200,
                 use: true,
                 render: (text, record) => _.get(text, `partner_name[${locale.locale}]`, "-")
+            },
+            {
+                title: GetIntlMessages("สำนักงาน"),
+                dataIndex: 'ShopBusinessPartners',
+                key: 'ShopBusinessPartners',
+                width: 200,
+                use: true,
+                render: (text, record) => {
+                    try {
+                        switch (record.ShopBusinessPartners.other_details.branch) {
+                            case "office":
+                                return "สำนักงานใหญ่"
+                            case "branch":
+                                return `สาขา${record.ShopBusinessPartners.other_details.branch_code === record.ShopBusinessPartners.other_details.branch_name ? " " : ` ${record.ShopBusinessPartners.other_details.branch_code} `}${record.ShopBusinessPartners.other_details.branch_name}`
+                            default:
+                                return "-"
+                        }
+                    } catch (error) {
+                        return "-"
+                    }
+
+                },
             },
             {
                 title: GetIntlMessages("เลขที่ใบสั่งซื้อสินค้า"),
@@ -236,14 +236,6 @@ const ImportDocuments = ({ view_doc_id, select_shop_ids, title = null, callBack,
 
         _column.map((x) => { x.use === undefined ? x.use = true : null })
         setColumns(_column.filter(x => x.use === true));
-    }
-
-    const whereProductOtherShops = (item, text) => {
-        return _.isPlainObject(item) ? _.isPlainObject(item.other_details) ? (_.isArray(item.other_details.other_shops) && item.other_details.other_shops.length > 0) ? item.other_details.other_shops[item.other_details.other_shops.length - 1][text] ?? "-" : "-" : "-" : "-"
-    }
-
-    const whereProductOtherDetails = (item, text) => {
-        return _.isPlainObject(item) ? _.isPlainObject(item.other_details) ? item.other_details[text] ?? "-" : "-" : "-"
     }
 
     /* ค่าเริ่มต้น */
@@ -1382,7 +1374,7 @@ const ImportDocuments = ({ view_doc_id, select_shop_ids, title = null, callBack,
                     onFinishFailed={onFinishFailedAddEditViewModal}
                 >
 
-                    <ImportDocAddEditViewModal pageId={'ad06eaab-6c5a-4649-aef8-767b745fab47'} form={formModal} mode={configModal.mode} expireDate={expireEditTimeDisable} getShopBusinessPartners={setShopBusinessPartners} calculateResult={calculateResult} setLoading={setLoading} />
+                    <ImportDocAddEditViewModal pageId={'ad06eaab-6c5a-4649-aef8-767b745fab47'} form={formModal} mode={configModal.mode} expireDate={expireEditTimeDisable} calculateResult={calculateResult} setLoading={setLoading} />
                     <Form.Item name={"product_list_check"} hidden>
                         <Input></Input>
                     </Form.Item>

@@ -33,16 +33,14 @@ const FormImportDocument = ({ form, mode, expireEditTimeDisable, dataList, calcu
 
 
     useEffect(() => {
+        shopBusinessPartnersList?.map((e) => {
+            e.partner_branch = e.other_details.branch ? e.other_details.branch === "office" ? "(สำนักงานใหญ่)" : "(" + e.other_details.branch_code + " " + e.other_details.branch_name + ")" : ""
+        })
+        console.log("shopBusinessPartnersList", shopBusinessPartnersList)
         setShopBusinessPartners(() => shopBusinessPartnersList)
     }, [shopBusinessPartnersList])
 
-    const callBackDataBusinessPartner = (data) => {
 
-        if (data && isArray(data)) {
-            setShopBusinessPartners(data)
-            if (isFunction(getShopBusinessPartners)) getShopBusinessPartners(data)
-        }
-    }
     /* Debounce Search */
     const debounceSearchPurchaseOrder = debounce((value, type) => searchPurchaseOrder(value, type), 800)
     const searchPurchaseOrder = async (value, type) => {
@@ -148,7 +146,7 @@ const FormImportDocument = ({ form, mode, expireEditTimeDisable, dataList, calcu
             const { business_partner_id, ShopPurchaseOrderLists, price_discount_bill, details } = value
             let product_list = []
             if (isArray(ShopPurchaseOrderLists) && ShopPurchaseOrderLists.length > 0) {
-                product_list = ShopPurchaseOrderLists.map((e, index) => {
+                product_list = ShopPurchaseOrderLists?.map((e, index) => {
                     const { details, product_id, purchase_unit_id, amount, price_unit, price_discount, price_discount_percent, price_grand_total, seq_number } = e
                     return {
                         product_id,
@@ -180,14 +178,25 @@ const FormImportDocument = ({ form, mode, expireEditTimeDisable, dataList, calcu
     }
 
 
-    const callBackPickBusinessPartners = async (data) => {
+    const callBackPickBusinessPartners = async (data, type = "modal") => {
         try {
 
-            console.log("data", data)
-            let businessPartnerData = await getShopBusinessPartnersDataListAll()
-            setShopBusinessPartners(businessPartnerData)
+            let businessPartnerData = await getShopBusinessPartnersDataListAll((data.partner_name[locale.locale]))
+            businessPartnerData?.map((e) => {
+                e.partner_branch = e.other_details.branch ? e.other_details.branch === "office" ? "(สำนักงานใหญ่)" : "(" + e.other_details.branch_code + " " + e.other_details.branch_name + ")" : ""
+            })
+
+            switch (type) {
+                case "bar":
+                    break;
+                default:
+                    setShopBusinessPartners(businessPartnerData)
+                    break;
+            }
+
             let _model = {
-                bus_partner_id: data.id
+                bus_partner_id: data.id,
+                tax_type: data?.other_details?.tax_type_id ?? "fafa3667-55d8-49d1-b06c-759c6e9ab064"
             }
             await form.setFieldsValue(_model)
             handleCancelBusinessPartnersDataModal()
@@ -211,6 +220,20 @@ const FormImportDocument = ({ form, mode, expireEditTimeDisable, dataList, calcu
         }
     }
 
+    const onSelectPartner = (e) => {
+        let find = shopBusinessPartners.find(x => x.id === e)
+        callBackPickBusinessPartners(find, "bar")
+    }
+
+    const debounceOnSearch = debounce((value) => onSearchBusinessPartnerData(value), 1000)
+
+    const onSearchBusinessPartnerData = async (e) => {
+        const data = await getShopBusinessPartnersDataListAll(e)
+        data?.map((e) => {
+            e.partner_branch = e.other_details.branch ? e.other_details.branch === "office" ? "(สำนักงานใหญ่)" : "(" + e.other_details.branch_code + " " + e.other_details.branch_name + ")" : ""
+        })
+        setShopBusinessPartners(data)
+    }
 
     /*End Debounce Select and Clear */
     return (
@@ -236,8 +259,9 @@ const FormImportDocument = ({ form, mode, expireEditTimeDisable, dataList, calcu
                                 placeholder="เลือกข้อมูล"
                                 disabled={mode == "view" || expireEditTimeDisable == true || !!form.getFieldValue().purchase_order_number}
                                 optionFilterProp="children"
+                                onSelect={(e) => onSelectPartner(e)}
                             >
-                                {shopBusinessPartners.map((e, index) => (
+                                {shopBusinessPartners?.map((e, index) => (
                                     <Select.Option value={e.id} key={index}>
                                         {e.code_id}
                                     </Select.Option>
@@ -260,13 +284,15 @@ const FormImportDocument = ({ form, mode, expireEditTimeDisable, dataList, calcu
                                     <Select
                                         style={{ width: "98%" }}
                                         showSearch
+                                        onSearch={(e) => debounceOnSearch(e)}
                                         placeholder="เลือกข้อมูล"
                                         disabled={mode == "view" || expireEditTimeDisable == true || !!form.getFieldValue().purchase_order_number}
                                         optionFilterProp="children"
+                                        onSelect={(e) => onSelectPartner(e)}
                                     >
-                                        {shopBusinessPartners.map((e, index) => (
+                                        {shopBusinessPartners?.map((e, index) => (
                                             <Select.Option value={e.id} key={index}>
-                                                {e.partner_name[locale.locale]}
+                                                {e.partner_name[locale.locale] + " " + e.partner_branch}
                                             </Select.Option>
                                         ))}
                                     </Select>
@@ -302,7 +328,7 @@ const FormImportDocument = ({ form, mode, expireEditTimeDisable, dataList, calcu
                                 disabled
                             // onChange={onChangeNamePartner}
                             >
-                                {shopBusinessPartners.map((e, index) => (
+                                {shopBusinessPartners?.map((e, index) => (
                                     <Select.Option value={e.id} key={index}>
                                         {e.tax_id ? e.tax_id : "-"}
                                     </Select.Option>
@@ -325,7 +351,7 @@ const FormImportDocument = ({ form, mode, expireEditTimeDisable, dataList, calcu
                                 disabled
                             // onChange={onChangeNamePartner}
                             >
-                                {shopBusinessPartners.map((e, index) => (
+                                {shopBusinessPartners?.map((e, index) => (
                                     <Select.Option value={e.id} key={index}>
                                         {/* {e.mobile_no ? e.mobile_no.mobile_no_1 : "-"} */}
                                         {get(e.mobile_no, "mobile_no_1", "-")}
@@ -360,7 +386,7 @@ const FormImportDocument = ({ form, mode, expireEditTimeDisable, dataList, calcu
                                 notFoundContent={loadingSearch ? <span>"กำลังโหลดข้อมูล..กรุณารอสักครู่"</span> : null}
                                 allowClear
                             >
-                                {getArrListValue("purchase_order_number_list").map((e, i) => <Select.Option value={e.id} key={`purchase_order_number-${i}-${e.id}`}>{get(e, `code_id`, "-")}</Select.Option>)}
+                                {getArrListValue("purchase_order_number_list")?.map((e, i) => <Select.Option value={e.id} key={`purchase_order_number-${i}-${e.id}`}>{get(e, `code_id`, "-")}</Select.Option>)}
                             </Select>
                         </Form.Item>
                     </Col>
@@ -388,7 +414,7 @@ const FormImportDocument = ({ form, mode, expireEditTimeDisable, dataList, calcu
                                     disabled
                                 // onChange={onChangeNamePartner}
                                 >
-                                    {shopBusinessPartners.map((e, index) => (
+                                    {shopBusinessPartners?.map((e, index) => (
                                         <Select.Option value={e.id} key={index}>
                                             {e.other_details.period_credit ? e.other_details.period_credit : "-"}
                                         </Select.Option>
@@ -410,7 +436,7 @@ const FormImportDocument = ({ form, mode, expireEditTimeDisable, dataList, calcu
                                     disabled
                                 // onChange={onChangeNamePartner}
                                 >
-                                    {shopBusinessPartners.map((e, index) => (
+                                    {shopBusinessPartners?.map((e, index) => (
                                         <Select.Option value={e.id} key={index}>
                                             {e.other_details.approval_limit ? e.other_details.approval_limit : "-"}
                                         </Select.Option>
@@ -461,7 +487,7 @@ const FormImportDocument = ({ form, mode, expireEditTimeDisable, dataList, calcu
                                 optionFilterProp="children"
                                 onChange={() => isFunction(calculateResult) ? calculateResult() : null}
                             >
-                                {taxTypeAllList.map((e, index) => (
+                                {taxTypeAllList?.map((e, index) => (
                                     <Select.Option value={e.id} key={`tax-type-${e.id}`}>
                                         {e.type_name[locale.locale]}
                                     </Select.Option>
@@ -483,7 +509,7 @@ const FormImportDocument = ({ form, mode, expireEditTimeDisable, dataList, calcu
                                 disabled
                             >
 
-                                {taxTypeAllList.map((e, index) => (
+                                {taxTypeAllList?.map((e, index) => (
                                     <Select.Option value={e.id} key={`tax-type-${e.id}`}>
                                         {e.detail['tax_rate_percent']}
                                     </Select.Option>
@@ -571,7 +597,7 @@ const FormImportDocument = ({ form, mode, expireEditTimeDisable, dataList, calcu
                                 optionFilterProp="children"
                                 disabled
                             >
-                                {userList.map((e) => <Select.Option key={`user-${e.id}`} value={e.id}>{e.name}</Select.Option>)}
+                                {userList?.map((e) => <Select.Option key={`user-${e.id}`} value={e.id}>{e.name}</Select.Option>)}
                             </Select>
                         </Form.Item>
                     </Col>

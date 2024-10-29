@@ -299,6 +299,28 @@ const DebtorDoc = ({ docTypeId }) => {
                 render: (text, record) => get(record?.ShopBusinessPartner?.partner_name, [locale.locale], "-"),
             },
             {
+                title: GetIntlMessages("สำนักงาน"),
+                dataIndex: 'ShopBusinessPartner',
+                key: 'ShopBusinessPartner',
+                width: 200,
+                use: true,
+                render: (text, record) => {
+                    try {
+                        switch (record.ShopBusinessPartner.other_details.branch) {
+                            case "office":
+                                return "สำนักงานใหญ่"
+                            case "branch":
+                                return `สาขา${record.ShopBusinessPartner.other_details.branch_code === record.ShopBusinessPartner.other_details.branch_name ? " " : ` ${record.ShopBusinessPartner.other_details.branch_code} `}${record.ShopBusinessPartner.other_details.branch_name}`
+                            default:
+                                return "-"
+                        }
+                    } catch (error) {
+                        return "-"
+                    }
+
+                },
+            },
+            {
                 title: () => GetIntlMessages("จำนวนเงินรวมทั้งสิ้น"),
                 dataIndex: 'price_grand_total',
                 key: 'price_grand_total',
@@ -519,7 +541,7 @@ const DebtorDoc = ({ docTypeId }) => {
                 remark: details.remark ?? null,
                 remark_inside: details.remark_inside ?? null,
                 ref_doc: details.ref_doc ?? null,
-                tax_period :moment(details.tax_period) ?? null
+                tax_period: moment(details.tax_period) ?? null
             }
 
             form.setFieldsValue({ ...model })
@@ -1044,7 +1066,7 @@ const DebtorDoc = ({ docTypeId }) => {
     /*end invoices button*/
 
     const MatchRound = (value) => (Math.round(+value * 100) / 100).toFixed(2)
-    
+
     return (
         <>
             <SearchInput configSearch={configSearch} configModal={configModal} loading={loading} onAdd={() => addEditViewModal("add", null)} value={modelSearch} />

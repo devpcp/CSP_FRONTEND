@@ -79,13 +79,28 @@ const PurchaseOrder = ({ docTypeId }) => {
                 align: "center",
                 render: (text, record) => get(text, `partner_name.${locale.locale}`, "-")
             },
-            // {
-            //     title: GetIntlMessages("purchase-unit"),
-            //     dataIndex: '',
-            //     key: '',
-            //     width: 150,
-            //     align: "center",
-            // },
+            {
+                title: GetIntlMessages("สำนักงาน"),
+                dataIndex: 'ShopBusinessPartners',
+                key: 'ShopBusinessPartners',
+                width: 200,
+                use: true,
+                render: (text, record) => {
+                    try {
+                        switch (record.ShopBusinessPartners.other_details.branch) {
+                            case "office":
+                                return "สำนักงานใหญ่"
+                            case "branch":
+                                return `สาขา${record.ShopBusinessPartners.other_details.branch_code === record.ShopBusinessPartners.other_details.branch_name ? " " : ` ${record.ShopBusinessPartners.other_details.branch_code} `}${record.ShopBusinessPartners.other_details.branch_name}`
+                            default:
+                                return "-"
+                        }
+                    } catch (error) {
+                        return "-"
+                    }
+
+                },
+            },
             {
                 title: GetIntlMessages("จำนวนสินค้า"),
                 // title: GetIntlMessages("amount"),
@@ -385,7 +400,7 @@ const PurchaseOrder = ({ docTypeId }) => {
                 }
             } else {
                 if (mode === "add") {
-                    form.setFieldsValue({ doc_date: moment(new Date()), tax_type_id: "8c73e506-31b5-44c7-a21b-3819bb712321", doc_type_id: "941c0fc7-794b-4838-afca-2bd8884dc36d", business_partners_list: [] })
+                    form.setFieldsValue({ doc_date: moment(new Date()), tax_type_id: "fafa3667-55d8-49d1-b06c-759c6e9ab064", doc_type_id: "941c0fc7-794b-4838-afca-2bd8884dc36d", business_partners_list: [] })
                 }
             }
 

@@ -169,7 +169,7 @@ const FormWarehouse = ({ name, index, form, expireEditTimeDisable, mode, getArrV
                                                 optionFilterProp="children"
                                                 disabled={mode == "view" || expireEditTimeDisable == true}
                                             >
-                                                {getArrWarehouse(index, i).map(e => <Select.Option value={e.code}>{e.name[locale.locale]}</Select.Option>)}
+                                                {getArrWarehouse(index, i)?.map(e => <Select.Option value={e.code}>{e.name[locale.locale]}</Select.Option>)}
                                             </Select>
 
                                         </Form.Item>
@@ -201,7 +201,7 @@ const FormWarehouse = ({ name, index, form, expireEditTimeDisable, mode, getArrV
                                                 disabled={mode == "view" || expireEditTimeDisable == true}
                                                 open={false}
                                             >
-                                                {getArrValue(index, "unit_list").map((e, i) => <Select.Option value={e.id} key={i}>{e.uom_data ? <span>{get(e, `type_name.${locale.locale}`, "-")} <Tag>UOM</Tag></span> : get(e, `type_name.${locale.locale}`, "-")}</Select.Option>)}
+                                                {getArrValue(index, "unit_list")?.map((e, i) => <Select.Option value={e.id} key={i}>{e.uom_data ? <span>{get(e, `type_name.${locale.locale}`, "-")} <Tag>UOM</Tag></span> : get(e, `type_name.${locale.locale}`, "-")}</Select.Option>)}
                                             </Select>
                                         </Form.Item>
                                     </Col>

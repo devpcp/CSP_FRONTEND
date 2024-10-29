@@ -99,7 +99,8 @@ const FormTemporaryDeliveryOrderDoc = ({ mode, calculateResult, disabledWhenDeli
                                 return {
                                     ...e,
                                     partner_name,
-                                    bus_partner_id: !!e?.ShopBusinessPartners ? e?.ShopBusinessPartners.id : e?.ShopBusinessPartners.id
+                                    bus_partner_id: !!e?.ShopBusinessPartners ? e?.ShopBusinessPartners.id : e?.ShopBusinessPartners.id,
+                                    partner_branch: e?.ShopBusinessPartners.other_details.branch ? e?.ShopBusinessPartners.other_details.branch === "office" ? "(สำนักงานใหญ่)" : "(" + e?.ShopBusinessPartners.other_details.branch_code + " " + e?.ShopBusinessPartners.other_details.branch_name + ")" : ""
                                 }
                             })
                             form.setFieldsValue({ easy_search_list: newData })
@@ -111,11 +112,9 @@ const FormTemporaryDeliveryOrderDoc = ({ mode, calculateResult, disabledWhenDeli
                 case "select":
                     if (isFunction(getStatusCarLoading)) getStatusCarLoading(true);
                     const { easy_search_list } = form.getFieldValue(), findSelected = easy_search_list.find(where => where.id === value);
-                    const { data } = await API.get(`/shopInventory/bydocinventoryid/${findSelected?.id}`)
                     if (!!findSelected) {
 
                         form.setFieldsValue({
-                            options_list: data.data.product_list ?? [],
                             ref_doc_list: easy_search_list,
                             shop_inventory_import_doc_id: findSelected.id,
                             arr_debt_list: [],
@@ -173,7 +172,8 @@ const FormTemporaryDeliveryOrderDoc = ({ mode, calculateResult, disabledWhenDeli
                                 return {
                                     ...e,
                                     partner_name,
-                                    bus_partner_id: e.id
+                                    bus_partner_id: e.id,
+                                    partner_branch: e?.other_details.branch ? e?.other_details.branch === "office" ? "(สำนักงานใหญ่)" : "(" + e?.other_details.branch_code + " " + e?.other_details.branch_name + ")" : ""
                                 }
                             })
                             form.setFieldValue("partner_list", newData)
@@ -216,7 +216,7 @@ const FormTemporaryDeliveryOrderDoc = ({ mode, calculateResult, disabledWhenDeli
     const callBackPickBusinessPartners = async (data) => {
         try {
             let partner_credit_debt_unpaid_balance = 0, partner_credit_debt_current_balance = 0
-         
+
             let businessPartnerData = await getShopBusinessPartnersDataListAll()
             const newData = businessPartnerData.map(e => {
                 const partner_name = !!e ? e.partner_name[locale.locale] : "-";
@@ -225,6 +225,7 @@ const FormTemporaryDeliveryOrderDoc = ({ mode, calculateResult, disabledWhenDeli
                     ...e,
                     partner_name,
                     bus_partner_id: e.id,
+                    partner_branch: e.other_details.branch ? e.other_details.branch === "office" ? "(สำนักงานใหญ่)" : "(" + e.other_details.branch_code + " " + e.other_details.branch_name + ")" : ""
                 }
             })
 
@@ -265,7 +266,6 @@ const FormTemporaryDeliveryOrderDoc = ({ mode, calculateResult, disabledWhenDeli
 
     const getShopBusinessPartnersDataListAll = async (search = "") => {
         const { data } = await API.get(`/shopBusinessPartners/all?${search != "" ? `search=${search}&` : ""}limit=9999&page=1&sort=partner_name.th&order=asc&status=default`)
-        // console.log('data.data shopBusinessCustomers', data.data.data)
         return data.data.data
     }
 
@@ -297,7 +297,7 @@ const FormTemporaryDeliveryOrderDoc = ({ mode, calculateResult, disabledWhenDeli
                                     loading={loadingEasySearch}
                                     placeholder={GetIntlMessages("พิมพ์อย่างน้อย 1 ตัวเพื่อค้นหา")}
                                 >
-                                    {getArrValue("easy_search_list").map(e => <Select.Option value={e.id} key={`easy-search-${e.id}`}>{`${e.code_id} -> ${e.partner_name}`}</Select.Option>)}
+                                    {getArrValue("easy_search_list").map(e => <Select.Option value={e.id} key={`easy-search-${e.id}`}>{`${e.code_id} -> ${e.partner_name + " " + e.partner_branch}`}</Select.Option>)}
                                     {/* {easySearchList.map(e => <Select.Option value={e.id} key={`easy-search-${e.id}`}>{e.value_name}</Select.Option>)} */}
 
                                 </Select>
@@ -333,7 +333,7 @@ const FormTemporaryDeliveryOrderDoc = ({ mode, calculateResult, disabledWhenDeli
                                     onSelect={(value) => handleSearchPartner(value, "select")}
 
                                 >
-                                    {getArrValue("partner_list").map(e => <Select.Option value={e.id} key={`partner-id-${e.id}`}>{e.partner_name}</Select.Option>)}
+                                    {getArrValue("partner_list").map(e => <Select.Option value={e.id} key={`partner-id-${e.id}`}>{e.partner_name + " " + e.partner_branch}</Select.Option>)}
 
                                 </Select>
                             </Form.Item>

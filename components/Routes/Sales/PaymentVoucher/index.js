@@ -236,6 +236,28 @@ const PaymentVoucherDoc = ({ docTypeId }) => {
                 render: (text, record) => !!text ? <div style={{ textAlign: "center" }}>{text?.partner_name[locale.locale] ?? "-"}</div> : "-",
             },
             {
+                title: GetIntlMessages("สำนักงาน"),
+                dataIndex: 'ShopBusinessPartners',
+                key: 'ShopBusinessPartners',
+                width: 200,
+                use: true,
+                render: (text, record) => {
+                    try {
+                        switch (record.ShopBusinessPartners.other_details.branch) {
+                            case "office":
+                                return "สำนักงานใหญ่"
+                            case "branch":
+                                return `สาขา${record.ShopBusinessPartners.other_details.branch_code === record.ShopBusinessPartners.other_details.branch_name ? " " : ` ${record.ShopBusinessPartners.other_details.branch_code} `}${record.ShopBusinessPartners.other_details.branch_name}`
+                            default:
+                                return "-"
+                        }
+                    } catch (error) {
+                        return "-"
+                    }
+
+                },
+            },
+            {
                 title: () => GetIntlMessages("จำนวนเงินรวมทั้งสิ้น"),
                 dataIndex: '',
                 key: '',
@@ -493,7 +515,7 @@ const PaymentVoucherDoc = ({ docTypeId }) => {
 
                 })
             }
-
+            let partner_branch = ShopBusinessPartners?.other_details.branch ? ShopBusinessPartners?.other_details.branch === "office" ? "(สำนักงานใหญ่)" : "(" + ShopBusinessPartners?.other_details.branch_code + " " + ShopBusinessPartners?.other_details.branch_name + ")" : ""
             const model = {
                 id: id,
                 code_id: code_id,
@@ -504,7 +526,7 @@ const PaymentVoucherDoc = ({ docTypeId }) => {
                 product_list: initData.product_list,
                 partner_id: ShopBusinessPartners.id,
                 partner_code: ShopBusinessPartners.code_id,
-                partner_name: ShopBusinessPartners.partner_name[locale.locale],
+                partner_name: ShopBusinessPartners.partner_name[locale.locale] + " " + partner_branch,
                 is_inv: details.is_inv,
                 tax_period: moment(details.tax_period),
                 ref_doc: details.ref_doc,
@@ -897,7 +919,7 @@ const PaymentVoucherDoc = ({ docTypeId }) => {
     }
 
     const MatchRound = (value) => (Math.round(+value * 100) / 100).toFixed(2)
-    
+
     return (
         <>
             <SearchInput configSearch={configSearch} configModal={configModal} loading={loading} onAdd={() => addEditViewModal("add", null)} value={modelSearch} />

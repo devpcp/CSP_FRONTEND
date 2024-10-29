@@ -301,6 +301,28 @@ const DebtorDoc = ({ docTypeId }) => {
                 render: (text, record) => get(text, `partner_name.${locale.locale}`, "-")
             },
             {
+                title: GetIntlMessages("สำนักงาน"),
+                dataIndex: 'ShopBusinessPartner',
+                key: 'ShopBusinessPartner',
+                width: 200,
+                use: true,
+                render: (text, record) => {
+                    try {
+                        switch (record.ShopBusinessPartner.other_details.branch) {
+                            case "office":
+                                return "สำนักงานใหญ่"
+                            case "branch":
+                                return `สาขา${record.ShopBusinessPartner.other_details.branch_code === record.ShopBusinessPartner.other_details.branch_name ? " " : ` ${record.ShopBusinessPartner.other_details.branch_code} `}${record.ShopBusinessPartner.other_details.branch_name}`
+                            default:
+                                return "-"
+                        }
+                    } catch (error) {
+                        return "-"
+                    }
+
+                },
+            },
+            {
                 title: () => GetIntlMessages("จำนวนเงินรวมทั้งสิ้น"),
                 dataIndex: 'price_grand_total',
                 key: 'price_grand_total',
@@ -543,11 +565,12 @@ const DebtorDoc = ({ docTypeId }) => {
             //     }
 
             // }
+            let partner_branch = ShopBusinessPartner.other_details.branch ? ShopBusinessPartner.other_details.branch === "office" ? "(สำนักงานใหญ่)" : "(" + ShopBusinessPartner.other_details.branch_code + " " + ShopBusinessPartner.other_details.branch_name + ")" : ""
             const model = {
                 ...value,
                 ref_doc: details.ref_doc ?? null,
                 debtor_billing_list,
-                partner_name: ShopBusinessPartner.partner_name[locale.locale],
+                partner_name: ShopBusinessPartner.partner_name[locale.locale] + " " + partner_branch,
                 shopPartnerDebtLists: ShopPartnerDebtLists.map(e => {
                     return {
                         ...e,

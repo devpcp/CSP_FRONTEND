@@ -18,10 +18,12 @@ const ComponentsRoutesModalFormProductReturnReceiptDoc = ({ mode, calculateResul
     const callBackPartnerData = (data) => {
         console.log("callback Data", data)
         setIsPartnerDataModalVisible(false)
+        let partner_branch = data?.other_details.branch ? data?.other_details.branch === "office" ? "(สำนักงานใหญ่)" : "(" + data?.other_details.branch_code + " " + data?.other_details.branch_name + ")" : ""
+        console.log("partner_branch", partner_branch)
         form.setFieldsValue({
             partner_id: data.id,
             partner_code: data.code_id,
-            partner_name: data.partner_name[locale.locale],
+            partner_name: data.partner_name[locale.locale] + " " + partner_branch,
         });
     }
 

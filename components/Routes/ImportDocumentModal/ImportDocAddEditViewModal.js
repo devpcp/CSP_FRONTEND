@@ -26,7 +26,7 @@ const purchaseUnitTypeTire = "103790b2-e9ab-411b-91cf-a22dbf624cbc" // -> เส
 const purchaseUnitTypeService = "af416ec2-c8f0-4c20-90a4-29487fecb315" // -> รายการ
 const purchaseUnitTypeBattery = "a7192601-316d-438e-a69e-f978d8445ae7" // -> ลูก // product_type battery ->5d82fef5-8267-4aea-a968-92a994071621 
 
-const ImportDocAddEditViewModal = ({ isAllBranch = false, shopArr = null, form, mode, expireDate, pageId, getShopBusinessPartners, visibleEachWarehouseMovementModal, calculateResult, setLoading, shopId, configShowMovementBtn = true, dropDownBtnWarehouse = false, callbackSelectProduct }) => {
+const ImportDocAddEditViewModal = ({ isAllBranch = false, shopArr = null, form, mode, expireDate, pageId, visibleEachWarehouseMovementModal, calculateResult, setLoading, shopId, configShowMovementBtn = true, dropDownBtnWarehouse = false, callbackSelectProduct }) => {
 
     useEffect(() => {
         getMasterData()
@@ -143,7 +143,7 @@ const ImportDocAddEditViewModal = ({ isAllBranch = false, shopArr = null, form, 
         return data.data
     }
     const getShopBusinessPartnersDataListAll = async (search = "") => {
-        const { data } = await API.get(`/shopBusinessPartners/all?${search != "" ? `search=${search}&` : ""}limit=9999&page=1&sort=partner_name.th&order=asc&status=default`)
+        const { data } = await API.get(`/shopBusinessPartners/all?${search != "" ? `search=${search}&` : ""}limit=10&page=1&sort=partner_name.th&order=asc&status=active`)
         // console.log('data.data shopBusinessCustomers', data.data.data)
         return data.data.data
     }
@@ -193,22 +193,6 @@ const ImportDocAddEditViewModal = ({ isAllBranch = false, shopArr = null, form, 
 
 
     }
-
-    const checkDocumentCreatedDate = () => {
-        try {
-            if (mode !== "add") {
-                const { doc_date } = form.getFieldValue()
-                const fixDate = new Date("January 12, 2023").getTime()
-                const currentDocumentDate = new Date(doc_date).getTime()
-                if (fixDate > currentDocumentDate) return true
-                else return false
-            }
-        } catch (error) {
-            // console.log('error :>> ', error);
-        }
-
-    }
-
 
 
     const addNewProductList = (add) => {
@@ -905,7 +889,7 @@ const ImportDocAddEditViewModal = ({ isAllBranch = false, shopArr = null, form, 
     return (
         <>
             {pageId == "a6c9c754-0239-4abe-ad6b-8cdb6b81dcc0" && mode != "add"
-                ? null : < FormImportDocument form={form} mode={mode} expireEditTimeDisable={expireEditTimeDisable} dataList={dataList} calculateResult={calculateResult} getShopBusinessPartners={getShopBusinessPartners} loadingSearch={loadingSearch} setLoadingSearch={setLoadingSearch} getArrListValue={getArrListValue} setLoading={setLoading} getShopBusinessPartnersDataListAll={getShopBusinessPartnersDataListAll} />
+                ? null : < FormImportDocument form={form} mode={mode} expireEditTimeDisable={expireEditTimeDisable} dataList={dataList} calculateResult={calculateResult} loadingSearch={loadingSearch} setLoadingSearch={setLoadingSearch} getArrListValue={getArrListValue} setLoading={setLoading} getShopBusinessPartnersDataListAll={getShopBusinessPartnersDataListAll} />
             }
 
             <div className="head-line-text pt-3">{GetIntlMessages("คลังสินค้า")}</div>
