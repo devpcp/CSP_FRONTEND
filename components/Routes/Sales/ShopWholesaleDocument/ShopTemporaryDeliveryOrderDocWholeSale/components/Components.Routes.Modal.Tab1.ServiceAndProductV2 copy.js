@@ -34,8 +34,8 @@ const ComponentsRoutesModalTab1ServiceAndProductV2 = ({ onFinish, calculateResul
     const [activeKeyTab, setActiveKeyTab] = useState("1");
     const [listIndex, setListIndex] = useState(0);
     const [listData, setListData] = useState([]);
-    console.log("setting_enable_sale_price_overwrite", authUser?.UsersProfile?.ShopsProfile?.shop_config?.enable_sale_price_overwrite)
-    const setting_enable_sale_price_overwrite = authUser?.UsersProfile?.ShopsProfile?.shop_config?.enable_sale_price_overwrite
+
+    const setting_enable_sale_price_overwrite = authUser?.UsersProfile?.ShopsProfile?.shop_config?.enable_sale_price_overwrite ?? true
     const setting_enable_sale_cost_show = authUser?.UsersProfile?.ShopsProfile?.shop_config?.enable_sale_cost_show
     const setting_enable_sale_warehouse_show = authUser?.UsersProfile?.ShopsProfile?.shop_config?.enable_sale_warehouse_show
 
