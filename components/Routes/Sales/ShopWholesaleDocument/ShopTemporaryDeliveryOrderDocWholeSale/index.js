@@ -1961,6 +1961,7 @@ const ShopTemporaryDeliveryOrderDocWholeSale = ({ docTypeId, title = null, callB
                 upload_product_list: value.details?.upload_product_list ?? [],
                 upload_payment_list: value.details?.upload_payment_list ?? [],
                 upload_remove_list: [],
+                ShopTemporaryDeliveryOrderLists: value.ShopTemporaryDeliveryOrderLists,
                 details: value.details
             })
             setIsEditImageModalVisible(true)
@@ -2092,6 +2093,7 @@ const ShopTemporaryDeliveryOrderDocWholeSale = ({ docTypeId, title = null, callB
 
 
             const model = {
+                shopTemporaryDeliveryOrderLists: values.ShopTemporaryDeliveryOrderLists,
                 details: values.details,
             }
             delete model.details.meta_data
@@ -2382,6 +2384,7 @@ const ShopTemporaryDeliveryOrderDocWholeSale = ({ docTypeId, title = null, callB
                     <Form.Item name="upload_product_list" hidden></Form.Item>
                     <Form.Item name="upload_payment_list" hidden></Form.Item>
                     <Form.Item name="upload_remove_list" hidden></Form.Item>
+                    <Form.Item name="ShopTemporaryDeliveryOrderLists" hidden></Form.Item>
                     <Tab4DocImage mode={"edit"} />
                 </Form>
             </Modal>
