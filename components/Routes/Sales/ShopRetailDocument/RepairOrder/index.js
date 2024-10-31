@@ -343,7 +343,7 @@ const RepairOrder = ({ docTypeId, view_doc_id, select_shop_ids, title = null, })
         button: {
             create: true,
             name: {
-                add: GetIntlMessages(`สร้าง${documentTypesName}`),
+                add: GetIntlMessages(`สร้าง`),
             },
             download: false,
             import: false,
@@ -1460,11 +1460,35 @@ const RepairOrder = ({ docTypeId, view_doc_id, select_shop_ids, title = null, })
             if ((+takeOutComma(credit_limit) ?? 0) !== 0) {
                 let cal1 = MatchRound((+takeOutComma(debt_amount)) + price_grand_total)
                 let cal2 = MatchRound(+takeOutComma(credit_limit))
+                let cal3 = MatchRound(+takeOutComma(debt_amount))
                 if (cal1 > cal2) {
                     Modal.confirm({
+                        title: "เกินวงเงินเครดิต",
                         cancelText: "ปิด",
                         okText: "ยืนยัน",
-                        content: <>ยอดรวมทั้งสิ้นรวมหนี้สินทั้งหมด เกินเครดิตคงเหลือ <br></br>ทั้งหมด {(cal1 - cal2).toLocaleString()} บาท ต้องการดำเนินการต่อหรือไม่ ?</>,
+                        content: <Row>
+                            <Col span={14}>
+                                วงเงินเครดิต คือ
+                            </Col>
+                            <Col span={10} style={{ textAlign: "end" }}>
+                                {(+cal2).toLocaleString()} บาท
+                            </Col>
+                            <Col span={14}>
+                                มียอดเครดิตคงค้างอยู่ที่
+                            </Col>
+                            <Col span={10} style={{ textAlign: "end" }}>
+                                {(+cal3).toLocaleString()} บาท
+                            </Col>
+                            <Col span={16}>
+                                บิลนี้จะทำให้ยอดเครดิตเกินไป
+                            </Col>
+                            <Col span={8} style={{ textAlign: "end" }}>
+                                {(cal1 - cal2).toLocaleString()} บาท<br></br>
+                            </Col>
+                            <Col span={24}>
+                                กรุณาติดต่อฝ่ายบริหาร เพื่ออนุมัติการขาย
+                            </Col>
+                        </Row>,
                         onOk: () => {
                             checkform()
                         },

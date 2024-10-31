@@ -1,4 +1,4 @@
-import { FileAddOutlined } from '@ant-design/icons'
+import { FileAddOutlined, FileImageOutlined } from '@ant-design/icons'
 import { Button, Col, Form, message, Row, Tabs, Dropdown, Space, Menu, Modal } from 'antd'
 import { get, isArray, isEmpty, isPlainObject } from 'lodash'
 import moment from 'moment'
@@ -16,6 +16,8 @@ import CarPreloader from '../../../_App/CarPreloader'
 import FormProductReturnReceiptDoc from './components/Components.Routes.Modal.FormProductReturnReceiptDoc'
 import ProductReturnReceiptDocLists from './components/Components.Routes.Modal.ProductReturnReceiptDocLists'
 import PrintOut from '../../../shares/PrintOut'
+import DocImage from './components/Components.Routes.Modal.DocImage'
+import { UploadImageCustomPathMultiple, DeleteImageCustomPathMultiple } from '../../../shares/FormUpload/API'
 
 const ProductReturnReceiptDoc = ({ docTypeId }) => {
 
@@ -29,7 +31,9 @@ const ProductReturnReceiptDoc = ({ docTypeId }) => {
     const { taxTypes, shopInCorporate, productPurchaseUnitTypes } = useSelector(({ master }) => master);
     const [disabledWhenDeliveryDocActive, setDisabledWhenDeliveryDocActive] = useState(false)
     const [disabledWhenTaxInvoiceDocActive, setDisabledWhenTaxInvoiceDocActive] = useState(false)
+    const [idEdit, setIsIdEdit] = useState(null);
 
+    
     const getStatusCarLoading = useCallback(
         (valStatus) => {
             setCarPreLoading(valStatus)
@@ -383,6 +387,7 @@ const ProductReturnReceiptDoc = ({ docTypeId }) => {
         setDisabledWhenDeliveryDocActive(false)
         setDisabledWhenTaxInvoiceDocActive(false)
         setActiveKeyTab("1")
+        setIsIdEdit(null)
         form.setFieldsValue({
             isModalVisible: false
         })
@@ -406,6 +411,7 @@ const ProductReturnReceiptDoc = ({ docTypeId }) => {
                 const { data } = await API.get(`/shopInventoryTransaction/byid/${id}`)
                 if (data.status == "success") {
                     setFormValueData(data.data)
+                    setIsIdEdit(id)
                 }
             } else {
                 form.setFieldsValue({
@@ -415,6 +421,8 @@ const ProductReturnReceiptDoc = ({ docTypeId }) => {
                     doc_date: moment(new Date()),
                     isModalVisible: true,
                     is_create_debt_credit_note_doc: "yes",
+                    upload_product_list: [],
+                    upload_remove_list: []
                 })
             }
             setActiveKeyTab("1")
@@ -500,6 +508,8 @@ const ProductReturnReceiptDoc = ({ docTypeId }) => {
                 tax_invoice_doc_id: details.tax_invoice_doc_id,
                 tax_invoice_doc_code: details.tax_invoice_doc_code,
                 tax_invoice_doc_date: tax_invoice_doc ? moment(tax_invoice_doc.doc_date) ?? null : null,
+                upload_product_list: value.details?.upload_product_list ?? [],
+                upload_remove_list: [],
             }
             // console.log("model", model)
             form.setFieldsValue({ ...model })
@@ -639,6 +649,58 @@ const ProductReturnReceiptDoc = ({ docTypeId }) => {
 
             } = values;
 
+            let shopId = authUser?.UsersProfile?.shop_id
+            let directory = "shopProductReturnReceiptDocument"
+            let upload_product_list = []
+            if (values.upload_product_list) {
+                if (values?.upload_product_list?.fileList?.length > 0) {
+                    await Promise.all(values.upload_product_list.fileList.map(async (e, index) => {
+                        await UploadImageCustomPathMultiple(e, { shopId: shopId, idEdit: idEdit, directory: directory, subject: "product" }).then(({ data }) => {
+                            if (data.status === "success") {
+                                try {
+                                    upload_product_list.push(
+                                        {
+                                            uid: index,
+                                            name: e.name,
+                                            status: 'done',
+                                            url: process.env.NEXT_PUBLIC_DIRECTORY + data.data.path,
+                                            path: data.data.path
+                                        }
+                                    )
+                                    e.url = process.env.NEXT_PUBLIC_DIRECTORY + data.data.path
+                                    e.path = data.data.path
+                                } catch (error) {
+                                    console.log("error: ", error)
+                                }
+                            } else if (data.status === "failed") {
+                                e.path = e.url.split(process.env.NEXT_PUBLIC_DIRECTORY)[1]
+                                // message.error(`รูปที่ ${index + 1} : ${data.data}`)
+                            }
+                        })
+                    })
+                    )
+                }
+            }
+
+            if (values.upload_remove_list) {
+                if (values?.upload_remove_list?.length > 0) {
+                    await Promise.all(values.upload_remove_list.map(async (e, index) => {
+                        await DeleteImageCustomPathMultiple(e.path).then(({ data }) => {
+                            if (data.status === "success") {
+                                try {
+
+                                } catch (error) {
+                                    console.log("error: ", error)
+                                }
+                            } else if (data.status === "failed") {
+                            }
+                        })
+                    })
+                    )
+                }
+            }
+
+
             let product_arr = []
             product_list.map((e, index) => {
                 let find = product_arr.find(x => x.product_id === e.shop_product_id)
@@ -758,7 +820,8 @@ const ProductReturnReceiptDoc = ({ docTypeId }) => {
                     temporary_delivery_order_doc_code: temporary_delivery_order_doc_code ?? null,
                     tax_invoice_doc_id: tax_invoice_doc_id,
                     tax_invoice_doc_code: tax_invoice_doc_code,
-                    doc_type
+                    doc_type,
+                    upload_product_list: await values.upload_product_list.fileList === undefined ? await values.upload_product_list : values.upload_product_list.fileList,
                 },
                 doc_type_id: docTypeId,
                 status: 2,
@@ -1105,14 +1168,21 @@ const ProductReturnReceiptDoc = ({ docTypeId }) => {
                                             {
                                                 label: (<span><FileAddOutlined style={{ fontSize: 18 }} /> สินค้า</span>),
                                                 key: '1',
-                                                children: <ProductReturnReceiptDocLists calculateResult={calculateResult} mode={configModal.mode} disabledWhenDeliveryDocActive={disabledWhenDeliveryDocActive} />,
+                                                children: <ProductReturnReceiptDocLists calculateResult={calculateResult} mode={configModal.mode} />,
+                                            },
+                                            {
+                                                label: (<span><FileImageOutlined style={{ fontSize: 18 }} /> รูปภาพ</span>),
+                                                key: '2',
+                                                children: <DocImage mode={configModal.mode} />,
                                             },
                                         ]}
                                     />
                                 </div>
                             </div>
                     }
+                    <Form.Item name="upload_product_list">
 
+                    </Form.Item>
                 </Form>
             </ModalFullScreen>
         </>

@@ -47,6 +47,12 @@ const GateWay = () => {
             client_secret: process.env.NEXT_PUBLIC_OAUTH_SATHITTHAM_LINE_CLIENT_SECRET,
           }
           break;
+        case "TIANZHAO":
+          bodyTokenLine = {
+            client_id: process.env.NEXT_PUBLIC_OAUTH_SATHITTHAM_LINE_CLIENT_ID,
+            client_secret: process.env.NEXT_PUBLIC_OAUTH_SATHITTHAM_LINE_CLIENT_SECRET,
+          }
+          break;
 
         default:
           Modal.error({
@@ -106,6 +112,12 @@ const GateWay = () => {
                     bodyTokenCSP = {
                       client_id: process.env.NEXT_PUBLIC_OAUTH_SATHITTHAM_CSP_CLIENT_ID,
                       client_secret: process.env.NEXT_PUBLIC_OAUTH_SATHITTHAM_CSP_CLIENT_SECRET,
+                    }
+                    break;
+                  case "TIANZHAO":
+                    bodyTokenCSP = {
+                      client_id: process.env.NEXT_PUBLIC_OAUTH_TIANZHAO_CSP_CLIENT_ID,
+                      client_secret: process.env.NEXT_PUBLIC_OAUTH_TIANZHAO_CSP_CLIENT_SECRET,
                     }
                     break;
 

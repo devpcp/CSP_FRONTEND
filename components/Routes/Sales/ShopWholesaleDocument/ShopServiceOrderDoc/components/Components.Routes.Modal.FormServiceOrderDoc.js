@@ -200,6 +200,8 @@ const FormServiceOrderDoc = ({ mode, calculateResult, disabledWhenDeliveryDocAct
                         console.log("error : ", error)
                     }
                     find = find.data.data
+                    console.log("find", find)
+
                     const customer_phone_list = Object.entries(find.mobile_no).map((x) => x[1]).filter(where => where !== null);
                     let address = `${find?.address?.[locale.locale] ?? ""} ${find?.Province?.[`prov_name_${locale.locale}`] ?? ""} ${find?.District?.[`name_${locale.locale}`] ?? ""} ${find?.SubDistrict?.[`name_${locale.locale}`] ?? ""} ${find?.SubDistrict?.zip_code ?? ""}`
                     let tags = find?.tags ?? [].map((e) => (e.id)) ?? []
@@ -210,8 +212,8 @@ const FormServiceOrderDoc = ({ mode, calculateResult, disabledWhenDeliveryDocAct
                     let debt_amount = find?.other_details?.debt_amount ? (find?.other_details?.debt_amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : null
                     let credit_remaining = ((+find?.other_details?.credit_limit ?? 0) - (+find?.other_details?.debt_amount ?? 0)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 
-                    if ((+takeOutComma(data?.other_details?.credit_limit) ?? 0) !== 0) {
-                        if (+takeOutComma(data?.other_details?.debt_amount) > +takeOutComma(data?.other_details?.credit_limit)) {
+                    if ((+takeOutComma(find?.other_details?.credit_limit) ?? 0) !== 0) {
+                        if (+takeOutComma(find?.other_details?.debt_amount) > +takeOutComma(find?.other_details?.credit_limit)) {
                             Modal.warning({
                                 content: 'จำนวนวงเงินที่ใช้ไป เกินกว่าจำนวนเงินเครดิต !!',
                             });
@@ -368,44 +370,6 @@ const FormServiceOrderDoc = ({ mode, calculateResult, disabledWhenDeliveryDocAct
     return (
         <>
             <Row gutter={[20, 0]}>
-                {/* {mode === "add" ?
-                    <>
-                        <Form.Item name="easy_search_list" shouldUpdate={(prevValue, curValue) => prevValue !== curValue} hidden />
-
-                        <Col span={12} hidden>
-                            <Form.Item
-                                name="easy_search"
-                                label={GetIntlMessages("search")}
-                                labelAlign='left'
-                                colon={false}
-                                wrapperCol={{ xl: { span: 24 }, lg: { span: 16 }, md: { span: 18 }, xs: { span: 24 } }}
-
-                            >
-                                <Select
-                                    showSearch
-                                    showArrow={false}
-                                    onSearch={(value) => debounceEasySearch(value, "search")}
-                                    onChange={(value) => handleEasySearch(value, "select")}
-                                    filterOption={false}
-                                    notFoundContent={loadingEasySearch ? "กำลังค้นหาข้อมูล...กรุณารอสักครู่..." : "ไม่พบข้อมูล"}
-                                    style={{ width: "100%" }}
-                                    disabled={mode !== "add"}
-                                    loading={loadingEasySearch}
-                                    placeholder={GetIntlMessages("พิมพ์อย่างน้อย 1 ตัวเพื่อค้นหา")}
-                                >
-                                    {getArrValue("easy_search_list").map(e => <Select.Option value={e.id} key={`easy-search-${e.id}`}>{e.value_name}</Select.Option>)}
-
-                                </Select>
-                            </Form.Item>
-                        </Col>
-                        <Col span={12} hidden>
-                            <Form.Item label={" "}>
-                               <ModalBothCustomersAndCar textButton={GetIntlMessages("เพิ่มข้อมูลทะเบียนรถ/ลูกค้า")} callback={callbackCustomers} />
-                            </Form.Item>
-                        </Col>
-                    </>
-
-                    : null} */}
 
                 <Col lg={8} md={12} sm={12} xs={24}>
                     <Form.Item
@@ -423,7 +387,7 @@ const FormServiceOrderDoc = ({ mode, calculateResult, disabledWhenDeliveryDocAct
                     </Form.Item>
                 </Col>
 
-                <Col xs={24} lg={8} xxl={8} style={{ width: "100%" }}>
+                <Col lg={8} md={12} sm={12} xs={24} style={{ width: "100%" }}>
                     <Row>
                         <Col span={mode === "view" ? 24 : 20}>
                             <Form.Item

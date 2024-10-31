@@ -648,7 +648,7 @@ const LineOAInventoryBalance = ({ callBack }) => {
                             {/* {ew.shelf.dot_show.split("X")[0]}X<span style={{ color: "red" }}>{ew.shelf.dot_show.split("X")[1]}</span> */}
                           </Col>
                           <Col span={4} style={{ display: "flex", placeContent: "end" }}>
-                            {ew.shelf.new_balance_show ?? ew.shelf.balance_show}  {ew.shelf.PurchaseUnit?.type_name[locale.locale]}
+                            {(ew.shelf.new_balance_show ?? ew.shelf.balance_show) === "NaN" ? "20>" : ew.shelf.new_balance_show ?? ew.shelf.balance_show}  {ew.shelf.PurchaseUnit?.type_name[locale.locale]}
                           </Col>
                           <Col span={8} style={{ display: "flex", placeContent: "end" }}>
                             <div hidden={isFunction(callBack)}>

@@ -198,7 +198,7 @@ const ChequeData = ({ title = null, callBack }) => {
                 align: "center",
                 use: isFunction(callBack) ?? false,
                 render: (text, record) => (
-                    <Button onClick={() => callBack(record)} disabled={record?.details?.cheque_use_status === false}>เลือก</Button>
+                    <Button onClick={() => callBack(record)} disabled={record?.details?.cheque_use_status === false || record.check_status !== 1}>เลือก</Button>
                 ),
             },
 

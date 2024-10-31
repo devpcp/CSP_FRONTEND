@@ -335,7 +335,7 @@ const RepairOrder = ({ docTypeId, view_doc_id, select_shop_ids, title = null, })
         button: {
             create: true,
             name: {
-                add: GetIntlMessages(`สร้าง${documentTypesName}`),
+                add: GetIntlMessages(`สร้าง`),
             },
             download: false,
             import: false,
@@ -702,16 +702,10 @@ const RepairOrder = ({ docTypeId, view_doc_id, select_shop_ids, title = null, })
     const getDataSearch = async ({ search = modelSearch.search ?? "", limit = configTable.limit, page = configTable.page, sort = configSort.sort, order = (configSort.order === "descend" ? "desc" : "asc"), _status = "active", doc_date_startDate = isArray(modelSearch.select_date) ? modelSearch.select_date[0] ?? "" : null, doc_date_endDate = isArray(modelSearch.select_date) ? modelSearch.select_date[1] ?? "" : null, payment_paid_status = modelSearch.payment_paid_status }) => {
         try {
             if (page === 1) setLoading(true)
-            // const res = await API.get(`/shopSalesTransactionDoc/all?limit=${limit}&page=${page}&sort=${sort}&order=${order}&status=${_status}&search=${search}&doc_type_id=${_status == 3 ? "b39bcb5d-6c72-4979-8725-c384c80a66c3" : docTypeId }`)
-            // const res = await API.get(`/shopSalesTransactionDoc/all?limit=${limit}&page=${page}&sort=${sort}&order=${order}&status=${_status}&search=${search}&doc_type_id=${docTypeId}`)
             const res = await API.get(`/shopServiceOrderDoc/all?search=${search}&status=${_status}&page=${page}&limit=${limit}&sort=${sort}&order=${order}&doc_sales_type=2${doc_date_startDate ? `&doc_date_startDate=${moment(doc_date_startDate).format("YYYY-MM-DD")}` : ""}${doc_date_endDate ? `&doc_date_endDate=${moment(doc_date_endDate).format("YYYY-MM-DD")}` : ""}${payment_paid_status ? `&payment_paid_status=${payment_paid_status}` : ""}${select_shop_ids ? `&select_shop_ids=${select_shop_ids}` : ""}`)
-            // const { currentCount, currentPage, pages, totalCount, data } = res.data.data;
-            // console.log('res :>> ', res);
             if (res.data.status === "success") {
                 const { currentCount, currentPage, pages, totalCount, data } = res.data.data;
                 data = data.map(e => {
-                    // console.log('e :>> ', e);
-                    // const DeliveryOrderDocsStatus = e?.ShopTemporaryDeliveryOrderDocs.some(where => where.status === 1) ?? false, taxInvoiceDocsStatus = e?.ShopTaxInvoiceDocs.some(where => where.status === 1) ?? false
                     const { ShopTemporaryDeliveryOrderDocs, ShopTaxInvoiceDocs, ShopPaymentTransactions } = e
                     const DeliveryOrderDocsStatus = !!ShopTemporaryDeliveryOrderDocs ? ShopTemporaryDeliveryOrderDocs.some(where => where.status === 1) : false, taxInvoiceDocsStatus = !!ShopTaxInvoiceDocs ? ShopTaxInvoiceDocs.some(where => where.status === 1) : false;
                     const newShopPaymentTransactionsArr = ShopPaymentTransactions.filter(where => !where.canceled_payment_by && !where.canceled_payment_date).map(e => e.is_partial_payment) ?? []
@@ -1390,11 +1384,35 @@ const RepairOrder = ({ docTypeId, view_doc_id, select_shop_ids, title = null, })
             if ((+takeOutComma(credit_limit) ?? 0) !== 0) {
                 let cal1 = MatchRound((+takeOutComma(debt_amount)) + price_grand_total)
                 let cal2 = MatchRound(+takeOutComma(credit_limit))
+                let cal3 = MatchRound(+takeOutComma(debt_amount))
                 if (cal1 > cal2) {
                     Modal.confirm({
+                        title: "เกินวงเงินเครดิต",
                         cancelText: "ปิด",
                         okText: "ยืนยัน",
-                        content: <>ยอดรวมทั้งสิ้นรวมหนี้สินทั้งหมด เกินเครดิตคงเหลือ <br></br>ทั้งหมด {(cal1 - cal2).toLocaleString()} บาท ต้องการดำเนินการต่อหรือไม่ ?</>,
+                        content: <Row>
+                            <Col span={14}>
+                                วงเงินเครดิต คือ
+                            </Col>
+                            <Col span={10} style={{ textAlign: "end" }}>
+                                {(+cal2).toLocaleString()} บาท
+                            </Col>
+                            <Col span={14}>
+                                มียอดเครดิตคงค้างอยู่ที่
+                            </Col>
+                            <Col span={10} style={{ textAlign: "end" }}>
+                                {(+cal3).toLocaleString()} บาท
+                            </Col>
+                            <Col span={16}>
+                                บิลนี้จะทำให้ยอดเครดิตเกินไป
+                            </Col>
+                            <Col span={8} style={{ textAlign: "end" }}>
+                                {(cal1 - cal2).toLocaleString()} บาท<br></br>
+                            </Col>
+                            <Col span={24}>
+                                กรุณาติดต่อฝ่ายบริหาร เพื่ออนุมัติการขาย
+                            </Col>
+                        </Row>,
                         onOk: () => {
                             checkform()
                         },
