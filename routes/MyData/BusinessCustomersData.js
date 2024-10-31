@@ -8,7 +8,7 @@ import TableList from '../../components//shares/TableList'
 import FormProvinceDistrictSubdistrict from '../../components/shares/FormProvinceDistrictSubdistrict';
 import FormProvinceDistrictSubdistrictSecond from '../../components/shares/FormProvinceDistrictSubdistrictSecond';
 import { FormInputLanguage, FormSelectLanguage } from '../../components/shares/FormLanguage';
-import { RoundingNumber, NoRoundingNumber,takeOutComma } from '../../components/shares/ConvertToCurrency';
+import { RoundingNumber, NoRoundingNumber, takeOutComma } from '../../components/shares/ConvertToCurrency';
 import { get, isPlainObject, isFunction, isArray } from "lodash";
 import GetIntlMessages from '../../util/GetIntlMessages';
 import { Cookies } from "react-cookie";
@@ -855,18 +855,28 @@ const BusinessCustomersData = ({ title = null, callBack }) => {
     /* master */
     const [businessTypeList, setBusinessTypeList] = useState([])
     const [tagsList, setTagsList] = useState([])
+    const [productGroupList, setProductGroupList] = useState([])
+    const [productTypeList, setProductTypeList] = useState([])
+    const [shopWarehouseList, setShopWarehouseList] = useState([])
+    const [shopShelfList, setShopShelfList] = useState([])
 
     const getMasterData = async () => {
         try {
             const promise1 = getBusinessTypeDataListAll();
             const promise2 = getTagsListAll();
+            const promise3 = getProductTypeGroupAll();
+            const promise4 = getProductTypeListAll();
+            const promise5 = getShopWareHouseListAll();
 
-            Promise.all([promise1, promise2,]).then((values) => {
+            Promise.all([promise1, promise2, promise3, promise4, promise5]).then((values) => {
                 setBusinessTypeList(values[0])
                 setTagsList(values[1])
+                setProductGroupList(values[2])
+                setProductTypeList(values[3])
+                setShopWarehouseList(values[4])
             });
         } catch (error) {
-
+            console.log("error")
         }
     }
 
@@ -879,6 +889,22 @@ const BusinessCustomersData = ({ title = null, callBack }) => {
     const getBusinessTypeDataListAll = async () => {
         const { data } = await API.get(`/master/businessType?sort=business_type_name.th&order=asc`)
         return data.data
+    }
+
+    /* เรียกข้อมูล กลุ่มสินค้า ทั้งหมด */
+    const getProductTypeGroupAll = async () => {
+        const { data } = await API.get(`/productTypeGroup/all?sort=code_id&order=asc`)
+        return data.status === "success" ? data.data.data ?? [] : []
+    }
+    /* เรียกข้อมูล ประเภทสินค้า ทั้งหมด */
+    const getProductTypeListAll = async (product_type_group_id = "") => {
+        const { data } = await API.get(`/productType/all?sort=code_id&order=asc&status=active${product_type_group_id ? `&type_group_id=${product_type_group_id}` : ""}`)
+        return data.status === "success" ? data.data.data ?? [] : []
+    }
+    /* เรียกข้อมูล คลัง ชั้น ทั้งหมด */
+    const getShopWareHouseListAll = async () => {
+        const { data } = await API.get(`/shopWarehouses/all?limit=99999&page=1&sort=code_id&order=asc`)
+        return data.status === "success" ? data.data.data ?? [] : []
     }
 
     const onFinishError = (error) => {
@@ -1173,13 +1199,13 @@ const BusinessCustomersData = ({ title = null, callBack }) => {
         return parts.join(".");
     }
 
-    const onChangeBrand = async (index_target, index_brand_data) => {
+    const onChangeBrand = async (index_target, index_filter_data) => {
 
         // console.log("index_target", index_target)
-        // console.log("index_brand_data", index_brand_data)
+        // console.log("index_filter_data", index_filter_data)
         // console.log("form", form.getFieldValue())
         const { target } = form.getFieldValue()
-        const { brand_id } = target[index_target].brand_data[index_brand_data]
+        const { brand_id } = target[index_target].brand_data[index_filter_data]
         const { data } = await API.get(`/productModelType/all?limit=999999&page=1&sort=model_name.th&order=asc&product_brand_id=${brand_id}`)
         let newModel = []
         if (data.status === "success") {
@@ -1192,7 +1218,7 @@ const BusinessCustomersData = ({ title = null, callBack }) => {
                     })
                 })
             }
-            target[index_target].brand_data[index_brand_data].model_list = newModel
+            target[index_target].brand_data[index_filter_data].model_list = newModel
             form.setFieldValue({
                 target
             })
@@ -1202,6 +1228,14 @@ const BusinessCustomersData = ({ title = null, callBack }) => {
             console.log("error", data)
         }
     }
+
+    const onChangeWarehouse = async (index_target) => {
+        const { target } = form.getFieldValue()
+        const { warehouse_id } = target[index_target]
+        let shelf_list = shopWarehouseList.filter(x => x.id === warehouse_id)[0].shelf
+        setShopShelfList(shelf_list)
+    }
+
     return (
         <>
 
@@ -1927,18 +1961,25 @@ const BusinessCustomersData = ({ title = null, callBack }) => {
                                                                         <Row key={field.key} style={{ display: 'flex', marginBottom: 8, alignContent: "center" }} align="baseline">
                                                                             <Col span={12}>
                                                                                 <Row>
-                                                                                    <Col xs={24} md={8} xl={12} >
+                                                                                    <Col xs={24} md={12} xl={12} >
                                                                                         <Form.Item label="ลำดับ" name={[field.name, 'order']} rules={[{ required: true, message: 'กรุณากรอกข้อมูล' }]}>
                                                                                             <Input />
                                                                                         </Form.Item>
                                                                                     </Col>
-                                                                                    <Col xs={24} md={8} xl={12}>
+                                                                                    <Col xs={24} md={12} xl={12}>
                                                                                         <Form.Item label="ชื่อ" name={[field.name, 'name']} rules={[{ required: true, message: 'กรุณากรอกข้อมูล' }]}>
                                                                                             <Input />
                                                                                         </Form.Item>
                                                                                     </Col>
-                                                                                    {/* <Col xs={24} md={8} xl={12}>
-                                                                                        <Form.Item label="ยี่ห้อ" name={[field.name, 'brand_id']} rules={[{ required: true, message: 'กรุณากรอกข้อมูล' }]}>
+
+                                                                                    <Col xs={24} md={12} xl={12} >
+                                                                                        <Form.Item label="ปี" name={[field.name, 'year']} rules={[{ required: true, message: 'กรุณากรอกข้อมูล' }, { min: 4, message: 'กรุณากรอกข้อมูลให้ถูกต้อง' }, { max: 4, message: 'กรุณากรอกข้อมูลให้ถูกต้อง' }]}>
+                                                                                            <Input maxLength={4} placeholder={moment(Date.now()).format("YYYY")} />
+                                                                                        </Form.Item>
+                                                                                    </Col>
+                                                                                    <Col xs={24} md={12} xl={12} ></Col>
+                                                                                    <Col xs={24} md={12} xl={12} >
+                                                                                        <Form.Item label="กลุ่มสินค้า" name={[field.name, 'product_group_id']} rules={[{ required: true, message: 'กรุณากรอกข้อมูล' },]}>
                                                                                             <Select
                                                                                                 disabled={configModal.mode == "view"}
                                                                                                 allowClear
@@ -1947,26 +1988,85 @@ const BusinessCustomersData = ({ title = null, callBack }) => {
                                                                                                 optionFilterProp='children'
                                                                                                 showSearch
                                                                                             >
-                                                                                                {isArray(productBrand) && productBrand.length > 0 ? productBrand.map((e, index) => (
+                                                                                                {isArray(productGroupList) && productGroupList.length > 0 ? productGroupList.map((e, index) => (
                                                                                                     <Select.Option value={e.id} key={index}>
-                                                                                                        {e.brand_name[locale.locale]}
+                                                                                                        {e.group_type_name[locale.locale]}
                                                                                                     </Select.Option>
                                                                                                 ))
                                                                                                     : null
                                                                                                 }
                                                                                             </Select>
                                                                                         </Form.Item>
-                                                                                    </Col> */}
-                                                                                    <Col xs={24} md={8} xl={12} >
-                                                                                        <Form.Item label="ปี" name={[field.name, 'year']} rules={[{ required: true, message: 'กรุณากรอกข้อมูล' }, { min: 4, message: 'กรุณากรอกข้อมูลให้ถูกต้อง' }, { max: 4, message: 'กรุณากรอกข้อมูลให้ถูกต้อง' }]}>
-                                                                                            <Input maxLength={4} placeholder={moment(Date.now()).format("YYYY")} />
+                                                                                    </Col>
+                                                                                    <Col xs={24} md={12} xl={12} >
+                                                                                        <Form.Item label="ประเภทสินค้า" name={[field.name, 'product_type_id']} rules={[{ required: false, message: 'กรุณากรอกข้อมูล' }]}>
+                                                                                            <Select
+                                                                                                disabled={configModal.mode == "view"}
+                                                                                                allowClear
+                                                                                                style={{ width: '100%' }}
+                                                                                                placeholder="เลือกข้อมูล"
+                                                                                                optionFilterProp='children'
+                                                                                                showSearch
+                                                                                            >
+                                                                                                {isArray(productTypeList) && productTypeList.length > 0 ? productTypeList.map((e, index) => (
+                                                                                                    <Select.Option value={e.id} key={index}>
+                                                                                                        {e.type_name[locale.locale]}
+                                                                                                    </Select.Option>
+                                                                                                ))
+                                                                                                    : null
+                                                                                                }
+                                                                                            </Select>
                                                                                         </Form.Item>
                                                                                     </Col>
-                                                                                    <Col xs={24} md={8} xl={12} style={{ textAlign: "end" }}>
-                                                                                        <Button onClick={() => remove(field.name)} type='danger'>ลบรายการ</Button>
+                                                                                    <Col xs={24} md={12} xl={12} >
+                                                                                        <Form.Item label="คลัง" name={[field.name, 'warehouse_id']} rules={[{ required: true, message: 'กรุณากรอกข้อมูล' }]}>
+                                                                                            <Select
+                                                                                                disabled={configModal.mode == "view"}
+                                                                                                allowClear
+                                                                                                style={{ width: '100%' }}
+                                                                                                placeholder="เลือกข้อมูล"
+                                                                                                optionFilterProp='children'
+                                                                                                showSearch
+                                                                                                onChange={() => onChangeWarehouse(index_target)}
+                                                                                            >
+                                                                                                {isArray(shopWarehouseList) && shopWarehouseList.length > 0 ? shopWarehouseList.map((e, index) => (
+                                                                                                    <Select.Option value={e.id} key={index}>
+                                                                                                        {e.name[locale.locale]}
+                                                                                                    </Select.Option>
+                                                                                                ))
+                                                                                                    : null
+                                                                                                }
+                                                                                            </Select>
+                                                                                        </Form.Item>
                                                                                     </Col>
-                                                                                    <Col span={24} >
-                                                                                        <Form.Item label="ยี่ห้อสินค้า">
+                                                                                    <Col xs={24} md={12} xl={12} >
+                                                                                        <Form.Item label="ชั้น" name={[field.name, 'shelf_id']} rules={[{ required: false, message: 'กรุณากรอกข้อมูล' },]}>
+                                                                                            <Select
+                                                                                                disabled={configModal.mode == "view"}
+                                                                                                allowClear
+                                                                                                style={{ width: '100%' }}
+                                                                                                placeholder="เลือกข้อมูล"
+                                                                                                optionFilterProp='children'
+                                                                                                showSearch
+                                                                                            >
+                                                                                                {isArray(shopShelfList) && shopShelfList.length > 0 ? shopShelfList.map((e, index) => (
+                                                                                                    <Select.Option value={e.id} key={index}>
+                                                                                                        {e.name[locale.locale]}
+                                                                                                    </Select.Option>
+                                                                                                ))
+                                                                                                    : null
+                                                                                                }
+                                                                                            </Select>
+                                                                                        </Form.Item>
+                                                                                    </Col>
+                                                                                    <Col xs={24} md={12} xl={12} style={{ textAlign: "end" }}></Col>
+                                                                                    <Col xs={24} md={12} xl={12} style={{ textAlign: "end" }}>
+                                                                                        <Form.Item label=" ">
+                                                                                            <Button onClick={() => remove(field.name)} type='danger'>ลบรายการ</Button>
+                                                                                        </Form.Item>
+                                                                                    </Col>
+                                                                                    <Col xs={24} >
+                                                                                        <Form.Item label="ตัวกรองยี่ห้อ">
                                                                                             <Form.List name={[field.name, 'brand_data']}>
                                                                                                 {(subFields, subOpt) => (
                                                                                                     <div
@@ -1976,7 +2076,7 @@ const BusinessCustomersData = ({ title = null, callBack }) => {
                                                                                                             rowGap: 16,
                                                                                                         }}
                                                                                                     >
-                                                                                                        {subFields.map((subField, index_brand_data) => (
+                                                                                                        {subFields.map((subField, index_filter_data) => (
                                                                                                             <Row key={subField.key} gutter={8}>
                                                                                                                 <Col span={12}>
                                                                                                                     <Form.Item label="ยี่ห้อ" name={[subField.name, 'brand_id']} rules={[{ required: true, message: 'กรุณากรอกข้อมูล' }]}>
@@ -1987,7 +2087,7 @@ const BusinessCustomersData = ({ title = null, callBack }) => {
                                                                                                                             placeholder="เลือกข้อมูล"
                                                                                                                             optionFilterProp='children'
                                                                                                                             showSearch
-                                                                                                                            onChange={() => onChangeBrand(index_target, index_brand_data)}
+                                                                                                                            onChange={() => onChangeBrand(index_target, index_filter_data)}
                                                                                                                         >
                                                                                                                             {isArray(productBrand) && productBrand.length > 0 ? productBrand.map((e, index) => (
                                                                                                                                 <Select.Option value={e.id} key={index}>
@@ -2010,7 +2110,7 @@ const BusinessCustomersData = ({ title = null, callBack }) => {
                                                                                                                             showSearch
                                                                                                                             mode='multiple'
                                                                                                                         >
-                                                                                                                            {isArray(modelList) && modelList.length > 0 ? modelList[index_target]?.brand_data[index_brand_data]?.model_list.map((e, index) => (
+                                                                                                                            {isArray(modelList) && modelList.length > 0 ? modelList[index_target]?.brand_data[index_filter_data]?.model_list.map((e, index) => (
                                                                                                                                 <Select.Option value={e?.id} key={index}>
                                                                                                                                     {e?.model_name[locale.locale]}
                                                                                                                                 </Select.Option>

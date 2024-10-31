@@ -112,9 +112,11 @@ const FormTemporaryDeliveryOrderDoc = ({ mode, calculateResult, disabledWhenDeli
                 case "select":
                     if (isFunction(getStatusCarLoading)) getStatusCarLoading(true);
                     const { easy_search_list } = form.getFieldValue(), findSelected = easy_search_list.find(where => where.id === value);
+                    const { data } = await API.get(`/shopInventory/bydocinventoryid/${findSelected?.id}`)
                     if (!!findSelected) {
 
                         form.setFieldsValue({
+                            options_list: data.data.product_list ?? [],
                             ref_doc_list: easy_search_list,
                             shop_inventory_import_doc_id: findSelected.id,
                             arr_debt_list: [],
