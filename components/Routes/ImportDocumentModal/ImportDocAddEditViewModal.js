@@ -3,9 +3,9 @@ import Fieldset from '../../shares/Fieldset';
 import FormSelectDot from "../Dot/Components.Select.Dot";
 import GetIntlMessages from '../../../util/GetIntlMessages';
 import { Form, Input, Select, Row, Col, Divider, Button, Space, DatePicker, InputNumber, Modal, Tooltip, Tag, Table } from 'antd';
-import { PlusOutlined, MinusCircleOutlined, TableOutlined, ShoppingCartOutlined, CalculatorOutlined, InfoCircleTwoTone } from '@ant-design/icons';
+import { PlusOutlined, MinusCircleOutlined, TableOutlined, ShoppingCartOutlined, CalculatorOutlined, InfoCircleTwoTone, SearchOutlined, EditOutlined } from '@ant-design/icons';
 import { useSelector } from 'react-redux';
-import { debounce, get, isArray, isEmpty, isFunction, isPlainObject, isString } from 'lodash';
+import { debounce, get, isArray, isEmpty, isFunction, isPlainObject, isString, values } from 'lodash';
 import API from '../../../util/Api'
 // import ComponentsSelectModalBusinessPartners from '../../../components/Routes/Modal/Components.Select.Modal.BusinessPartners'
 import SortingData from '../../../components/shares/SortingData'
@@ -275,7 +275,7 @@ const ImportDocAddEditViewModal = ({ isAllBranch = false, shopArr = null, form, 
     const handleSearchProduct = async (index, value) => {
         const { product_list } = form.getFieldValue()
         if (product_list && isArray(product_list)) {
-            const { data } = await API.get(`/shopProducts/all?search=${value}&limit=20&page=1&sort=start_date&order=desc&status=active`);
+            const { data } = await API.get(`/shopProducts/all?search=${value}&limit=10&page=1&sort=start_date&order=desc&status=active`);
             // console.log('data :>> ', data);
             const newData = SortingData(data.data.data, `Product.product_name.${locale.locale}`)
             product_list[index].productId_list = data.status == "success" ? newData : []
@@ -737,13 +737,69 @@ const ImportDocAddEditViewModal = ({ isAllBranch = false, shopArr = null, form, 
         setExVatPrice(0);
     }
 
+    const onChangeProductIds = async (index, value) => {
+        try {
+            console.log('value', value)
+            const ShopProduct = await getShopProduct(value);
+            const { product_list } = form.getFieldValue()
+            product_list[index].unit = null
+            product_list[index].warehouse_detail.map((e, index) => e.purchase_unit_id = null)
+            // let unit_list_arr
+            if (product_list[index].product_id) {
+                console.log("ShopProduct", ShopProduct)
+                product_list[index].ProductTypeGroupId = ShopProduct.Product.ProductType ? ShopProduct.Product.ProductType.type_group_id : null
+                const unit_list_arr = ShopProduct.Product.ProductType.ProductPurchaseUnitTypes
+                product_list[index].unit_list = unit_list_arr ? unit_list_arr ?? [] : []
+                const find = ShopProduct.Product.ProductType.ProductPurchaseUnitTypes.find(where => { return where.id === purchaseUnitTypeTire || where.id === purchaseUnitTypeService || where.id === purchaseUnitTypeBattery })
+                product_list[index].unit = isPlainObject(find) ? find.id : null
+                product_list[index].uom_arr = ShopProduct.details.uom_arr ?? []
+                product_list[index].warehouse_detail = isArray(product_list[index].warehouse_detail) && product_list[index].warehouse_detail.length > 0 ?
+                    product_list[index].warehouse_detail.map(e => { return { ...e, purchase_unit_id: find?.id ?? null } }) : []
+
+                form.setFieldsValue({ product_list });
+            } else {
+                null
+            }
+        } catch (error) {
+            console.log('error', error)
+        }
+
+    }
+    
     const callBackProductPick = async (value, index) => {
         try {
-            // const { product_list } = form.getFieldValue()
-            // product_list[index].productId_list = [value]
-            // form.setFieldsValue({ product_list })
-            // onChangeProductId(index, value.id)
+            const { product_list } = form.getFieldValue()
+            console.log("product_list", product_list)
+            console.log("test", value)
+
+            let _model = {
+                productId_list: [value],
+                ProductTypeGroupId: "",
+                amount_all: null,
+                discount_3: null,
+                discount_3_type: "bath",
+                discount_percentage_1: null,
+                discount_percentage_2: null,
+                is_discount: false,
+                is_discount_by_bath: false,
+                is_discount_by_percent: false,
+                price: null,
+                price_discount_for_cal: 0,
+                price_grand_total: "0.00",
+                price_grand_total_add_vat: "0.00",
+                price_grand_total_before_vat: "0.00",
+                price_grand_total_vat: "0.00",
+                price_unit_add_vat: "0.00",
+                price_unit_before_vat: "0.00",
+                price_unit_vat: "0.00",
+                product_id: value.id,
+                unit_list: value.Product.ProductType.ProductPurchaseUnitTypes,
+
+            }
+
+            onChangeProductId(index, value.id)
             handleCancelProductDataModal()
+            console.log("product_list", product_list)
         } catch (error) {
             console.log("error", error)
         }
@@ -757,7 +813,7 @@ const ImportDocAddEditViewModal = ({ isAllBranch = false, shopArr = null, form, 
         }
     }
 
-    const setOpenProductDataModal = (index) => {
+    const handleOpenProductDataModal = (index) => {
         setListIndex(index)
         setIsProductDataModalVisible(true)
     }
@@ -923,7 +979,7 @@ const ImportDocAddEditViewModal = ({ isAllBranch = false, shopArr = null, form, 
                                                     </Row>
                                                     <Row gutter={[10]} >
 
-                                                        <Col lg={8} md={12} xs={24} style={{ width: "100%" }}>
+                                                        <Col lg={4} md={12} xs={24} style={{ width: "100%" }}>
                                                             <Form.Item
                                                                 {...tailformItemLayout}
                                                                 validateTrigger={['onChange', 'onBlur']}
@@ -947,37 +1003,58 @@ const ImportDocAddEditViewModal = ({ isAllBranch = false, shopArr = null, form, 
                                                             </Form.Item>
                                                         </Col>
 
-                                                        <Col lg={8} md={12} xs={24} style={{ width: "100%" }}>
-                                                            <Form.Item
-                                                                {...tailformItemLayout}
-                                                                validateTrigger={['onChange', 'onBlur']}
-                                                                name={[field.name, "product_id"]}
-                                                                fieldKey={[field.fieldKey, "product_name"]}
-                                                                label={GetIntlMessages("product-name")}
-                                                            >
+                                                        <Col lg={12} md={12} xs={24} style={{ width: "100%" }}>
+                                                            <Row>
+                                                                <Col span={21}>
+                                                                    <Form.Item
+                                                                        {...tailformItemLayout}
+                                                                        validateTrigger={['onChange', 'onBlur']}
+                                                                        name={[field.name, "product_id"]}
+                                                                        fieldKey={[field.fieldKey, "product_name"]}
+                                                                        label={GetIntlMessages("product-name")}
+                                                                    >
+                                                                        <Select
+                                                                            showSearch
+                                                                            placeholder="เลือกข้อมูล"
+                                                                            optionFilterProp="children"
+                                                                            disabled={mode == "view" || expireEditTimeDisable == true}
+                                                                            onChange={(value) => onChangeProductId(index, value)}
+                                                                            onSearch={(value) => debounceOnSearch(index, value)}
+                                                                            filterOption={false}
+                                                                            notFoundContent={null}
+                                                                            dropdownMatchSelectWidth={false}
+                                                                            style={{
+                                                                                height: "auto",
+                                                                                wordWrap: "break-word",
+                                                                            }}
+                                                                        >
+                                                                            {getArrValue(index, "productId_list").map((e, i) => <Select.Option value={e.id} key={i}>{get(e, `Product.product_name.${[locale.locale]}`, "-")}</Select.Option>)}
+                                                                        </Select>
 
-                                                                <Select
-                                                                    showSearch
-                                                                    placeholder="เลือกข้อมูล"
-                                                                    optionFilterProp="children"
-                                                                    disabled={mode == "view" || expireEditTimeDisable == true}
-                                                                    onChange={(value) => onChangeProductId(index, value)}
-                                                                    onSearch={(value) => debounceOnSearch(index, value)}
-                                                                    filterOption={false}
-                                                                    notFoundContent={null}
-                                                                    dropdownMatchSelectWidth={false}
-                                                                    style={{
-                                                                        height: "auto",
-                                                                        wordWrap: "break-word",
+                                                                    </Form.Item>
+                                                                </Col>
 
-                                                                    }}
-                                                                >
-                                                                    {getArrValue(index, "productId_list").map((e, i) => <Select.Option value={e.id} key={i}>{get(e, `Product.product_name.${[locale.locale]}`, "-")}</Select.Option>)}
-                                                                </Select>
-
-                                                            </Form.Item>
-
-
+                                                                <Col span={2} style={{ paddingRight: "10px", textAlign: "end" }}>
+                                                                    <Form.Item label=" ">
+                                                                        <Button
+                                                                            icon={<EditOutlined />}
+                                                                            type="primary"
+                                                                            style={{ borderRadius: "10px", }}
+                                                                            onClick={() => handleOpenProductDataModal(index)}
+                                                                        ></Button>
+                                                                    </Form.Item>
+                                                                </Col>
+                                                                <Col span={1}>
+                                                                    <Form.Item label=" ">
+                                                                        <Button
+                                                                            icon={<SearchOutlined />}
+                                                                            type="primary"
+                                                                            style={{ borderRadius: "10px" }}
+                                                                            onClick={() => handleOpenProductDataModal(index)}
+                                                                        ></Button>
+                                                                    </Form.Item>
+                                                                </Col>
+                                                            </Row>
                                                         </Col>
 
                                                         {!!form.getFieldValue()?.purchase_order_number ?
@@ -1156,13 +1233,15 @@ const ImportDocAddEditViewModal = ({ isAllBranch = false, shopArr = null, form, 
                                                                             onChange={(value) => onChangeUnit(index, value)}
                                                                         >
 
-                                                                            {getArrValue(index, "unit_list").map((e, i) => <Select.Option value={e.id} key={i}>{e.uom_data ? <span>{get(e, `type_name.${locale.locale}`, "-")} <Tag>UOM</Tag></span> : get(e, `type_name.${locale.locale}`, "-")}</Select.Option>)}
+                                                                            {getArrValue(index, "unit_list").map((e, i) => <Select.Option value={e.id} key={i}>{e.uom_data ? <span>{get(e, `type_name.${locale.locale}`, "-")} <Tag>U</Tag></span> : get(e, `type_name.${locale.locale}`, "-")}</Select.Option>)}
                                                                         </Select>
                                                                     </Form.Item>
                                                                 </Col>
                                                                 <Col lg={1} md={4} xs={12} style={{ width: "100%" }}>
                                                                     <Form.Item label=" ">
-                                                                        <Button type='primary' onClick={() => { setOpenUomModal(index) }}>UOM</Button>
+                                                                        <Tooltip title="การแปลงหน่วย">
+                                                                            <Button type='primary' style={{ borderRadius: "10px" }} onClick={() => { setOpenUomModal(index) }}>U</Button>
+                                                                        </Tooltip>
                                                                     </Form.Item>
                                                                 </Col>
                                                             </>
@@ -1183,6 +1262,7 @@ const ImportDocAddEditViewModal = ({ isAllBranch = false, shopArr = null, form, 
                                                                         formatter={(value) => addComma(value)}
                                                                         parser={(value) => value.replace(/\$\s?|(,*)/g, '')}
                                                                         onChange={(value) => onChangeUnit(index, value)}
+                                                                        precision={2}
                                                                     />
                                                                 </Form.Item>
 
@@ -1222,6 +1302,7 @@ const ImportDocAddEditViewModal = ({ isAllBranch = false, shopArr = null, form, 
                                                                     <InputNumber style={{ width: "100%" }} className='ant-input-number-after-addon-20-percent' stringMode step={"1"} placeholder="0" disabled addonAfter="บาท" readOnly
                                                                         formatter={(value) => addComma(value)}
                                                                         parser={(value) => value.replace(/\$\s?|(,*)/g, '')}
+                                                                        precision={2}
                                                                     />
                                                                 </Form.Item>
                                                             </Col>

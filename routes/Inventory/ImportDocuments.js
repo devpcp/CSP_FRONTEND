@@ -706,10 +706,10 @@ const ImportDocuments = ({ view_doc_id, select_shop_ids, title = null, callBack,
                     formValue.tailgate_discount = RoundingNumber(transactionInfo.details.tailgate_discount)
                     formValue.tax_rate = transactionInfo.details.tax_rate
                     formValue.total_discount = transactionInfo.details.total_discount
-                    formValue.total_price_all = transactionInfo.details.total_price_all
-                    formValue.total_price_all_after_discount = transactionInfo.details?.total_price_all_after_discount ? transactionInfo.details?.total_price_all_after_discount ?? null : null
-                    formValue.vat = transactionInfo.details.vat
-                    formValue.net_price = transactionInfo.details.net_price
+                    formValue.total_price_all = (+transactionInfo.details.total_price_all).toLocaleString(undefined, twoDigits)
+                    formValue.total_price_all_after_discount = transactionInfo.details?.total_price_all_after_discount ? (+transactionInfo.details?.total_price_all_after_discount).toLocaleString(undefined, twoDigits) ?? null : null
+                    formValue.vat = (+transactionInfo.details.vat).toLocaleString(undefined, twoDigits)
+                    formValue.net_price = (+transactionInfo.details.net_price).toLocaleString(undefined, twoDigits)
                     formValue.note = transactionInfo.details.note
                     formValue.user_id = transactionInfo.details.user_id ?? null
                     formValue.status = transactionInfo.status
@@ -717,6 +717,7 @@ const ImportDocuments = ({ view_doc_id, select_shop_ids, title = null, callBack,
                     formValue.tax_period = moment(transactionInfo.details.tax_period) ?? null
                     formValue.debt_price_amount_left = transactionInfo.details.debt_price_amount_left ?? 0
                     formValue.payment_paid_status = transactionInfo.payment_paid_status
+                    formValue.price_before_vat = (+transactionInfo.details.price_before_vat).toLocaleString(undefined, twoDigits)
                 }
 
                 if (dataDocInventoryId.data.status == "success") {
@@ -1166,7 +1167,7 @@ const ImportDocuments = ({ view_doc_id, select_shop_ids, title = null, callBack,
             total_discount: price_discount_total ? price_discount_total.toLocaleString(undefined, twoDigits) : "0.00",
             net_price: net_price ? net_price.toLocaleString(undefined, twoDigits) : "0.00",
             total_price_all_after_discount: total_price_all_after_discount ? total_price_all_after_discount.toLocaleString(undefined, twoDigits) : + "0.00",
-            vat: vat ? vat.toLocaleString(undefined, twoDigits) : "0.00",
+            vat: vat ? (+vat).toLocaleString(undefined, twoDigits) : "0.00",
             Final_discount: tailgate_discount,
             total_amount,
             total_price_all: total_price_all ? total_price_all.toLocaleString(undefined, twoDigits) : "0.00",
