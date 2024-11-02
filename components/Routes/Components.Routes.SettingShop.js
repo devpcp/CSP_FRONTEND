@@ -3,7 +3,7 @@ import { Form, Input, Select, Button, Modal, Image, Switch, Col, Row, Tabs, Time
 import API from '../../util/Api'
 import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
 import Swal from "sweetalert2";
-import { isArray, isPlainObject } from 'lodash'
+import { isArray, isPlainObject, get } from 'lodash'
 import IntlMessages from '../../util/IntlMessages';
 import GetIntlMessages from '../../util/GetIntlMessages';
 import GetTextValueSelect from '../../util/GetTextValueSelect';
@@ -37,6 +37,8 @@ const SettingShop = () => {
         separate_ShopSalesTransaction_DocType_doc_code: false
     }])
     const [businessHours, setBusinessHours] = useState([]);
+    const [warehouseList, setWarehouseList] = useState([])
+    const [shelfList, setShelfList] = useState([])
 
     const { RangePicker } = DatePicker;
 
@@ -46,6 +48,11 @@ const SettingShop = () => {
 
     const getSettingShop = async () => {
         try {
+            let dataWarehouse = await getShelfData()
+            dataWarehouse.map((e) => {
+                e.value
+            })
+            setWarehouseList(dataWarehouse)
 
             const error = () => {
                 Swal.fire({
@@ -100,7 +107,7 @@ const SettingShop = () => {
                                     is_open: true,
                                 },
                             ]
-
+                            _model.address = _model.address
                             if (isPlainObject(_model.shop_config)) {
                                 _model.enable_ShopSalesTransaction_INV_doc_code = _model.shop_config.enable_ShopSalesTransaction_INV_doc_code
                                 _model.enable_ShopSalesTransaction_TRN_doc_code = _model.shop_config.enable_ShopSalesTransaction_TRN_doc_code
@@ -114,20 +121,20 @@ const SettingShop = () => {
                                 _model.enable_sale_price_overwrite = _model.shop_config.enable_sale_price_overwrite
                                 _model.business_hours = _model.shop_config.business_hours ?? business_hours
                                 _model.holidays = _model.shop_config.holidays
+                                _model.default_warehouse_id = _model.shop_config.default_warehouse_id
+                                _model.default_shelf_id = _model.shop_config.default_shelf_id
                             }
                             try {
                                 _model.business_hours.map((e) => {
                                     e.open_time = e.open_time ? moment(e.open_time) : null
                                     e.close_time = e.close_time ? moment(e.close_time) : null
                                 })
-                                console.log("business_hours", _model.business_hours)
                             } catch (error) {
                                 console.log("error", error)
                             }
 
                             try {
                                 _model.holidays.map((e) => {
-                                    console.log("eeee", e)
                                     e.range_date = e.range_date ? [moment(e.range_date[0]), moment(e.range_date[1])] : null
                                 })
                                 console.log("holidays", _model.holidays)
@@ -136,7 +143,7 @@ const SettingShop = () => {
                             }
 
                             setBusinessHours(_model.business_hours)
-
+                            console.log("_model", _model)
                             form.setFieldsValue(_model)
                             setMyDealers(_model)
                             setIsIdEdit(_model.id)
@@ -182,6 +189,7 @@ const SettingShop = () => {
         try {
             // console.log(`value`, value)
             const item = {
+                address: value.address,
                 shop_config: {
                     enable_ShopSalesTransaction_INV_doc_code: value.enable_ShopSalesTransaction_INV_doc_code,
                     enable_ShopSalesTransaction_TRN_doc_code: value.enable_ShopSalesTransaction_TRN_doc_code,
@@ -195,6 +203,8 @@ const SettingShop = () => {
                     enable_sale_price_overwrite: value.enable_sale_price_overwrite,
                     business_hours: value.business_hours,
                     holidays: value.holidays,
+                    default_warehouse_id: value.default_warehouse_id,
+                    default_shelf_id: value.default_shelf_id,
                 }
             }
 
@@ -319,6 +329,26 @@ const SettingShop = () => {
             business_hours[index_business_hours].close_time = null/*  */
         }
         setBusinessHours(business_hours)
+    }
+
+    /* เรียกข้อมูล คลังสินค้า ทั้งหมด */
+    const getShelfData = async () => {
+        const { data } = await API.get(`shopWarehouses/all?limit=9999&page=1&sort=code_id&order=asc`)
+        // console.log('data.data getShelfData', data.data.data);
+        return data.data.data
+    }
+
+    const onChangeWarehouse = (id) => {
+        if (id) {
+            let selectWarehouse = warehouseList.find(x => x.id === id)
+            setShelfList(selectWarehouse.shelf)
+        } else {
+            setShelfList([])
+        }
+        let model = {
+            default_shelf_id: null
+        }
+        form.setFieldsValue(model)
     }
 
     return (
@@ -610,6 +640,45 @@ const SettingShop = () => {
                                                 />
                                             </Form.Item>
                                         </Col>
+                                        <Col span={20}>
+                                            ตั้งค่าคลังเริ่มต้น
+                                            <br></br>
+                                            <Label className='second'>เลือกคลังเริ่มต้นสำหรับ ใช้ในหน้าใบรับเข้า ใบปรับลดปรับเพิ่ม</Label>
+                                        </Col>
+                                        <Col span={4}>
+                                            <Form.Item
+                                                name="default_warehouse_id"
+                                            >
+                                                <Select
+                                                    style={{ width: 120 }}
+                                                    optionFilterProp="children"
+                                                    placeholder="เลือกข้อมูล"
+                                                    onChange={(e) => onChangeWarehouse(e)}
+                                                    allowClear
+                                                >
+                                                    {warehouseList.map((e, i) => <Select.Option value={e.id} key={i}>{e.name[locale.locale]}</Select.Option>)}
+                                                </Select>
+                                            </Form.Item>
+                                        </Col>
+                                        <Col span={20}>
+                                            ตั้งค่าชั้นเริ่มต้น
+                                            <br></br>
+                                            <Label className='second'>เลือกชั้นเริ่มต้นสำหรับ ใช้ในหน้าใบรับเข้า ใบปรับลดปรับเพิ่ม</Label>
+                                        </Col>
+                                        <Col span={4}>
+                                            <Form.Item
+                                                name="default_shelf_id"
+                                            >
+                                                <Select
+                                                    style={{ width: 120 }}
+                                                    optionFilterProp="children"
+                                                    placeholder="เลือกข้อมูล"
+                                                    allowClear
+                                                >
+                                                    {shelfList.map((e, i) => <Select.Option value={e.code} key={i}>{e.name[locale.locale]}</Select.Option>)}
+                                                </Select>
+                                            </Form.Item>
+                                        </Col>
                                     </Row>,
                             },
                             {
@@ -775,7 +844,9 @@ const SettingShop = () => {
                     <Form.Item name="enable_warehouse_cost_show" hidden />
                     <Form.Item name="business_hours" hidden />
                     <Form.Item name="holidays" hidden />
-
+                    <Form.Item name="address" hidden />
+                    <Form.Item name="default_warehouse_id" hidden />
+                    <Form.Item name="default_shelf_id" hidden />
                 </Form>
             </Modal>
             <style jsx global>

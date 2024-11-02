@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import Fieldset from '../../shares/Fieldset';
 import FormSelectDot from "../Dot/Components.Select.Dot";
 import GetIntlMessages from '../../../util/GetIntlMessages';
-import { Form, Input, Select, Row, Col, Divider, Button, Space, DatePicker, InputNumber, Modal, Tooltip, Tag, Table } from 'antd';
+import { Form, Input, Select, Row, Col, Divider, Button, Space, DatePicker, InputNumber, Modal, Tooltip, Tag, Table, Checkbox } from 'antd';
 import { PlusOutlined, MinusCircleOutlined, TableOutlined, ShoppingCartOutlined, CalculatorOutlined, InfoCircleTwoTone, SearchOutlined, EditOutlined } from '@ant-design/icons';
 import { useSelector } from 'react-redux';
 import { debounce, get, isArray, isEmpty, isFunction, isPlainObject, isString, values } from 'lodash';
@@ -100,6 +100,8 @@ const ImportDocAddEditViewModal = ({ isAllBranch = false, shopArr = null, form, 
 
     const getMasterData = async () => {
         try {
+            const { shopBusinessPartnersList } = form.getFieldValue()
+            console.log("forms", form.getFieldValue())
             const promise1 = getBusinessTypeDataListAll()
             const promise2 = getShopBusinessPartnersDataListAll()
             const promise3 = getTaxType()
@@ -107,7 +109,8 @@ const ImportDocAddEditViewModal = ({ isAllBranch = false, shopArr = null, form, 
             const promise5 = getShelfData()
             const [value1, value2, value3, value4, value5] = await Promise.all([promise1, promise2, promise3, promise4, promise5])
             setBusinessTypeList(() => value1)
-            setShopBusinessPartners(() => value2)
+            let partner_list = shopBusinessPartnersList?.length > 0 ? shopBusinessPartnersList.concat(value2) : value2
+            setShopBusinessPartners(() => partner_list)
             setTaxTypeAllList(() => value3)
             setgetShelfDataAll(() => value5)
             if (isArray(value4)) {
@@ -133,7 +136,7 @@ const ImportDocAddEditViewModal = ({ isAllBranch = false, shopArr = null, form, 
                 setUserList(new_data);
             }
         } catch (error) {
-            // console.log('error getMasterData :>> ', error);
+            console.log('error getMasterData :>> ', error);
         }
     }
 
@@ -217,7 +220,9 @@ const ImportDocAddEditViewModal = ({ isAllBranch = false, shopArr = null, form, 
                         warehouse: null,
                     }
                 ],
-                productId_list: []
+                productId_list: [],
+                changed_name_status: false,
+                changed_product_name: null
             }
 
             add(defaultValue)
@@ -242,9 +247,8 @@ const ImportDocAddEditViewModal = ({ isAllBranch = false, shopArr = null, form, 
                 const find = ShopProduct.Product.ProductType.ProductPurchaseUnitTypes.find(where => { return where.id === purchaseUnitTypeTire || where.id === purchaseUnitTypeService || where.id === purchaseUnitTypeBattery })
                 product_list[index].unit = isPlainObject(find) ? find.id : null
                 product_list[index].uom_arr = ShopProduct.details.uom_arr ?? []
-                product_list[index].warehouse_detail = isArray(product_list[index].warehouse_detail) && product_list[index].warehouse_detail.length > 0 ?
-                    product_list[index].warehouse_detail.map(e => { return { ...e, purchase_unit_id: find?.id ?? null } }) : []
-
+                product_list[index].warehouse_detail = isArray(product_list[index].warehouse_detail) && product_list[index].warehouse_detail.length > 0 ? product_list[index].warehouse_detail.map(e => { return { ...e, purchase_unit_id: find?.id ?? null } }) : []
+                product_list[index].product_name = ShopProduct.Product.product_name[locale.locale]
                 form.setFieldsValue({ product_list });
             } else {
                 null
@@ -690,6 +694,20 @@ const ImportDocAddEditViewModal = ({ isAllBranch = false, shopArr = null, form, 
         return parts.join(".");
     }
 
+    const formatNumber = (val, isUseDecimals = true) => {
+        try {
+            if (isUseDecimals) {
+                return Number(val).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }).replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+            } else {
+                return Number(val).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 }).replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+            }
+
+        } catch (error) {
+
+        }
+    }
+
+
     const [isModalCalVatOpen, setIsModalCalVatOpen] = useState(false);
     const [inVatPrice, setInVatPrice] = useState(0);
     const [indexCalVatPrice, setIndexCalVatPrice] = useState(0);
@@ -765,13 +783,15 @@ const ImportDocAddEditViewModal = ({ isAllBranch = false, shopArr = null, form, 
         }
 
     }
-    
+
     const callBackProductPick = async (value, index) => {
         try {
             const { product_list } = form.getFieldValue()
             console.log("product_list", product_list)
-            console.log("test", value)
+            console.log("test", value.Product.ProductType.ProductPurchaseUnitTypes)
+            let find = value.Product.ProductType.ProductPurchaseUnitTypes.find(where => { return where.id === purchaseUnitTypeTire || where.id === purchaseUnitTypeService || where.id === purchaseUnitTypeBattery })
 
+            console.log("find", find)
             let _model = {
                 productId_list: [value],
                 ProductTypeGroupId: "",
@@ -794,9 +814,16 @@ const ImportDocAddEditViewModal = ({ isAllBranch = false, shopArr = null, form, 
                 price_unit_vat: "0.00",
                 product_id: value.id,
                 unit_list: value.Product.ProductType.ProductPurchaseUnitTypes,
+                unit: isPlainObject(find) ? find.id : null,
+                warehouse_detail: [
+                    {
+                        purchase_unit_id: isPlainObject(find) ? find.id : null,
+                    }
+                ]
 
             }
-
+            product_list[index] = _model
+            form.setFieldsValue({ product_list })
             onChangeProductId(index, value.id)
             handleCancelProductDataModal()
             console.log("product_list", product_list)
@@ -942,6 +969,23 @@ const ImportDocAddEditViewModal = ({ isAllBranch = false, shopArr = null, form, 
         },
     ]
 
+    const handleCheckChangeName = (val, index) => {
+        try {
+            const { product_list } = form.getFieldValue()
+            product_list[index].changed_name_status = val
+
+            if (!val) {
+                product_list[index].changed_product_name = null
+            } else {
+                product_list[index].changed_product_name = product_list[index].product_name
+            }
+            form.setFieldsValue({ product_list })
+            console.log("product_list", product_list)
+        } catch (error) {
+
+        }
+    }
+
     return (
         <>
             {pageId == "a6c9c754-0239-4abe-ad6b-8cdb6b81dcc0" && mode != "add"
@@ -1005,13 +1049,14 @@ const ImportDocAddEditViewModal = ({ isAllBranch = false, shopArr = null, form, 
 
                                                         <Col lg={12} md={12} xs={24} style={{ width: "100%" }}>
                                                             <Row>
-                                                                <Col span={21}>
+                                                                <Col span={21} >
                                                                     <Form.Item
                                                                         {...tailformItemLayout}
                                                                         validateTrigger={['onChange', 'onBlur']}
                                                                         name={[field.name, "product_id"]}
                                                                         fieldKey={[field.fieldKey, "product_name"]}
                                                                         label={GetIntlMessages("product-name")}
+                                                                        hidden={form.getFieldValue().product_list[index].changed_name_status}
                                                                     >
                                                                         <Select
                                                                             showSearch
@@ -1032,16 +1077,31 @@ const ImportDocAddEditViewModal = ({ isAllBranch = false, shopArr = null, form, 
                                                                         </Select>
 
                                                                     </Form.Item>
+                                                                    <Form.Item
+                                                                        {...tailformItemLayout}
+                                                                        validateTrigger={['onChange', 'onBlur']}
+                                                                        name={[field.name, "changed_product_name"]}
+                                                                        fieldKey={[field.fieldKey, "changed_product_name"]}
+                                                                        label={GetIntlMessages("ชื่อสินค้าที่เปลี่ยน")}
+                                                                        hidden={!form.getFieldValue().product_list[index].changed_name_status}
+                                                                    >
+                                                                        <Input placeholder='กรอกข้อมูล' />
+                                                                    </Form.Item>
                                                                 </Col>
 
-                                                                <Col span={2} style={{ paddingRight: "10px", textAlign: "end" }}>
-                                                                    <Form.Item label=" ">
-                                                                        <Button
-                                                                            icon={<EditOutlined />}
-                                                                            type="primary"
-                                                                            style={{ borderRadius: "10px", }}
-                                                                            onClick={() => handleOpenProductDataModal(index)}
-                                                                        ></Button>
+                                                                <Col span={2} style={{ paddingRight: "10px", textAlign: "center" }}>
+                                                                    <Form.Item
+                                                                        {...tailformItemLayout}
+                                                                        style={{ margin: 0 }}
+                                                                        name={[field.name, "change_name_status"]}
+                                                                        label="เปลี่ยนชื่อ"
+                                                                    >
+                                                                        {console.log("s", form.getFieldValue().product_list[index])}
+                                                                        <Checkbox
+                                                                            checked={form.getFieldValue().product_list[index].changed_name_status}
+                                                                            disabled={mode === "view"}
+                                                                            onChange={(checkedValue) => handleCheckChangeName(checkedValue.target.checked, index)}
+                                                                        />
                                                                     </Form.Item>
                                                                 </Col>
                                                                 <Col span={1}>
@@ -1050,6 +1110,7 @@ const ImportDocAddEditViewModal = ({ isAllBranch = false, shopArr = null, form, 
                                                                             icon={<SearchOutlined />}
                                                                             type="primary"
                                                                             style={{ borderRadius: "10px" }}
+                                                                            disabled={mode === "view"}
                                                                             onClick={() => handleOpenProductDataModal(index)}
                                                                         ></Button>
                                                                     </Form.Item>
@@ -1057,19 +1118,17 @@ const ImportDocAddEditViewModal = ({ isAllBranch = false, shopArr = null, form, 
                                                             </Row>
                                                         </Col>
 
-                                                        {!!form.getFieldValue()?.purchase_order_number ?
-                                                            <Col lg={8} md={12} xs={24} style={{ width: "100%" }}>
-                                                                <Form.Item
-                                                                    {...tailformItemLayout}
-                                                                    validateTrigger={['onChange', 'onBlur']}
-                                                                    name={[field.name, "changed_product_name"]}
-                                                                    fieldKey={[field.fieldKey, "changed_product_name"]}
-                                                                    label={GetIntlMessages("ชื่อสินค้าที่เปลี่ยน")}
-                                                                >
-                                                                    <Input disabled />
-                                                                </Form.Item>
-                                                            </Col>
-                                                            : null}
+                                                        {/* <Col lg={8} md={12} xs={24} style={{ width: "100%" }}>
+                                                            <Form.Item
+                                                                {...tailformItemLayout}
+                                                                validateTrigger={['onChange', 'onBlur']}
+                                                                name={[field.name, "changed_product_name"]}
+                                                                fieldKey={[field.fieldKey, "changed_product_name"]}
+                                                                label={GetIntlMessages("ชื่อสินค้าที่เปลี่ยน")}
+                                                            >
+                                                                <Input disabled />
+                                                            </Form.Item>
+                                                        </Col> */}
 
                                                         <Col lg={4} md={12} xs={24} style={{ width: "100%" }}>
                                                             <Form.Item
@@ -1240,7 +1299,14 @@ const ImportDocAddEditViewModal = ({ isAllBranch = false, shopArr = null, form, 
                                                                 <Col lg={1} md={4} xs={12} style={{ width: "100%" }}>
                                                                     <Form.Item label=" ">
                                                                         <Tooltip title="การแปลงหน่วย">
-                                                                            <Button type='primary' style={{ borderRadius: "10px" }} onClick={() => { setOpenUomModal(index) }}>U</Button>
+                                                                            <Button
+                                                                                type='primary'
+                                                                                style={{ borderRadius: "10px" }}
+                                                                                disabled={mode === "view"}
+                                                                                onClick={() => { setOpenUomModal(index) }}
+                                                                            >
+                                                                                U
+                                                                            </Button>
                                                                         </Tooltip>
                                                                     </Form.Item>
                                                                 </Col>
@@ -1258,8 +1324,15 @@ const ImportDocAddEditViewModal = ({ isAllBranch = false, shopArr = null, form, 
                                                                     fieldKey={[field.fieldKey, "total_price"]}
                                                                     label={GetIntlMessages("ราคารวม")}
                                                                 >
-                                                                    <InputNumber style={{ width: "100%" }} disabled className='ant-input-number-after-addon-20-percent' stringMode step={"1"} placeholder="0" addonAfter="บาท"
-                                                                        formatter={(value) => addComma(value)}
+                                                                    <InputNumber
+                                                                        style={{ width: "100%" }}
+                                                                        disabled
+                                                                        className='ant-input-number-after-addon-20-percent'
+                                                                        stringMode
+                                                                        step={"1.00"}
+                                                                        placeholder="0"
+                                                                        addonAfter="บาท"
+                                                                        formatter={(value) => formatNumber(value)}
                                                                         parser={(value) => value.replace(/\$\s?|(,*)/g, '')}
                                                                         onChange={(value) => onChangeUnit(index, value)}
                                                                         precision={2}
@@ -1300,7 +1373,7 @@ const ImportDocAddEditViewModal = ({ isAllBranch = false, shopArr = null, form, 
                                                                     label={GetIntlMessages("ยอดสุทธิ")}
                                                                 >
                                                                     <InputNumber style={{ width: "100%" }} className='ant-input-number-after-addon-20-percent' stringMode step={"1"} placeholder="0" disabled addonAfter="บาท" readOnly
-                                                                        formatter={(value) => addComma(value)}
+                                                                        formatter={(value) => formatNumber(value)}
                                                                         parser={(value) => value.replace(/\$\s?|(,*)/g, '')}
                                                                         precision={2}
                                                                     />
@@ -1398,7 +1471,7 @@ const ImportDocAddEditViewModal = ({ isAllBranch = false, shopArr = null, form, 
                                     stringMode
                                     placeholder="0"
                                     disabled={mode == "view"}
-                                    formatter={(value) => addComma(value)}
+                                    formatter={(value) => formatNumber(value)}
                                     parser={(value) => value.replace(/\$\s?|(,*)/g, '')}
                                     onBlur={calculateResult}
                                     controls={false}
@@ -1416,7 +1489,7 @@ const ImportDocAddEditViewModal = ({ isAllBranch = false, shopArr = null, form, 
                                     placeholder="0"
                                     disabled
                                     readOnly
-                                    formatter={(value) => addComma(value)}
+                                    formatter={(value) => formatNumber(value)}
                                     parser={(value) => value.replace(/\$\s?|(,*)/g, '')}
                                 />
                             </Form.Item>
@@ -1430,7 +1503,7 @@ const ImportDocAddEditViewModal = ({ isAllBranch = false, shopArr = null, form, 
                                     stringMode
                                     disabled
                                     placeholder="0"
-                                    formatter={(value) => addComma(value)}
+                                    formatter={(value) => formatNumber(value)}
                                     parser={(value) => value.replace(/\$\s?|(,*)/g, '')}
                                 />
                             </Form.Item>
@@ -1445,7 +1518,7 @@ const ImportDocAddEditViewModal = ({ isAllBranch = false, shopArr = null, form, 
                                     placeholder="0"
                                     disabled
                                     readOnly
-                                    formatter={(value) => addComma(value)}
+                                    formatter={(value) => formatNumber(value)}
                                     parser={(value) => value.replace(/\$\s?|(,*)/g, '')}
                                 />
                             </Form.Item>
@@ -1460,7 +1533,7 @@ const ImportDocAddEditViewModal = ({ isAllBranch = false, shopArr = null, form, 
                                     placeholder="0"
                                     disabled
                                     readOnly
-                                    formatter={(value) => addComma(value)}
+                                    formatter={(value) => formatNumber(value)}
                                     parser={(value) => value.replace(/\$\s?|(,*)/g, '')}
                                 />
                             </Form.Item>
@@ -1475,12 +1548,13 @@ const ImportDocAddEditViewModal = ({ isAllBranch = false, shopArr = null, form, 
                                     placeholder="0"
                                     disabled
                                     readOnly
-                                    formatter={(value) => addComma(value)}
+                                    formatter={(value) => formatNumber(value)}
                                     parser={(value) => value.replace(/\$\s?|(,*)/g, '')}
                                 />
                             </Form.Item>
                             <Form.Item
                                 {...tailformItemLayout}
+                                stringMode min={0} precision={2}
                                 name="net_price" label={GetIntlMessages("จำนวนเงินรวมทั้งสิ้น")}>
                                 <InputNumber
                                     style={{ width: "100%" }}
@@ -1489,7 +1563,7 @@ const ImportDocAddEditViewModal = ({ isAllBranch = false, shopArr = null, form, 
                                     placeholder="0"
                                     disabled
                                     readOnly
-                                    formatter={(value) => addComma(value)}
+                                    formatter={(value) => formatNumber(value)}
                                     parser={(value) => value.replace(/\$\s?|(,*)/g, '')}
                                 />
                             </Form.Item>

@@ -165,6 +165,7 @@ const FormImportDocument = ({ form, mode, expireEditTimeDisable, dataList, calcu
                         price_discount_total: Number(amount) * Number(price_discount),
                         price_discount_total: RoundingNumber(Number(amount) * Number(price_discount)),
                         seq_number: seq_number.toString(),
+                        changed_name_status: details?.changed_name_status ?? false,
                         changed_product_name: details?.changed_product_name ?? null
                     }
                 })
@@ -305,6 +306,7 @@ const FormImportDocument = ({ form, mode, expireEditTimeDisable, dataList, calcu
                                     <Button
                                         type='primary'
                                         style={{ width: "100%", borderRadius: "10px" }}
+                                        disabled={mode === "view"}
                                         onClick={() => handleOpenBusinessPartnersDataModal()}
                                     >
                                         เลือก

@@ -631,7 +631,9 @@ const ImportDocuments = ({ view_doc_id, select_shop_ids, title = null, callBack,
                     discount_percentage_2: null,
                     discount_3: null,
                     discount_3_type: "bath",
-                    warehouse_detail: warehouseDetail
+                    warehouse_detail: warehouseDetail,
+                    changed_name_status: false,
+                    changed_product_name: null
                 })
             }
         }
@@ -717,7 +719,8 @@ const ImportDocuments = ({ view_doc_id, select_shop_ids, title = null, callBack,
                     formValue.tax_period = moment(transactionInfo.details.tax_period) ?? null
                     formValue.debt_price_amount_left = transactionInfo.details.debt_price_amount_left ?? 0
                     formValue.payment_paid_status = transactionInfo.payment_paid_status
-                    formValue.price_before_vat = (+transactionInfo.details.price_before_vat).toLocaleString(undefined, twoDigits)
+                    formValue.price_before_vat = (+transactionInfo.details.price_before_vat).toLocaleString(undefined, twoDigits),
+                    formValue.shopBusinessPartnersList = [transactionInfo.ShopBusinessPartners]
                 }
 
                 if (dataDocInventoryId.data.status == "success") {
@@ -803,6 +806,9 @@ const ImportDocuments = ({ view_doc_id, select_shop_ids, title = null, callBack,
                             uom_data: e.details.uom_data,
                             uom_arr: e.ShopProduct.details.uom_arr,
 
+                            changed_name_status: e.details?.changed_name_status ?? false,
+                            changed_product_name: e.details?.changed_product_name ?? null,
+
                             warehouse_detail: e.warehouse_detail.map((items, index) => {
                                 // console.log('items warehouse_detail dataDocInventoryId', items)
                                 return {
@@ -847,7 +853,7 @@ const ImportDocuments = ({ view_doc_id, select_shop_ids, title = null, callBack,
                 console.log("_model", _model)
                 formModal.setFieldsValue(await _model)
             }
-
+            calculateResult()
             setIsModalVisible(true)
 
         } catch (error) {
@@ -904,7 +910,7 @@ const ImportDocuments = ({ view_doc_id, select_shop_ids, title = null, callBack,
                     note: value.note,
                     user_id: value.user_id,
                     is_inv: value.is_inv,
-                    tax_period: moment(value.tax_period).format("YYYY-MM")
+                    tax_period: moment(value.tax_period).format("YYYY-MM"),
                 },
                 doc_type_id: "ad06eaab-6c5a-4649-aef8-767b745fab47", //ใบนำเข้า
                 doc_date: moment(value.doc_date).format("YYYY-MM-DD"),
@@ -979,6 +985,10 @@ const ImportDocuments = ({ view_doc_id, select_shop_ids, title = null, callBack,
                             is_discount_by_percent: items?.is_discount_by_percent ?? false,
                             is_discount_by_bath: items?.is_discount_by_bath ?? "0.00",
                             price_discount_for_cal: items?.price_discount_for_cal ?? "0.00",
+
+
+                            changed_name_status: items?.changed_name_status,
+                            changed_product_name: items?.changed_product_name,
                         },
                     }
                 }),
@@ -1163,15 +1173,15 @@ const ImportDocuments = ({ view_doc_id, select_shop_ids, title = null, callBack,
         let result = {
             total: total ? MatchRound(total) : "0.00",
             tailgate_discount: RoundingNumber(tailgate_discount),
-            discount: discount ? discount.toLocaleString(undefined, twoDigits) : "0.00",
-            total_discount: price_discount_total ? price_discount_total.toLocaleString(undefined, twoDigits) : "0.00",
-            net_price: net_price ? net_price.toLocaleString(undefined, twoDigits) : "0.00",
-            total_price_all_after_discount: total_price_all_after_discount ? total_price_all_after_discount.toLocaleString(undefined, twoDigits) : + "0.00",
-            vat: vat ? (+vat).toLocaleString(undefined, twoDigits) : "0.00",
+            discount: discount ? MatchRound(discount) : "0.00",
+            total_discount: price_discount_total ? MatchRound(price_discount_total) : "0.00",
+            net_price: net_price ? MatchRound(net_price) : "0.00",
+            total_price_all_after_discount: total_price_all_after_discount ? MatchRound(total_price_all_after_discount) : + "0.00",
+            vat: vat ? MatchRound(+vat) : "0.00",
             Final_discount: tailgate_discount,
             total_amount,
-            total_price_all: total_price_all ? total_price_all.toLocaleString(undefined, twoDigits) : "0.00",
-            price_before_vat: price_before_vat ? price_before_vat.toLocaleString(undefined, twoDigits) : "0.00",
+            total_price_all: total_price_all ? MatchRound(total_price_all) : "0.00",
+            price_before_vat: price_before_vat ? MatchRound(price_before_vat) : "0.00",
         }
         console.log("result", result)
         formModal.setFieldsValue(result)

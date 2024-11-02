@@ -196,21 +196,21 @@ const FormTemporaryDeliveryOrderDoc = ({ mode, calculateResult, disabledWhenDeli
                 case "select":
                     if (isFunction(getStatusCarLoading)) getStatusCarLoading(true);
                     const { easy_search_list } = form.getFieldValue(), findSelected = easy_search_list.find(where => where.id === value);
-
+                    console.log("findSelected", findSelected)
+                    const { data } = await API.get(`/shopTemporaryDeliveryOrderDoc/byId/${findSelected?.id}`)
                     if (!!findSelected) {
 
                         form.setFieldsValue({
                             customer_type: findSelected.customer_type,
-                            options_list: findSelected.ShopTemporaryDeliveryOrderLists ?? [],
+                            options_list: data.data.product_list ?? [],
                             // customer_list,
                             // customer_id,
                             ref_doc_list: easy_search_list,
                             ref_doc: findSelected.id,
                             arr_debt_list: [],
-                            // options_list : []
                         })
-                        await handleSearchCustomer(findSelected.customer_id, 'search', 'easy_search')
-                        await handleSearchCustomer(findSelected.customer_id, 'select', 'easy_search')
+                        // await handleSearchCustomer(findSelected.customer_id, 'search', 'easy_search')
+                        // await handleSearchCustomer(findSelected.customer_id, 'select', 'easy_search')
                     }
                     if (isFunction(getStatusCarLoading)) getStatusCarLoading(false);
                     break;
@@ -460,17 +460,17 @@ const FormTemporaryDeliveryOrderDoc = ({ mode, calculateResult, disabledWhenDeli
                             )}
                         >
                             {getArrValue("customer_list").map(e => <Select.Option value={e.id} key={`customer-id-${e.id}`}>{e.customer_full_name}</Select.Option>)}
-                       </Select>
+                        </Select>
                     </Form.Item>
                 </Col>
 
-            
+
 
                 <Col lg={8} md={12} sm={12} xs={24}>
                     <Form.Item
                         name="customer_credit_debt_unpaid_balance"
                         label="จำนวนเงินค้างชำระ"
-                 
+
                     >
                         <InputNumber disabled stringMode step={"0.01"} min={0} precision={2} style={{ width: "100%" }} formatter={(value) => !!value && value.length > 0 ? `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',') : ""}
                             parser={(value) => value.replace(/\$\s?|(,*)/g, '')} />
@@ -501,12 +501,12 @@ const FormTemporaryDeliveryOrderDoc = ({ mode, calculateResult, disabledWhenDeli
                 </Col>
 
 
-              
+
                 <Col lg={8} md={12} sm={12} xs={24}>
                     <Form.Item
                         name="customer_credit_debt_current_balance"
                         label="วงเงินเครดิตคงเหลือ"
-                   >
+                    >
                         <InputNumber disabled stringMode step={"0.01"} min={0} precision={2} style={{ width: "100%" }} formatter={(value) => !!value && value.length > 0 ? `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',') : ""}
                             parser={(value) => value.replace(/\$\s?|(,*)/g, '')} />
                     </Form.Item>
@@ -537,7 +537,7 @@ const FormTemporaryDeliveryOrderDoc = ({ mode, calculateResult, disabledWhenDeli
                         <DatePicker style={{ width: "100%" }} format={"YYYY-MM-DD"} disabled={mode === "view"} />
                     </Form.Item>
                 </Col>
-                
+
 
                 <Col lg={8} md={12} sm={12} xs={24}>
                     <Form.Item
@@ -570,7 +570,7 @@ const FormTemporaryDeliveryOrderDoc = ({ mode, calculateResult, disabledWhenDeli
                             loading={loadingEasySearch}
                         >
                             {documentTypes.map((e, index) => <Select.Option value={e.id} key={`doc-type-${e.id}`}>{e?.type_name[locale.locale]}</Select.Option>)}
-                       </Select>
+                        </Select>
                     </Form.Item>
                 </Col>
                 <Col lg={8} md={12} sm={12} xs={24} >

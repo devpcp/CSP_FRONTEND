@@ -14,7 +14,7 @@ import SearchInput from '../../../shares/SearchInput'
 import TableList from '../../../shares/TableList'
 import CarPreloader from '../../../_App/CarPreloader'
 import FormTemporaryDeliveryOrderDoc from './components/Components.Routes.Modal.FormDebtorDoc'
-import Tab1ServiceAndProductV2 from './components/Components.Routes.Modal.Tab1.DocumentDebtLists'
+import Tab1ServiceAndProductV2 from './components/Components.Routes.Modal.Tab1.DocumentDebtLists copy'
 import TabPaymentInfo from './components/Components.Routes.Modal.Tab.PaymentInfo'
 import PaymentDocs from './components/Components.Routes.Modal.PaymentDocsV2'
 
@@ -598,41 +598,9 @@ const DebtorDoc = ({ docTypeId, title = null, callBack, }) => {
             // }
 
             let options_list = []
-            if (!!ShopCustomerDebtCreditLists && isArray(ShopCustomerDebtCreditLists) && ShopCustomerDebtCreditLists.length > 0) {
-                options_list = ShopCustomerDebtCreditLists.map((e, index) => {
-                    // if(!!e.ShopTemporaryDeliveryOrderDoc){
-                    //     options_list.push(e.ShopTemporaryDeliveryOrderDoc)
-                    // }
-                    if (e.details.meta_data.Product) {
-                        return {
-                            ...e,
-                            list_id: e.id,
-                            list_name: e.id
-                        }
-                    } else {
-                        return {
-                            ...e,
-
-                        }
-                    }
-
-                })
-                ShopCustomerDebtCreditLists = ShopCustomerDebtCreditLists.map((e, index) => {
-                    // if(!!e.ShopTemporaryDeliveryOrderDoc){
-                    //     options_list.push(e.ShopTemporaryDeliveryOrderDoc)
-                    // }
-                    if (e.details.meta_data.Product) {
-                        return {
-                            ...e,
-                            list_id: e.id,
-                            list_name: e.id
-                        }
-                    } else {
-                        return {
-                            ...e,
-                        }
-                    }
-                })
+            if (!!shop_temporary_delivery_order_doc_id) {
+                const { data } = await API.get(`/shopInventory/bydocinventoryid/${shop_temporary_delivery_order_doc_id}`)
+                options_list = data?.data?.product_list
             }
 
             const model = {
