@@ -53,9 +53,8 @@ const BusinessCustomersData = ({ title = null, callBack }) => {
     const [lineData, setLineData] = useState(null);
     const [showModalTagsData, setShowModalTagsData] = useState(false);
     const [showModalSalesHistoryData, setShowModalSalesHistoryData] = useState(false);
-    const { productBrand } = useSelector(({ master }) => master);
     const [isBusiness, setIsBusiness] = useState(false);
-    const [modelList, setModelList] = useState({})
+
 
     /**
     * ค่าเริ่มต้นของ
@@ -473,7 +472,7 @@ const BusinessCustomersData = ({ title = null, callBack }) => {
                     _model.upload_remove_list = []
                     _model.is_business = isPlainObject(_model.other_details) ? _model.other_details["is_business"] ?? null : null
 
-                    setModelList(_model.target)
+                    setModelTargetList(_model.target)
 
                     if (isPlainObject(_model.other_details)) {
                         switch (_model.other_details["branch"]) {
@@ -558,26 +557,32 @@ const BusinessCustomersData = ({ title = null, callBack }) => {
         console.log("value", value)
         console.log("getfrm", form.getFieldsValue())
         try {
-            let new_model = []
+          
             const { target } = value
-            if (target) {
-                target.map((e) => {
-                    e.brand_data.map((eel) => {
-                        if (eel.model !== undefined) {
-                            eel.model.map((eeel) => {
-                                new_model.push(eel.model_list.find(x => x.id === eeel))
-                            })
-                            eel.model_list = new_model
-                        } else {
-                            eel.model_list = []
-                        }
-                    })
+            try {
+                if (target) {
+                    target.map((e) => {
+                        e.brand_data.map((eel) => {
+                            if (eel.model !== undefined && eel?.model?.length !== 0) {
+                                let new_model = []
+                                eel.model.map((eeel) => {
+                                    new_model.push(eel.model_list.find(x => x.id === eeel))
+                                })
+                                eel.model_list = new_model
+                            } else {
+                                eel.model_list = []
+                            }
+                        })
 
-                    e.target_data.map((el) => {
-                        el.year = e.year
+                        e.target_data.map((el) => {
+                            el.year = e.year
+                        })
                     })
-                })
+                }
+            } catch (error) {
+                console.log("error", error)
             }
+
 
             let shopId = authUser?.UsersProfile?.shop_id
             let directory = "shopBusinessCustomer"
@@ -859,21 +864,27 @@ const BusinessCustomersData = ({ title = null, callBack }) => {
     const [productTypeList, setProductTypeList] = useState([])
     const [shopWarehouseList, setShopWarehouseList] = useState([])
     const [shopShelfList, setShopShelfList] = useState([])
+    const [brandList, setBrandList] = useState([])
+    const [modelList, setModelList] = useState([])
+    const [modelTargetList, setModelTargetList] = useState([])
 
     const getMasterData = async () => {
         try {
             const promise1 = getBusinessTypeDataListAll();
             const promise2 = getTagsListAll();
-            const promise3 = getProductTypeGroupAll();
-            const promise4 = getProductTypeListAll();
-            const promise5 = getShopWareHouseListAll();
+            const promise3 = getFilterDataSearch();
+            const promise4 = getShopWareHouseListAll();
 
-            Promise.all([promise1, promise2, promise3, promise4, promise5]).then((values) => {
+            Promise.all([promise1, promise2, promise3, promise4]).then((values) => {
+                console.log("values[3]", values[2])
+                const { productGroupLists, productTypeLists, productBrandLists, productModelLists } = values[2];
                 setBusinessTypeList(values[0])
                 setTagsList(values[1])
-                setProductGroupList(values[2])
-                setProductTypeList(values[3])
-                setShopWarehouseList(values[4])
+                setProductGroupList(productGroupLists)
+                setProductTypeList(productTypeLists)
+                setShopWarehouseList(values[3])
+                setBrandList(productBrandLists)
+                setModelList(productModelLists)
             });
         } catch (error) {
             console.log("error")
@@ -906,6 +917,13 @@ const BusinessCustomersData = ({ title = null, callBack }) => {
         const { data } = await API.get(`/shopWarehouses/all?limit=99999&page=1&sort=code_id&order=asc`)
         return data.status === "success" ? data.data.data ?? [] : []
     }
+
+    const getFilterDataSearch = async () => {
+        try {
+            const { data } = await API.get(`/shopProducts/filter/categories`);
+            return data
+        } catch (error) { }
+    };
 
     const onFinishError = (error) => {
         console.log(`error`, error)
@@ -1206,7 +1224,13 @@ const BusinessCustomersData = ({ title = null, callBack }) => {
         // console.log("form", form.getFieldValue())
         const { target } = form.getFieldValue()
         const { brand_id } = target[index_target].brand_data[index_filter_data]
-        const { data } = await API.get(`/productModelType/all?limit=999999&page=1&sort=model_name.th&order=asc&product_brand_id=${brand_id}`)
+        // const { data } = await API.get(`/productModelType/all?limit=999999&page=1&sort=model_name.th&order=asc&product_brand_id=${brand_id}`)
+        let data = {
+            data: {
+                data: modelList.filter(x => x.product_brand_id === brand_id),
+            },
+            status: "success"
+        }
         let newModel = []
         if (data.status === "success") {
             console.log("data.data", data.data.data)
@@ -1223,7 +1247,7 @@ const BusinessCustomersData = ({ title = null, callBack }) => {
                 target
             })
 
-            setModelList(target)
+            setModelTargetList(target)
         } else {
             console.log("error", data)
         }
@@ -2089,9 +2113,9 @@ const BusinessCustomersData = ({ title = null, callBack }) => {
                                                                                                                             showSearch
                                                                                                                             onChange={() => onChangeBrand(index_target, index_filter_data)}
                                                                                                                         >
-                                                                                                                            {isArray(productBrand) && productBrand.length > 0 ? productBrand.map((e, index) => (
+                                                                                                                            {isArray(brandList) && brandList?.length > 0 ? brandList?.map((e, index) => (
                                                                                                                                 <Select.Option value={e.id} key={index}>
-                                                                                                                                    {e.brand_name[locale.locale]}
+                                                                                                                                    {e?.brand_name[locale.locale]}
                                                                                                                                 </Select.Option>
                                                                                                                             ))
                                                                                                                                 : null
@@ -2110,7 +2134,7 @@ const BusinessCustomersData = ({ title = null, callBack }) => {
                                                                                                                             showSearch
                                                                                                                             mode='multiple'
                                                                                                                         >
-                                                                                                                            {isArray(modelList) && modelList.length > 0 ? modelList[index_target]?.brand_data[index_filter_data]?.model_list.map((e, index) => (
+                                                                                                                            {isArray(modelTargetList) && modelTargetList?.length > 0 ? modelTargetList[index_target]?.brand_data[index_filter_data]?.model_list?.map((e, index) => (
                                                                                                                                 <Select.Option value={e?.id} key={index}>
                                                                                                                                     {e?.model_name[locale.locale]}
                                                                                                                                 </Select.Option>

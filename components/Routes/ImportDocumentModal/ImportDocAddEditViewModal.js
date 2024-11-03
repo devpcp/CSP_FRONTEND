@@ -1049,7 +1049,7 @@ const ImportDocAddEditViewModal = ({ isAllBranch = false, shopArr = null, form, 
 
                                                         <Col lg={12} md={12} xs={24} style={{ width: "100%" }}>
                                                             <Row>
-                                                                <Col span={21} >
+                                                                <Col span={pageId == "a6c9c754-0239-4abe-ad6b-8cdb6b81dcc0" && mode != "add" ? 24 : 21} >
                                                                     <Form.Item
                                                                         {...tailformItemLayout}
                                                                         validateTrigger={['onChange', 'onBlur']}
@@ -1088,33 +1088,36 @@ const ImportDocAddEditViewModal = ({ isAllBranch = false, shopArr = null, form, 
                                                                         <Input placeholder='กรอกข้อมูล' />
                                                                     </Form.Item>
                                                                 </Col>
-
-                                                                <Col span={2} style={{ paddingRight: "10px", textAlign: "center" }}>
-                                                                    <Form.Item
-                                                                        {...tailformItemLayout}
-                                                                        style={{ margin: 0 }}
-                                                                        name={[field.name, "change_name_status"]}
-                                                                        label="เปลี่ยนชื่อ"
-                                                                    >
-                                                                        {console.log("s", form.getFieldValue().product_list[index])}
-                                                                        <Checkbox
-                                                                            checked={form.getFieldValue().product_list[index].changed_name_status}
-                                                                            disabled={mode === "view"}
-                                                                            onChange={(checkedValue) => handleCheckChangeName(checkedValue.target.checked, index)}
-                                                                        />
-                                                                    </Form.Item>
-                                                                </Col>
-                                                                <Col span={1}>
-                                                                    <Form.Item label=" ">
-                                                                        <Button
-                                                                            icon={<SearchOutlined />}
-                                                                            type="primary"
-                                                                            style={{ borderRadius: "10px" }}
-                                                                            disabled={mode === "view"}
-                                                                            onClick={() => handleOpenProductDataModal(index)}
-                                                                        ></Button>
-                                                                    </Form.Item>
-                                                                </Col>
+                                                                {pageId == "a6c9c754-0239-4abe-ad6b-8cdb6b81dcc0" && mode != "add" ? null
+                                                                    :
+                                                                    <>
+                                                                        <Col span={2} style={{ paddingRight: "10px", textAlign: "center" }}>
+                                                                            <Form.Item
+                                                                                {...tailformItemLayout}
+                                                                                style={{ margin: 0 }}
+                                                                                name={[field.name, "change_name_status"]}
+                                                                                label="เปลี่ยนชื่อ"
+                                                                            >
+                                                                                <Checkbox
+                                                                                    checked={form.getFieldValue().product_list[index].changed_name_status}
+                                                                                    disabled={mode === "view"}
+                                                                                    onChange={(checkedValue) => handleCheckChangeName(checkedValue.target.checked, index)}
+                                                                                />
+                                                                            </Form.Item>
+                                                                        </Col>
+                                                                        <Col span={1}>
+                                                                            <Form.Item label=" ">
+                                                                                <Button
+                                                                                    icon={<SearchOutlined />}
+                                                                                    type="primary"
+                                                                                    style={{ borderRadius: "10px" }}
+                                                                                    disabled={mode === "view"}
+                                                                                    onClick={() => handleOpenProductDataModal(index)}
+                                                                                ></Button>
+                                                                            </Form.Item>
+                                                                        </Col>
+                                                                    </>
+                                                                }
                                                             </Row>
                                                         </Col>
 

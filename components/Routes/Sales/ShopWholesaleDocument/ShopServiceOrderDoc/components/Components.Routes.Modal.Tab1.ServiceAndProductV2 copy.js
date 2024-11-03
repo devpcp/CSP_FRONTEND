@@ -784,7 +784,7 @@ const ComponentsRoutesModalTab1ServiceAndProductV2 = ({ onFinish, calculateResul
 
             switch (type) {
                 case "search":
-                    const { data } = await API.get(`/shopStock/all?search=${value}&limit=10&page=1&sort=balance_date&order=asc&status=active&filter_wyz_code=false&filter_available_balance=true&min_balance=1`)
+                    const { data } = await API.get(`/shopStock/all?dropdown=true&search=${value}&limit=10&page=1&sort=balance_date&order=asc&status=active&filter_wyz_code=false&filter_available_balance=true&min_balance=1`)
                     // console.log('data :>> ', data);
                     if (data.status === "success") {
                         list_service_product[index]["shop_stock_list"] = SortingData(data.data.data, `ShopProduct.Product.product_name.${locale.locale}`)

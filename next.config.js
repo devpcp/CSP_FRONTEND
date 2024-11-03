@@ -117,6 +117,7 @@ module.exports = {
       '/CRM/Promotion': { page: '/CRM/Promotion' },
       '/Setting/TagsData': { page: '/Setting/TagsData' },
       '/CheckStock': { page: '/CheckStock' },
+      '/pdfview': { page: '/pdfview' },
     }
   },
   images: {
