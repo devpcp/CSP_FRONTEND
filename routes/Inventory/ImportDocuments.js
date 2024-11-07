@@ -691,14 +691,20 @@ const ImportDocuments = ({ view_doc_id, select_shop_ids, title = null, callBack,
 
                 // if (data.status == "success" && isArray(data.data) && data.data.length > 0) {
                 const formValue = formModal.getFieldsValue()
-
+                let { ShopBusinessPartners } = transactionInfo
+                let purchase_order_list = {
+                    id: transactionInfo.details.purchase_order_number,
+                    code_id: transactionInfo.details.purchase_order_code_id,
+                    partner_name: ShopBusinessPartners.partner_name[locale.locale],
+                    partner_branch: ShopBusinessPartners.other_details.branch ? ShopBusinessPartners.other_details.branch === "office" ? "(สำนักงานใหญ่)" : "(" + ShopBusinessPartners.other_details.branch_code + " " + ShopBusinessPartners.other_details.branch_name + ")" : ""
+                }
                 if (data.status == "success") {
                     formValue.id = transactionInfo.id
                     formValue.code_id = transactionInfo.code_id
                     formValue.user_id = transactionInfo.id
                     formValue.bus_partner_id = transactionInfo.bus_partner_id
                     formValue.purchase_order_number = transactionInfo.details.purchase_order_number
-                    formValue.purchase_order_number_list = [{ id: transactionInfo.details.purchase_order_number, code_id: transactionInfo.details.purchase_order_code_id }]
+                    formValue.purchase_order_number_list = [purchase_order_list]
                     formValue.credit_balance = transactionInfo.details.credit_balance
                     formValue.credit_balance = transactionInfo.details.credit_balance
                     formValue.tax_type = transactionInfo.details.tax_type
@@ -720,7 +726,7 @@ const ImportDocuments = ({ view_doc_id, select_shop_ids, title = null, callBack,
                     formValue.debt_price_amount_left = transactionInfo.details.debt_price_amount_left ?? 0
                     formValue.payment_paid_status = transactionInfo.payment_paid_status
                     formValue.price_before_vat = (+transactionInfo.details.price_before_vat).toLocaleString(undefined, twoDigits),
-                    formValue.shopBusinessPartnersList = [transactionInfo.ShopBusinessPartners]
+                        formValue.shopBusinessPartnersList = [transactionInfo.ShopBusinessPartners]
                 }
 
                 if (dataDocInventoryId.data.status == "success") {

@@ -85,7 +85,7 @@ const ComponentsRoutesModalProductList = ({ onFinish, onFinishFailed, mode,isTab
             const { shopPurchaseOrderLists } = form.getFieldValue();
             if (isPlainObject(shopPurchaseOrderLists[index])) {
                 if (!!value) {
-                    const { data } = await API.get(`/shopProducts/all?limit=50&page=1&search=${value}&status=active&sort=start_date&order=asc`);
+                    const { data } = await API.get(`/shopProducts/all?limit=50&page=1&search=${value}&status=active&sort=start_date&order=asc&dropdown=false`);
                     shopPurchaseOrderLists[index].list_shop_stock = data.status === "success" ? SortingData(data.data.data, `Product.product_name.${locale.locale}`) : []
                 }
             } else {

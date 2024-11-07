@@ -809,6 +809,7 @@ const ImportDocuments = ({ view_doc_id, select_shop_ids, title = null, }) => {
             product_list[index].purchase_unit_list = data.data[0].Product.ProductType.ProductPurchaseUnitTypes
             product_list[index].unit = null
             product_list[index].warehouse_detail.map((e, index) => e.purchase_unit_id = null)
+            console.log("product_list[index].warehouse_detail", product_list[index].warehouse_detail)
             if (product_list[index].product_id) {
                 let product_stock = await getShopStockById(value)
                 const _find = product_stock
@@ -824,6 +825,7 @@ const ImportDocuments = ({ view_doc_id, select_shop_ids, title = null, }) => {
                         new_data_status: false
                     }
                 }) ?? [] : []
+                product_list[index]?.warehouse_detail = product_list[index]?.warehouse_detail.slice(0, 10)
                 formModal.setFieldsValue({ product_list });
             } else {
                 null
@@ -837,7 +839,7 @@ const ImportDocuments = ({ view_doc_id, select_shop_ids, title = null, }) => {
     const handleSearchProduct = async (index, value) => {
         const { product_list } = formModal.getFieldValue()
         if (product_list && isArray(product_list)) {
-            const { data } = await API.get(`/shopProducts/all?search=${value}&limit=100&page=1&sort=start_date&order=desc&status=active&filter_wyz_code=false&filter_available_balance=false&dropdown=true`);
+            const { data } = await API.get(`/shopProducts/all?search=${value}&limit=20&page=1&sort=start_date&order=desc&status=active&filter_wyz_code=false&filter_available_balance=false&dropdown=true`);
             product_list[index].productId_list = data.status == "success" ? data.data.data : []
         }
         formModal.setFieldsValue({ product_list })
@@ -1636,7 +1638,7 @@ const ImportDocuments = ({ view_doc_id, select_shop_ids, title = null, }) => {
                 >
                     <IncomeProduct form={formModal} />
 
-                    <div className="head-line-text pt-3">{GetIntlMessages("คลังสินค้า")}{configModal.mode}</div>
+                    <div className="head-line-text pt-3">{GetIntlMessages("คลังสินค้า")}</div>
                     <div className="detail-before-table">
                         <Form.Item
                             labelCol={24}

@@ -30,7 +30,7 @@ const { Text, Link } = Typography;
 const { Search } = Input;
 const cookies = new Cookies();
 
-const PurchaseOrder = ({ docTypeId }) => {
+const PurchaseOrder = ({ docTypeId, title = null, callBack }) => {
     // debugger
     const [loading, setLoading] = useState(false);
 
@@ -61,6 +61,19 @@ const PurchaseOrder = ({ docTypeId }) => {
                 key: 'code_id',
                 width: 200,
                 align: "center",
+                render: (text, record) => {
+                    if (isFunction(callBack)) {
+                        return (
+                            <Link href="#" onClick={() => callBack(record)}>
+                                {text}
+                            </Link>
+                        )
+                    } else {
+                        return (
+                            <Text>{text ?? "-"}</Text>
+                        )
+                    }
+                },
             },
             {
                 title: GetIntlMessages("รหัสผู้จำหน่าย"),
@@ -143,10 +156,22 @@ const PurchaseOrder = ({ docTypeId }) => {
                     }
                 }
             },
+            {
+                title: () => GetIntlMessages("เลือก"),
+                dataIndex: '',
+                key: '',
+                width: 100,
+                align: "center",
+                use: isFunction(callBack) ?? false,
+                render: (text, record) => (
+                    <Button onClick={() => callBack(record)}>เลือก</Button>
+                ),
+            },
 
         ];
 
-        setColumns(_column)
+        _column.map((x) => { x.use === undefined ? x.use = true : null })
+        setColumns(_column.filter(x => x.use === true));
     }
 
     /* ค้นหา */
@@ -418,7 +443,7 @@ const PurchaseOrder = ({ docTypeId }) => {
             if (isPlainObject(data)) {
                 const { details, tax_type_id, ShopPurchaseOrderLists, doc_type_id, doc_date, code_id, business_partner_id, ShopBusinessPartner } = data
                 // const { details, ShopVehicleCustomer, tax_type_id, ShopPurchaseOrderLists, doc_type_id, doc_date, code_id } = data
-
+                console.log("ShopBusinessPartner", ShopBusinessPartner)
                 const _model = {
                     code_id,
                     // customer_type: details?.customer_type,
@@ -759,7 +784,8 @@ const PurchaseOrder = ({ docTypeId }) => {
     return (
         <>
             <>
-                <SearchInput configSearch={configSearch} configModal={configModal} loading={loading} onAdd={() => addEditViewModal("add")} value={modelSearch} />
+                <div className="head-line-text" hidden={title === null ? true : false}>{title}</div>
+                <SearchInput configSearch={configSearch} configModal={configModal} loading={loading} onAdd={() => addEditViewModal("add")} value={modelSearch} title={title !== null ? false : true} />
                 <TableList columns={columns} data={listSearchDataTable} loading={loading} configTable={configTable} callbackSearch={getDataSearch} addEditViewModal={addEditViewModal} changeStatus={changeStatus} />
             </>
 

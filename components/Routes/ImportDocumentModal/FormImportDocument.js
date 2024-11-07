@@ -13,6 +13,7 @@ import { RoundingNumber, takeOutComma, } from '../../shares/ConvertToCurrency'
 import Swal from "sweetalert2";
 import ProductData from "../../../routes/MyData/ProductsData"
 import BusinessPartnersData from "../../../routes/MyData/BusinessPartnersData"
+import PurchaseOrderData from "../../../components/Routes/Inventory/PurchaseAndPrePurchaseOrderDoc"
 import FormWarehouse from "./FormWarehouse"
 
 const tailformItemLayout = {
@@ -30,13 +31,15 @@ const FormImportDocument = ({ form, mode, expireEditTimeDisable, dataList, calcu
     const { taxTypeAllList, userList, shopBusinessPartnersList } = dataList
     const [shopBusinessPartners, setShopBusinessPartners] = useState([])
     const [isBusinessPartnersDataModalVisible, setIsBusinessPartnersDataModalVisible] = useState(false);
+    const [isPurchaseOrderDataModalVisible, setIsPurchaseOrderDataModalVisible] = useState(false);
+
 
 
     useEffect(() => {
         shopBusinessPartnersList?.map((e) => {
             e.partner_branch = e.other_details.branch ? e.other_details.branch === "office" ? "(สำนักงานใหญ่)" : "(" + e.other_details.branch_code + " " + e.other_details.branch_name + ")" : ""
         })
-        console.log("shopBusinessPartnersList", shopBusinessPartnersList)
+
         setShopBusinessPartners(() => shopBusinessPartnersList)
     }, [shopBusinessPartnersList])
 
@@ -54,8 +57,13 @@ const FormImportDocument = ({ form, mode, expireEditTimeDisable, dataList, calcu
                         const { data } = await API.get(`/shopPurchaseOrderDoc/all?search=${value}&status=active&page=1&limit=10&sort=doc_date&order=desc`);
                         if (data.status === "success") {
                             // setBussinessPartnerList(() => data.data.data)
-                            purchase_order_number_list = data.data.data ?? []
-
+                            let listData = data.data.data ?? []
+                            listData.map((e) => {
+                                let { ShopBusinessPartner } = e
+                                e.partner_name = ShopBusinessPartner.partner_name[locale.locale]
+                                e.partner_branch = ShopBusinessPartner.other_details.branch ? ShopBusinessPartner.other_details.branch === "office" ? "(สำนักงานใหญ่)" : "(" + ShopBusinessPartner.other_details.branch_code + " " + ShopBusinessPartner.other_details.branch_name + ")" : ""
+                            })
+                            purchase_order_number_list = listData
                         }
                     }
 
@@ -236,6 +244,39 @@ const FormImportDocument = ({ form, mode, expireEditTimeDisable, dataList, calcu
         setShopBusinessPartners(data)
     }
 
+    const callBackPickPurchaseOrder = async (data, type = "modal") => {
+        try {
+            let { ShopBusinessPartner } = data
+            data.partner_name = ShopBusinessPartner.partner_name[locale.locale]
+            data.partner_branch = ShopBusinessPartner.other_details.branch ? ShopBusinessPartner.other_details.branch === "office" ? "(สำนักงานใหญ่)" : "(" + ShopBusinessPartner.other_details.branch_code + " " + ShopBusinessPartner.other_details.branch_name + ")" : ""
+
+            let _model = {
+                purchase_order_number_list: [data],
+                purchase_order_number: data.id
+            }
+            await form.setFieldsValue(_model)
+            await selectClearPurchaseOrder(data.id, "select")
+            handleCancelPurchaseOrderDataModal()
+        } catch (error) {
+            console.log("callBackPickPurchaseOrder", error)
+        }
+    }
+
+    const handleOpenPurchaseOrderDataModal = () => {
+        try {
+            setIsPurchaseOrderDataModalVisible(true)
+        } catch (error) {
+
+        }
+    }
+    const handleCancelPurchaseOrderDataModal = () => {
+        try {
+            setIsPurchaseOrderDataModalVisible(false)
+        } catch (error) {
+
+        }
+    }
+
     /*End Debounce Select and Clear */
     return (
         <>
@@ -366,31 +407,47 @@ const FormImportDocument = ({ form, mode, expireEditTimeDisable, dataList, calcu
 
 
                     <Col xs={24} lg={8} xxl={8} style={{ width: "100%" }}>
-                        <Form.Item
-                            {...tailformItemLayout}
-                            validateTrigger={['onChange', 'onBlur']}
-                            name="purchase_order_number"
-                            label={GetIntlMessages("เลขใบสั่งซื้อสินค้า")}
-                        >
-                            {/* <Input placeholder="" disabled={mode == "view" || expireEditTimeDisable == true} /> */}
-                            <Select
-                                showSearch
-                                placeholder="เลือกข้อมูล"
-                                // disabled={mode == "view"}
-                                optionFilterProp="children"
-                                // filterOption={false}
-                                disabled={mode == "view" || expireEditTimeDisable == true}
-                                // onChange={onChangeNamePartner}
-                                onSearch={(value) => debounceSearchPurchaseOrder(value, "search")}
-                                onSelect={(value) => debouncePurchaseOrder(value, "select")}
-                                onClear={(value) => debouncePurchaseOrder(value, "clear")}
-                                help={loadingSearch ? "กำลังโหลดข้อมูล..กรุณารอสักครู่" : null}
-                                notFoundContent={loadingSearch ? <span>"กำลังโหลดข้อมูล..กรุณารอสักครู่"</span> : null}
-                                allowClear
-                            >
-                                {getArrListValue("purchase_order_number_list")?.map((e, i) => <Select.Option value={e.id} key={`purchase_order_number-${i}-${e.id}`}>{get(e, `code_id`, "-")}</Select.Option>)}
-                            </Select>
-                        </Form.Item>
+                        <Row>
+                            <Col lg={20} md={20} sm={18} xs={18}>
+                                <Form.Item
+                                    {...tailformItemLayout}
+                                    validateTrigger={['onChange', 'onBlur']}
+                                    name="purchase_order_number"
+                                    label={GetIntlMessages("เลขใบสั่งซื้อสินค้า")}
+                                >
+                                    {/* <Input placeholder="" disabled={mode == "view" || expireEditTimeDisable == true} /> */}
+                                    <Select
+                                        showSearch
+                                        placeholder="เลือกข้อมูล"
+                                        // disabled={mode == "view"}
+                                        optionFilterProp="children"
+                                        // filterOption={false}
+                                        disabled={mode == "view" || expireEditTimeDisable == true}
+                                        // onChange={onChangeNamePartner}
+                                        onSearch={(value) => debounceSearchPurchaseOrder(value, "search")}
+                                        onSelect={(value) => debouncePurchaseOrder(value, "select")}
+                                        onClear={(value) => debouncePurchaseOrder(value, "clear")}
+                                        help={loadingSearch ? "กำลังโหลดข้อมูล..กรุณารอสักครู่" : null}
+                                        notFoundContent={loadingSearch ? <span>"กำลังโหลดข้อมูล..กรุณารอสักครู่"</span> : null}
+                                        allowClear
+                                    >
+                                        {getArrListValue("purchase_order_number_list")?.map((e, i) => <Select.Option value={e.id} key={`purchase_order_number-${i}-${e.id}`}>{`${get(e, `code_id`, "-")} > ${get(e, `partner_name`, "-")} ${get(e, `partner_branch`, "")}`}</Select.Option>)}
+                                    </Select>
+                                </Form.Item>
+                            </Col>
+                            <Col lg={4} md={4} sm={6} xs={6} style={{ paddingTop: "30.8px", justifyContent: "end" }}>
+                                <Form.Item >
+                                    <Button
+                                        type='primary'
+                                        style={{ width: "100%", borderRadius: "10px" }}
+                                        disabled={mode === "view"}
+                                        onClick={() => handleOpenPurchaseOrderDataModal()}
+                                    >
+                                        เลือก
+                                    </Button>
+                                </Form.Item>
+                            </Col>
+                        </Row>
                     </Col>
 
                     <Col xs={24} lg={8} xxl={8} style={{ width: "100%" }} hidden>
@@ -605,6 +662,7 @@ const FormImportDocument = ({ form, mode, expireEditTimeDisable, dataList, calcu
                     </Col>
                 </Row >
             </div >
+
             <Modal
                 maskClosable={false}
                 open={isBusinessPartnersDataModalVisible}
@@ -618,6 +676,21 @@ const FormImportDocument = ({ form, mode, expireEditTimeDisable, dataList, calcu
                 )}
             >
                 {<BusinessPartnersData title="จัดการข้อมูลผู้จำหน่าย" callBack={callBackPickBusinessPartners} />}
+            </Modal>
+
+            <Modal
+                maskClosable={false}
+                open={isPurchaseOrderDataModalVisible}
+                onCancel={handleCancelPurchaseOrderDataModal}
+                width="90vw"
+                style={{ top: 5 }}
+                footer={(
+                    <>
+                        <Button onClick={() => handleCancelPurchaseOrderDataModal()}>{GetIntlMessages("กลับ")}</Button>
+                    </>
+                )}
+            >
+                {<PurchaseOrderData title="จัดการข้อมูลผู้จำหน่าย" callBack={callBackPickPurchaseOrder} />}
             </Modal>
         </>
     )

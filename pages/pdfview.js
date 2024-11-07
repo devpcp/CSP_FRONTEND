@@ -2,6 +2,7 @@
 import React from "react";
 import dynamic from "next/dynamic";
 import PDFFile from '../components/PDF/pages/pdf';
+import PDFInvoiceComponent from '../components/PDF/pages/InvoiceComponent';
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 const PDFViewer = dynamic(
@@ -23,6 +24,9 @@ const PDFView = () => {
             switch (pages) {
                 case "test":
                     setPagesPDF(<PDFFile />)
+                    break;
+                case "invoice":
+                    setPagesPDF(<PDFInvoiceComponent />)
                     break;
                 default:
                     setPagesPDF(<PDFFile />)

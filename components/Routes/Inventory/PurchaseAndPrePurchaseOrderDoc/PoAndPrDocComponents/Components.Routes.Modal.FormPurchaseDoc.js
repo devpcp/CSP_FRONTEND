@@ -1,7 +1,7 @@
 import { Col, DatePicker, Form, Input, Row, Select, Button, Modal } from 'antd'
 import useFormInstance from 'antd/lib/form/hooks/useFormInstance'
 import { get, isArray, debounce, isFunction, isPlainObject } from 'lodash'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 import API from '../../../../../util/Api'
 import GetIntlMessages from '../../../../../util/GetIntlMessages'
@@ -29,6 +29,14 @@ const ComponentsRoutesModalFormPurchaseDoc = ({ mode, configModal, docTypeId, on
             // console.log('error getArrListValue:>> ', error);
         }
     }
+
+    useEffect(() => {
+        const { business_partners_list } = form.getFieldValue()
+        business_partners_list?.map((e) => {
+            e.partner_branch = e.other_details.branch ? e.other_details.branch === "office" ? "(สำนักงานใหญ่)" : "(" + e.other_details.branch_code + " " + e.other_details.branch_name + ")" : ""
+        })
+        setShopBusinessPartners(business_partners_list)
+    }, [])
 
     const getShopBusinessPartnersDataListAll = async (value = "") => {
         const { data } = await API.get(`/shopBusinessPartners/all?search=${value}&limit=10&page=1&sort=partner_name.th&order=desc&status=active`);

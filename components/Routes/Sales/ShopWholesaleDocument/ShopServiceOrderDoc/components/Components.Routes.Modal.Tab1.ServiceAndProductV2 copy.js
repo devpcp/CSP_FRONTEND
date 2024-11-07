@@ -18,7 +18,7 @@ const { Text, Link } = Typography;
 
 const ComponentsRoutesModalTab1ServiceAndProductV2 = ({ onFinish, calculateResult, mode, disabledWhenDeliveryDocActive = false }) => {
     const { locale, mainColor, subColor } = useSelector(({ settings }) => settings);
-    const { taxTypes } = useSelector(({ master }) => master);
+    const { taxTypes, productPurchaseUnitTypes } = useSelector(({ master }) => master);
     const { authUser } = useSelector(({ auth }) => auth);
     const form = Form.useFormInstance()
 
@@ -796,8 +796,25 @@ const ComponentsRoutesModalTab1ServiceAndProductV2 = ({ onFinish, calculateResul
                     if (isPlainObject(find)) {
                         const { product_cost } = find
 
-                        const warehouse_detail = find?.warehouse_detail.map(e => { return { ...e, shelf: e.shelf.item, ...e.shelf } }) ?? []
-                        // list_service_product[index]["price_unit"] = find.ShopProduct.Product.price
+                        let new_array = []
+                        Promise.all(find.warehouse_detail?.map((e) => {
+                            e.shelf?.map((ee) => {
+                                let ShopWarehouse = shopWarehouseAllList?.find(x => x?.id === e?.warehouse)
+                                new_array.push({
+                                    ShopWarehouse: ShopWarehouse,
+                                    warehouse: e.warehouse,
+                                    shelf: {
+                                        ...ee,
+                                        PurchaseUnit: productPurchaseUnitTypes?.find(x => x?.id === ee?.purchase_unit_id),
+                                        Shelf: ShopWarehouse?.shelf?.find(x => x?.code === ee?.item)
+                                    }
+                                })
+                            })
+                        }))
+
+                        let filter = new_array.filter(x => x.shelf.balance !== "0")
+
+                        const warehouse_detail = filter.map(e => { return { ...e, shelf: e.shelf.item, ...e.shelf } }) ?? []
                         const warehouseArr = takeOutDuplicateValue(warehouse_detail, "warehouse")
                         const shefArr = takeOutDuplicateValue(warehouse_detail, "item")
 
@@ -2738,6 +2755,33 @@ const ComponentsRoutesModalTab1ServiceAndProductV2 = ({ onFinish, calculateResul
                     amount: null
                 }
             })
+
+            let new_array = []
+            Promise.all(data.warehouse_detail?.map((e) => {
+                e.shelf?.map((ee) => {
+                    let ShopWarehouse = shopWarehouseAllList?.find(x => x?.id === e?.warehouse)
+                    new_array.push({
+                        ShopWarehouse: ShopWarehouse,
+                        warehouse: e.warehouse,
+                        shelf: {
+                            ...ee,
+                            PurchaseUnit: productPurchaseUnitTypes?.find(x => x?.id === ee?.purchase_unit_id),
+                            Shelf: ShopWarehouse?.shelf?.find(x => x?.code === ee?.item)
+                        }
+                    })
+                })
+            }))
+
+            let filter = new_array.filter(x => x.shelf.balance !== "0")
+
+            const warehouse_detail = filter.map(e => { return { ...e, shelf: e.shelf.item, ...e.shelf } }) ?? []
+            const warehouseArr = takeOutDuplicateValue(warehouse_detail, "warehouse")
+            const shefArr = takeOutDuplicateValue(warehouse_detail, "item")
+
+            if (warehouseArr.length === 1 && shefArr.length === 1) {
+                let unit_list = data?.ShopProduct.Product.ProductType.ProductPurchaseUnitTypes ?? []
+                callbackSelectProduct({ ...data, product_list: [{ warehouse_detail, unit_list }] }, 0, 0, null, indexCallBack)
+            }
 
             calculateTable()
             handleCancelInventoryBalanceModal()

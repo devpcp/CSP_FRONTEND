@@ -11,6 +11,9 @@ const ComponentsRoutesModalProductWarehouse = ({ title = null, callBack, listDat
     const { locale } = useSelector(({ settings }) => settings);
 
     const { productPurchaseUnitTypes } = useSelector(({ master }) => master);
+
+    const [listDataTable, setListDataTable] = useState([]);
+
     useEffect(() => {
         setColumnsTable()
     }, [listIndex]);
@@ -23,11 +26,29 @@ const ComponentsRoutesModalProductWarehouse = ({ title = null, callBack, listDat
     const getMasterData = async () => {
         try {
             const shopWarehouseAllList = await getShopWarehousesAllList()
+            let new_array = []
+            console.log("listData", listData)
             Promise.all(listData?.map((e) => {
-                e.ShopWarehouse = shopWarehouseAllList?.find(x => x?.id === e?.warehouse)
-                e.shelf.PurchaseUnit = productPurchaseUnitTypes?.find(x => x?.id === e?.shelf?.purchase_unit_id)
-                e.shelf.Shelf = e?.ShopWarehouse?.shelf?.find(x => x?.code === e?.shelf?.item)
+                e.shelf?.map((ee) => {
+                    let ShopWarehouse = shopWarehouseAllList?.find(x => x?.id === e?.warehouse)
+                    new_array.push({
+                        ShopWarehouse: ShopWarehouse,
+                        warehouse: e.warehouse,
+                        shelf: {
+                            ...ee,
+                            PurchaseUnit: productPurchaseUnitTypes?.find(x => x?.id === ee?.purchase_unit_id),
+                            Shelf: ShopWarehouse?.shelf?.find(x => x?.code === ee?.item)
+                        }
+                    })
+                })
             }))
+            new_array.filter(x => x.shelf.balance !== "0")
+            setListDataTable(new_array.filter(x => x.shelf.balance !== "0"))
+            // Promise.all(listData?.map((e) => {
+            //     e.ShopWarehouse = shopWarehouseAllList?.find(x => x?.id === e?.warehouse)
+            //     e.shelf.PurchaseUnit = productPurchaseUnitTypes?.find(x => x?.id === e?.shelf?.purchase_unit_id)
+            //     e.shelf.Shelf = e?.ShopWarehouse?.shelf?.find(x => x?.code === e?.shelf?.item)
+            // }))
             await setColumnsTable()
         } catch (error) {
             console.log("getMasterData : ", error)
@@ -181,7 +202,7 @@ const ComponentsRoutesModalProductWarehouse = ({ title = null, callBack, listDat
                 <Table
                     rowKey="id"
                     columns={columns}
-                    dataSource={listData}
+                    dataSource={listDataTable}
                     rowClassName={() => 'editable-row'}
                     bordered
                     pagination={false}
