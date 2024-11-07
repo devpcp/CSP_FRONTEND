@@ -107,11 +107,32 @@ const LineOAInventoryBalance = ({ callBack }) => {
   const getDataSearch = async ({ search = modelSearch.search ?? "", filter_balance = modelSearch.filter_balance ?? "", limit = configTable.limit, page = configTable.page, sort = configSort.sort, order = (configSort.order === "descend" ? "desc" : "asc"), _which = (status === "management") ? "michelin data" : "my data", type_group_id = modelSearch.type_group_id ?? "", product_type_id = modelSearch.product_type_id ?? "", product_brand_id = modelSearch.product_brand_id ?? "", product_model_id = modelSearch.product_model_id ?? "" }) => {
     try {
       if (page === 1) setLoading(true)
-      const res = await API.get(`/shopStock/all?filter_available_balance=true&type_group_id=da791822-401c-471b-9b62-038c671404ab&limit=${limit}&page=${page}&sort=${sort}&order=${order}&search=${search}&status=active&min_balance=${filter_balance[0]}&max_balance=${filter_balance[1]}${!!type_group_id ? `&type_group_id=${type_group_id}` : ""}${!!product_type_id ? `&product_type_id=${product_type_id}` : ""}${!!product_brand_id ? `&product_brand_id=${product_brand_id}` : ""}${!!product_model_id ? `&product_model_id=${product_model_id}` : ""}`)
+      const res = await API.get(`/shopStock/all?dropdown=true&filter_available_balance=true&type_group_id=da791822-401c-471b-9b62-038c671404ab&limit=${limit}&page=${page}&sort=${sort}&order=${order}&search=${search}&status=active&min_balance=${filter_balance[0]}&max_balance=${filter_balance[1]}${!!type_group_id ? `&type_group_id=${type_group_id}` : ""}${!!product_type_id ? `&product_type_id=${product_type_id}` : ""}${!!product_brand_id ? `&product_brand_id=${product_brand_id}` : ""}${!!product_model_id ? `&product_model_id=${product_model_id}` : ""}`)
 
       if (res.data.status === "success") {
         // console.log("res.data.", res.data.data)
         const { currentCount, currentPage, pages, totalCount, data } = res.data.data;
+
+        data?.map((el) => {
+          let new_array = []
+          Promise.all(el?.warehouse_detail?.map((e) => {
+            e.shelf?.map((ee) => {
+              let ShopWarehouse = warehouseList?.find(x => x?.id === e?.warehouse)
+              new_array.push({
+                ShopWarehouse: ShopWarehouse,
+                warehouse: e.warehouse,
+                shelf: {
+                  ...ee,
+                  PurchaseUnit: productPurchaseUnitTypes?.find(x => x?.id === ee?.purchase_unit_id),
+                  Shelf: ShopWarehouse?.shelf?.find(x => x?.code === ee?.item)
+                }
+              })
+            })
+          }))
+          el?.warehouse_detail =  new_array.filter(x => x.shelf.balance !== "0")
+        })
+
+
         data?.map((e) => {
           e.warehouse_show = []
           e.warehouse_detail?.map((ew) => {
@@ -187,6 +208,7 @@ const LineOAInventoryBalance = ({ callBack }) => {
         if (page === 1) setLoading(false)
       }
     } catch (error) {
+      console.log("error", error)
       Modal.error({
         title: 'เกิดข้อผิดพลาด',
         content: error,

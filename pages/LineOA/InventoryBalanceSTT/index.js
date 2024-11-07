@@ -114,6 +114,27 @@ const LineOAInventoryBalance = ({ callBack }) => {
       if (res.data.status === "success") {
         // console.log("res.data.", res.data.data)
         const { currentCount, currentPage, pages, totalCount, data } = res.data.data;
+
+        data?.map((el) => {
+          let new_array = []
+          Promise.all(el?.warehouse_detail?.map((e) => {
+            e.shelf?.map((ee) => {
+              let ShopWarehouse = warehouseList?.find(x => x?.id === e?.warehouse)
+              new_array.push({
+                ShopWarehouse: ShopWarehouse,
+                warehouse: e.warehouse,
+                shelf: {
+                  ...ee,
+                  PurchaseUnit: productPurchaseUnitTypes?.find(x => x?.id === ee?.purchase_unit_id),
+                  Shelf: ShopWarehouse?.shelf?.find(x => x?.code === ee?.item)
+                }
+              })
+            })
+          }))
+          el?.warehouse_detail =  new_array.filter(x => x.shelf.balance !== "0")
+        })
+
+        
         let yearNow = moment(Date.now()).format("YY")
         data?.map((e) => {
           e.warehouse_show = []

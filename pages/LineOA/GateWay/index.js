@@ -15,7 +15,24 @@ const GateWay = () => {
   let { code, state } = router.query;
   const [loading, setLoading] = useState(false);
   const { mainColor, locale } = useSelector(({ settings }) => settings);
+  const [retry, setRetry] = useState(0);
+
   useEffect(async () => {
+    await initLine()
+  }, [router.query]);
+
+
+  const getCustomerBusinessByLineUserId = async (line_user_id) => {
+    const { data } = await API.get(`/shopBusinessCustomers/all?search=${line_user_id}&jsonField.other_details=line_arr`);
+    return data.status == "success" ? data.data : []
+  }
+
+  const getCustomerPersonalByLineUserId = async (line_user_id) => {
+    const { data } = await API.get(`/shopPersonalCustomers/all?search=${line_user_id}&jsonField.other_details=line_arr`);
+    return data.status == "success" ? data.data : []
+  }
+
+  const initLine = async () => {
     if (code && state) {
       let shop_name = state?.split("_")[0]
       let redirect_uri = state?.split("_")[1]
@@ -76,6 +93,7 @@ const GateWay = () => {
         )
         .then(async (res) => {
           try {
+            console.log("res", res)
             await apiLine
               .get(
                 "https://api.line.me/oauth2/v2.1/userinfo",
@@ -205,8 +223,8 @@ const GateWay = () => {
               })
               .catch((error) => {
                 Modal.error({
-                  title: 'เกิดข้อผิดพลาด',
-                  content: error,
+                  title: 'เกิดข้อผิดพลาดในการดึงข้อมูล LINE',
+                  content: "" + error,
                   centered: true,
                   footer: null,
                 });
@@ -215,8 +233,8 @@ const GateWay = () => {
 
           } catch (error) {
             Modal.error({
-              title: 'เกิดข้อผิดพลาด',
-              content: error,
+              title: 'เกิดข้อผิดพลาดในการดึงข้อมูล LINE',
+              content: "" + error,
               centered: true,
               footer: null,
             });
@@ -225,29 +243,28 @@ const GateWay = () => {
 
         })
         .catch((error) => {
+          console.log("error", error)
+          setTimeout(() => {
+            getRetry()
+          }, 3000);
+
           Modal.error({
-            title: 'เกิดข้อผิดพลาด',
-            content: error,
+            title: 'เกิดข้อผิดพลาดในการเชื่อมต่อข้อมูล LINE',
+            content: retry === 2 ? "กรุณาปิดหน้าต่างแล้วลองอีกครั้ง" :"" + error,
             centered: true,
             footer: null,
           });
         });
 
-    } else {
-
     }
-
-  }, [router.query]);
-
-
-  const getCustomerBusinessByLineUserId = async (line_user_id) => {
-    const { data } = await API.get(`/shopBusinessCustomers/all?search=${line_user_id}&jsonField.other_details=line_arr`);
-    return data.status == "success" ? data.data : []
   }
 
-  const getCustomerPersonalByLineUserId = async (line_user_id) => {
-    const { data } = await API.get(`/shopPersonalCustomers/all?search=${line_user_id}&jsonField.other_details=line_arr`);
-    return data.status == "success" ? data.data : []
+  const getRetry = () => {
+    if (retry < 2) {
+      initLine()
+      retry++
+    }
+    console.log("retry", retry)
   }
 
   return (
