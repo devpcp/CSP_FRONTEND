@@ -28,6 +28,16 @@ const ComponentsPayWithCheque = ({ icon, textButton, initForm, total, callback, 
         form.submit()
     }
 
+
+    useEffect(() => {
+        form.setFieldsValue(
+            {
+                price_grand_total: total,
+                payment_paid_date: moment(Date.now()),
+            }
+        )
+    }, [isModalVisible])
+
     const handleCancel = () => {
         form.resetFields()
         setIsModalVisible(false)
@@ -50,7 +60,8 @@ const ComponentsPayWithCheque = ({ icon, textButton, initForm, total, callback, 
                     cheque_id: value.cheque_id ?? null,
                     check_amount: value.check_amount ?? "0.00",
                     cheque_amount_remaining: value.cheque_amount_remaining ?? "0.00"
-                }
+                },
+                payment_paid_date: moment(value.payment_paid_date).format("YYYY-MM-DD HH:mm:ss")
             }
             let change = Number(value?.payment_price_paid) - Number(total)
             if (change < -1 || change > 1) {
@@ -194,7 +205,7 @@ const ComponentsPayWithCheque = ({ icon, textButton, initForm, total, callback, 
                         </div>
 
                         <Row gutter={[30, 10]} style={{ padding: "30px" }}>
-                            <Col xs={24}>
+                            <Col xs={12}>
                                 <Form.Item
                                     name='cheque_id'
                                     label={GetIntlMessages("บัญชีที่รับเงิน")}
@@ -223,6 +234,15 @@ const ComponentsPayWithCheque = ({ icon, textButton, initForm, total, callback, 
                                             เลือก
                                         </Button>
                                     } />
+                                </Form.Item>
+                            </Col>
+                            <Col xs={12}>
+                                <Form.Item
+                                    rules={[{ required: true }]}
+                                    label={GetIntlMessages("วันเวลารับชำระ")}
+                                    name="payment_paid_date"
+                                >
+                                    <DatePicker style={{ width: "100%" }} format={"DD/MM/YYYY HH:mm"} showTime={{ format: 'HH:mm' }} />
                                 </Form.Item>
                             </Col>
                             <Col span={8}>

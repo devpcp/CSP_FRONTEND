@@ -172,7 +172,8 @@ const ComponentsPayWithPartialPayment = ({ icon, textButton, loading, total, cal
                                 details: {
                                     change: e.change,
                                     remark: e.remark ?? null,
-                                }
+                                },
+                                payment_paid_date: moment(e.payment_paid_date).format("YYYY-MM-DD HH:mm:ss")
                             }
                         case 2:
                             return {
@@ -188,7 +189,8 @@ const ComponentsPayWithPartialPayment = ({ icon, textButton, loading, total, cal
                                     card_type_text: null,
                                     remark: e.remark ?? null,
                                     card_4_end_code: e.card_4_end_code ?? null,
-                                }
+                                },
+                                payment_paid_date: moment(e.payment_paid_date).format("YYYY-MM-DD HH:mm:ss")
                             }
                         case 3:
                             return {
@@ -200,8 +202,8 @@ const ComponentsPayWithPartialPayment = ({ icon, textButton, loading, total, cal
                                 details: {
                                     remark: null,
                                     transferor_name: e.transferor_name ?? null,
-                                    transfer_time: moment(e.transfer_time).format("YYYY-MM-DD HH:mm") ?? null,
-                                }
+                                },
+                                payment_paid_date: moment(e.payment_paid_date).format("YYYY-MM-DD HH:mm:ss")
                             }
 
                         default:
@@ -210,7 +212,7 @@ const ComponentsPayWithPartialPayment = ({ icon, textButton, loading, total, cal
 
                 }),
             }
-
+            // console.log("model", model)
             if (isArray(value.payment_method_list) && value.payment_method_list.length > 0) {
                 Swal.fire({
                     title: GetIntlMessages("ยืนยันการชำระเงินหรือไม่ ?"),
@@ -264,7 +266,8 @@ const ComponentsPayWithPartialPayment = ({ icon, textButton, loading, total, cal
                         change: value.change,
                         payment_price_paid: value.payment_price_paid,
                         remark: value.remark,
-                        showDeleteBtn: true
+                        showDeleteBtn: true,
+                        payment_paid_date: moment(value.payment_paid_date).format("YYYY-MM-DD HH:mm:ss")
                     }
                     break;
                 case 2:
@@ -273,7 +276,8 @@ const ComponentsPayWithPartialPayment = ({ icon, textButton, loading, total, cal
                         payment_method_name: "เครดิต/เดบิต",
                         payment_price_paid: value.payment_price_paid,
                         ...value.details,
-                        showDeleteBtn: true
+                        showDeleteBtn: true,
+                        payment_paid_date: moment(value.payment_paid_date).format("YYYY-MM-DD HH:mm:ss")
                     }
                     break;
                 case 3:
@@ -283,7 +287,8 @@ const ComponentsPayWithPartialPayment = ({ icon, textButton, loading, total, cal
                         payment_price_paid: value.payment_price_paid,
                         bank_name_list_id: value.bank_name_list_id,
                         ...value.details,
-                        showDeleteBtn: true
+                        showDeleteBtn: true,
+                        payment_paid_date: moment(value.payment_paid_date).format("YYYY-MM-DD HH:mm:ss")
                     }
                     break;
 
@@ -416,7 +421,7 @@ const ComponentsPayWithPartialPayment = ({ icon, textButton, loading, total, cal
                             <Row>
                                 <Col xxl={{ span: 8, offset: 4 }} lg={{ span: 10, offset: 2 }} md={12} sm={24} xs={24}>
                                     <div className={`pay-box`}>
-                                        <Button loading={loading} type='primary' disabled={(isArray(form.getFieldValue("payment_method_list")) && form.getFieldValue("payment_method_list").length === 0 ) || form.getFieldValue("price_balance") < 0} onClick={() => form.submit()} className={`pay-btn`}>รับชำระ</Button>
+                                        <Button loading={loading} type='primary' disabled={(isArray(form.getFieldValue("payment_method_list")) && form.getFieldValue("payment_method_list").length === 0) || form.getFieldValue("price_balance") < 0} onClick={() => form.submit()} className={`pay-btn`}>รับชำระ</Button>
                                     </div>
                                 </Col>
                                 <Col xxl={8} lg={10} md={12} sm={24} xs={24}>

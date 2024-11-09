@@ -10,6 +10,8 @@ import { isFunction, isPlainObject, get, debounce, isNumber } from 'lodash';
 import { MaskedInput, createDefaultMaskGenerator } from 'react-hook-mask';
 import { RoundingNumber, NoRoundingNumber, takeOutComma } from '../../../../shares/ConvertToCurrency';
 import Swal from 'sweetalert2';
+import moment from 'moment';
+
 const ComponentsPayWithCreditCard = ({ icon, textButton, disabled, initForm, total = 0, callback, loading, isPartialPayment = false }) => {
 
     const { locale, mainColor } = useSelector(({ settings }) => settings);
@@ -25,7 +27,12 @@ const ComponentsPayWithCreditCard = ({ icon, textButton, disabled, initForm, tot
     const [disablePaymentBtn, setDisablePaymentBtn] = useState(true);
 
     useEffect(() => {
-        form.setFieldsValue({ price_grand_total: total })
+        form.setFieldsValue(
+            {
+                price_grand_total: total,
+                payment_paid_date: moment(Date.now()),
+            }
+        )
     }, [isModalVisible])
 
     useEffect(async () => {
@@ -68,7 +75,8 @@ const ComponentsPayWithCreditCard = ({ icon, textButton, disabled, initForm, tot
                     card_type_text: null,
                     remark: value.remark ?? null,
                     card_4_end_code: value.card_4_end_code ?? null,
-                }
+                },
+                payment_paid_date: moment(value.payment_paid_date).format("YYYY-MM-DD HH:mm:ss")
                 // change: value.change
             }
             model.details.card_type_text = creditDebitTypeListAll.find(where => where.id === value.card_type_id)?.name
@@ -558,6 +566,15 @@ const ComponentsPayWithCreditCard = ({ icon, textButton, disabled, initForm, tot
                                             </Form.Item>
                                         </Col>
                                     </Row>
+                                </Col>
+                                <Col xs={24}>
+                                    <Form.Item
+                                        rules={[{ required: true }]}
+                                        label={GetIntlMessages("วันเวลารับชำระ")}
+                                        name="payment_paid_date"
+                                    >
+                                        <DatePicker style={{ width: "100%" }} format={"DD/MM/YYYY HH:mm"} showTime={{ format: 'HH:mm' }} />
+                                    </Form.Item>
                                 </Col>
                                 <Col span={24}>
                                     <Form.Item

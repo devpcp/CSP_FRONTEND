@@ -288,6 +288,7 @@ const PaymentDocsV2 = ({ docId, title, loading, handleCancelTemDoc, initForm, ca
                     }
                     break;
                 case 1:
+                    //เงินสด
                     model = {
                         shop_id,
                         shop_service_order_doc_id,
@@ -299,10 +300,12 @@ const PaymentDocsV2 = ({ docId, title, loading, handleCancelTemDoc, initForm, ca
                             change: value.change,
                             actual_paid: value.cash,
                             remark: value.remark ?? null,
-                        }
+                        },
+                        payment_paid_date: value.payment_paid_date,
                     }
                     break;
                 case 2:
+                    //เครดิต
                     model = {
                         shop_id,
                         shop_service_order_doc_id,
@@ -311,10 +314,12 @@ const PaymentDocsV2 = ({ docId, title, loading, handleCancelTemDoc, initForm, ca
                         payment_price_paid: value.payment_price_paid,
                         is_partial_payment: isPartialPayment,
                         bank_name_list_id: value.bank_id,
-                        details: value.details
+                        details: value.details,
+                        payment_paid_date: value.payment_paid_date,
                     }
                     break;
                 case 3:
+                    //โอน
                     model = {
                         shop_id,
                         shop_service_order_doc_id,
@@ -323,22 +328,26 @@ const PaymentDocsV2 = ({ docId, title, loading, handleCancelTemDoc, initForm, ca
                         payment_price_paid: value.payment_price_paid,
                         is_partial_payment: isPartialPayment,
                         bank_name_list_id: value.bank_id,
-                        details: value.details
+                        details: value.details,
+                        payment_paid_date: value.payment_paid_date,
                     }
                     break;
+
                 case 4:
+                    //เช็ค
                     model = {
                         shop_id,
                         shop_service_order_doc_id,
                         doc_date,
                         payment_method: type,
                         is_partial_payment: isPartialPayment,
-                        ...value
-                        // shopPaymentTransactions: value.shopPaymentTransactions.filter(where => !where.id)
+                        ...value,
+                        payment_paid_date: value.payment_paid_date,
 
                     }
                     break;
                 case 5:
+                    //ลูกหนี้
                     model = {
                         shop_id,
                         shop_service_order_doc_id,
@@ -350,8 +359,10 @@ const PaymentDocsV2 = ({ docId, title, loading, handleCancelTemDoc, initForm, ca
                             change: value.change,
                             actual_paid: value.cash,
                             remark: value.remark ?? null,
-                        }
+                        },
+                        payment_paid_date: value.payment_paid_date,
                     }
+                    break;
 
 
                 default:

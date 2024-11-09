@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Button, Form, Input, Modal, message, Row, Col, InputNumber } from 'antd'
+import { Button, Form, Input, Modal, message, Row, Col, InputNumber, DatePicker } from 'antd'
 import { useSelector } from 'react-redux';
 import GetIntlMessages from '../../../../../util/GetIntlMessages';
 import { isFunction, isPlainObject } from 'lodash';
@@ -8,8 +8,9 @@ import { RoundingNumber, NoRoundingNumber, takeOutComma } from '../../../../shar
 import API from '../../../../../util/Api';
 import Swal from "sweetalert2";
 import CarPreloader from '../../../../_App/CarPreloader';
+import moment from 'moment';
 
-const ComponentsPayWithCash = ({ icon, textButton, disabled, callback, total = 0, loading, initForm ,isPartialPayment = false}) => {
+const ComponentsPayWithCash = ({ icon, textButton, disabled, callback, total = 0, loading, initForm, isPartialPayment = false }) => {
 
     const [form] = Form.useForm()
     // const form = Form.useFormInstance()
@@ -21,12 +22,17 @@ const ComponentsPayWithCash = ({ icon, textButton, disabled, callback, total = 0
     const { permission_obj } = useSelector(({ permission }) => permission)
 
     useEffect(() => {
-        form.setFieldsValue({price_grand_total : total})
+        form.setFieldsValue(
+            {
+                price_grand_total: total,
+                payment_paid_date: moment(Date.now()),
+            }
+        )
     }, [isModalVisible])
 
     useEffect(() => {
         if (checkCash && checkCash.length > 0) setDisableSubmitCash(false)
-        else setDisableSubmitCash(true)             
+        else setDisableSubmitCash(true)
     }, [checkCash])
 
 
@@ -43,12 +49,13 @@ const ComponentsPayWithCash = ({ icon, textButton, disabled, callback, total = 0
     const onFinish = async (value) => {
         try {
             // console.log('value', value)
-            let cash = takeOutComma(value.cash), change = takeOutComma(value.change) , payment_price_paid = value.price_grand_total; 
+            let cash = takeOutComma(value.cash), change = takeOutComma(value.change), payment_price_paid = value.price_grand_total;
             const model = {
                 cash,
                 remark: value.remark ?? null,
                 change,
-                payment_price_paid
+                payment_price_paid,
+                payment_paid_date: moment(value.payment_paid_date).format("YYYY-MM-DD HH:mm:ss")
             }
 
             let isNegativeNumber = false
@@ -83,14 +90,14 @@ const ComponentsPayWithCash = ({ icon, textButton, disabled, callback, total = 0
                 // })
             } else {
                 Swal.fire({
-                    title: GetIntlMessages(isPartialPayment ? "ยืนยันการเพิ่มรายการชำระหรือไม่ ?" :"ยืนยันการชำระหรือไม่ ?" ),
+                    title: GetIntlMessages(isPartialPayment ? "ยืนยันการเพิ่มรายการชำระหรือไม่ ?" : "ยืนยันการชำระหรือไม่ ?"),
                     // text: "You won't be able to revert this!",
                     icon: 'question',
                     showCancelButton: true,
                     confirmButtonColor: mainColor,
                     confirmButtonText: GetIntlMessages("submit"),
                     cancelButtonText: GetIntlMessages("cancel")
-                }).then(async ({isConfirmed}) => {
+                }).then(async ({ isConfirmed }) => {
                     if (isConfirmed) {
                         // res = await API.post(`/shopPaymentTransaction/add`, model)
                         // res ={data :{status : "success"}}
@@ -291,7 +298,7 @@ const ComponentsPayWithCash = ({ icon, textButton, disabled, callback, total = 0
                 visible={isModalVisible}
                 onOk={handleOk}
                 onCancel={handleCancel}
-                title={`ชำระเงินสด`} 
+                title={`ชำระเงินสด`}
                 footer={null}
                 className={`cash-modal`}
             >
@@ -348,6 +355,13 @@ const ComponentsPayWithCash = ({ icon, textButton, disabled, callback, total = 0
                             >
                                 <Input readOnly style={{ textAlign: "end" }} addonAfter={`บาท`} />
                             </Form.Item>
+                            <Form.Item
+                                label={GetIntlMessages("วันเวลารับชำระ")}
+                                name="payment_paid_date"
+                            >
+                                <DatePicker style={{ width: "100%" }} format={"DD/MM/YYYY HH:mm"} showTime={{ format: 'HH:mm' }} />
+                            </Form.Item>
+
 
                             <Form.Item
                                 label={GetIntlMessages("หมายเหตุ")}
@@ -361,7 +375,7 @@ const ComponentsPayWithCash = ({ icon, textButton, disabled, callback, total = 0
                                 <Row>
                                     <Col xxl={{ span: 8, offset: 4 }} lg={{ span: 10, offset: 2 }} md={12} sm={24} xs={24}>
                                         <div className={`pay-box`}>
-                                            <Button loading={loading} disabled={disableSubmitCash} type='primary' onClick={() => form.submit()} className={`pay-btn`}>{isPartialPayment ? `ยืนยัน` :`รับเงิน`}</Button>
+                                            <Button loading={loading} disabled={disableSubmitCash} type='primary' onClick={() => form.submit()} className={`pay-btn`}>{isPartialPayment ? `ยืนยัน` : `รับเงิน`}</Button>
                                         </div>
                                     </Col>
                                     <Col xxl={8} lg={10} md={12} sm={24} xs={24}>

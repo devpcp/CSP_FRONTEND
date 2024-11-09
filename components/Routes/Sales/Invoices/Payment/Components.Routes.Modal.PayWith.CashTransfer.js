@@ -23,7 +23,13 @@ const ComponentsPayWithCashTransfer = ({ icon, textButton, disabled, initForm, t
     const [isModalVisible, setIsModalVisible] = useState(false);
 
     useEffect(() => {
-        form.setFieldsValue({ price_grand_total: total, transfer_type: "none" })
+        form.setFieldsValue(
+            {
+                price_grand_total: total,
+                transfer_type: "none",
+                payment_paid_date: moment(Date.now())
+            }
+        )
         const formData = initForm.getFieldValue(), customerData = formData[!!formData["ShopPersonalCustomer"] ? "ShopPersonalCustomer" : "ShopBusinessCustomer"], isPersonal = !!formData["ShopPersonalCustomer"] ? true : false
 
         if (!!customerData) {
@@ -79,10 +85,10 @@ const ComponentsPayWithCashTransfer = ({ icon, textButton, disabled, initForm, t
                     remark: null,
                     transferor_name: value.transferor_name ?? null,
                     transfer_type: value.transfer_type ?? null,
-                    transfer_time: moment(value.transfer_time).format("YYYY-MM-DD HH:mm") ?? null,
                     my_bank_account_id: value.my_bank_account_id ?? null,
                     my_bank_account_name: value.my_bank_account_name ?? null,
-                }
+                },
+                payment_paid_date: moment(value.payment_paid_date).format("YYYY-MM-DD HH:mm:ss")
                 // change: value.change
             }
             // console.log('model', model)
@@ -411,10 +417,10 @@ const ComponentsPayWithCashTransfer = ({ icon, textButton, disabled, initForm, t
                         <Col xs={12}>
                             <Form.Item
                                 rules={[{ required: true }]}
-                                label={GetIntlMessages("วันเวลาที่โอน")}
-                                name="transfer_time"
+                                label={GetIntlMessages("วันเวลารับชำระ")}
+                                name="payment_paid_date"
                             >
-                                <DatePicker style={{ width: "100%" }} format={"YYYY-MM-DD HH:mm"} showTime={{ format: 'HH:mm' }} />
+                                <DatePicker style={{ width: "100%" }} format={"DD/MM/YYYY HH:mm"} showTime={{ format: 'HH:mm' }} />
                             </Form.Item>
                         </Col>
 

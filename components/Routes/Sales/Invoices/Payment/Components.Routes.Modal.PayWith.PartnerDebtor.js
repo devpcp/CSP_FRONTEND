@@ -49,7 +49,8 @@ const ComponentsPayWithCash = ({ icon, textButton, disabled, callback, total = 0
                 cash,
                 remark: value.remark ?? null,
                 change,
-                payment_price_paid
+                payment_price_paid,
+                payment_paid_date: moment(value.payment_paid_date).format("YYYY-MM-DD HH:mm:ss")
             }
 
             let isNegativeNumber = false
