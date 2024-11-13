@@ -1,5 +1,6 @@
 import React from 'react';
 import { Page, Text, View, Document, StyleSheet, Image, Font } from '@react-pdf/renderer';
+import moment from 'moment'
 
 Font.register({
   family: 'THSarabunNew',
@@ -10,54 +11,88 @@ const styles = StyleSheet.create({
   page: {
     backgroundColor: "#fff",
     fontFamily: 'THSarabunNew',
-    fontSize: 11,
-    paddingTop: 30,
-    paddingLeft: 50,
-    paddingRight: 50,
+    fontSize: 16,
+    paddingTop: 96,
+    paddingLeft: 37.8,
+    paddingRight: 37.8,
     lineHeight: 1.5,
-    flexDirection: "column"
   },
   section: {
     margin: 10,
     padding: 10,
-    flexGrow: 1
   },
-  label: {
-    fontSize: 18,
-  }
+  row: {
+    flexDirection: "row",
+    display: "flex",
+    flexFlow: "row wrap",
+    minWidth: 0
+  },
+  Col100: {
+    display: "block",
+    flex: "0 0 100%",
+    maxWidth: "100%",
+    backgroundColor: "yellow"
+  },
+  Col50: {
+    display: "block",
+    flex: "0 0 50%",
+    maxWidth: "50%",
+    // backgroundColor: "red"
+  },
+  Col33: {
+    display: "block",
+    flex: "0 0 33.33333333%",
+    maxWidth: "33.33333333%",
+    backgroundColor: "green"
+  },
+  Col25: {
+    display: "block",
+    flex: "0 0 25%",
+    maxWidth: "25%",
+    backgroundColor: "green"
+  },
+  invoiceDateContainer: {
+    flexDirection: "row",
+    justifyContent: "flex-end"
+  },
 });
 
 // Create Document Component
-const MyDocument = () => (
+const MyDocument = ({ docData }) => {
+  console.log("docData", docData)
 
-  <Document>
-    <Page size="A4" style={styles.page} wrap={"true"}>
-      <View style={styles.section}>
-        <Image
-          style={styles.logo}
-          src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/React-icon.svg/2300px-React-icon.svg.png"
-        />
-        <Text style={styles.label}>ข้อมูลลูกค้า</Text>
+  return (
+    <Document>
+      <Page size="A4" style={styles.page} wrap={"true"}>
+        <View style={styles.row}>
+          <View style={styles.Col50}>
+            <Image
+              style={styles.image}
+              src={docData.logoTopLeft}
+            />
+            <Text>{docData?.shopName}</Text>
+            <Text>{docData?.shopName}</Text>
+            <Text>{docData?.shopName}</Text>
+            <Text>{docData?.shopName}</Text>
+          </View>
+          <View style={styles.Col50}>
+            <View style={styles.invoiceDateContainer}>
+              <Text>{docData?.customerName}</Text>
+            </View>
+          </View>
+        </View>
+
+      </Page>
+      <Page size="A4" style={styles.page} wrap={"true"}>
         <View style={styles.section}>
-          <Text>Section #2</Text>
+          <Text>Section #1</Text>
         </View>
         <View style={styles.section}>
           <Text>Section #2</Text>
         </View>
-      </View>
-      <View style={styles.section}>
-        <Text>Section #2</Text>
-      </View>
-    </Page>
-    <Page size="A4" style={styles.page} wrap={"true"}>
-      <View style={styles.section}>
-        <Text>Section #1</Text>
-      </View>
-      <View style={styles.section}>
-        <Text>Section #2</Text>
-      </View>
-    </Page>
-  </Document>
-);
+      </Page>
+    </Document>
+  );
+}
 
 export default MyDocument;

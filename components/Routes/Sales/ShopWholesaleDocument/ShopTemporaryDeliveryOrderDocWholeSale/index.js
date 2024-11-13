@@ -1,5 +1,5 @@
 import { CarOutlined, FileAddOutlined, UserOutlined, DownOutlined, FileImageOutlined, InfoCircleTwoTone } from '@ant-design/icons'
-import { Button, Col, Form, message, Row, Tabs, Dropdown, Space, Menu, Checkbox, Input, Modal, Result, Select, Tooltip, Typography } from 'antd'
+import { Button, Col, Form, message, Row, Tabs, Dropdown, Space, Menu, Checkbox, Input, Modal, Result, Select, Tooltip, Typography, Badge } from 'antd'
 import { get, isArray, isEmpty, isPlainObject, isFunction } from 'lodash'
 import moment from 'moment'
 import React, { useEffect, useState } from 'react'
@@ -636,8 +636,19 @@ const ShopTemporaryDeliveryOrderDocWholeSale = ({ docTypeId, title = null, callB
                 width: 120,
                 align: "center",
                 render: (text, record) => {
+
+                    let { upload_car_list, upload_payment_list, upload_product_list } = record.details
+                    let checkCarImage = isArray(upload_car_list) ? upload_car_list.length > 0 : false
+                    let checkPaymentImage = isArray(upload_payment_list) ? upload_payment_list.length > 0 : false
+                    let checkProductImage = isArray(upload_product_list) ? upload_product_list.length > 0 : false
+
+                    let checkHaveImage = checkCarImage || checkPaymentImage || checkProductImage
                     return (
-                        <Button type='text' onClick={() => handleOpenEditImageModal(record)} icon={<FileImageOutlined style={{ fontSize: "18px" }} />}></Button>
+                        <>
+                            <Badge dot={checkHaveImage} >
+                                <Button type='text' onClick={() => handleOpenEditImageModal(record)} icon={<FileImageOutlined style={{ fontSize: "18px" }} />}></Button>
+                            </Badge>
+                        </>
                     )
                 },
 
@@ -1979,6 +1990,7 @@ const ShopTemporaryDeliveryOrderDocWholeSale = ({ docTypeId, title = null, callB
             setLoading(true)
             setCarPreLoading(true)
             console.log("vl", values)
+            let idEdit = values.id
 
             let shopId = authUser?.UsersProfile?.shop_id
             let directory = "shopRetailDocument"

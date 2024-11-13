@@ -1,6 +1,6 @@
 import { CarOutlined, FileAddOutlined, UserOutlined, DownOutlined, FileImageOutlined, InfoCircleTwoTone, SettingOutlined } from '@ant-design/icons'
-import { Button, Col, Form, message, Row, Tabs, Dropdown, Space, Menu, Checkbox, Input, Modal, Result, Select, Tooltip, Typography, Popover } from 'antd'
-import { get, isArray, isEmpty, isPlainObject, result, isFunction } from 'lodash'
+import { Button, Col, Form, message, Row, Tabs, Dropdown, Space, Menu, Checkbox, Input, Modal, Result, Select, Tooltip, Typography, Popover, Badge } from 'antd'
+import { get, isArray, isEmpty, isPlainObject, result, isFunction, isUndefined } from 'lodash'
 import moment from 'moment'
 import React, { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
@@ -23,6 +23,7 @@ import { UploadImageCustomPathMultiple, DeleteImageCustomPathMultiple } from '..
 import BusinessCustomersData from '../../../../../routes/MyData/BusinessCustomersData'
 import PersonalCustomersData from '../../../../../routes/MyData/PersonalCustomersData'
 import { useRouter } from 'next/router'
+import PDFView from '../../../../../pages/pdfview'
 
 const { Text, Link } = Typography;
 
@@ -381,6 +382,29 @@ const TemporaryDeliveryOrderDoc = ({ docTypeId, title = null, callBack, }) => {
                 },
             },
             // {
+            //     title: () => (<>{GetIntlMessages("พิมพ์")}  <Popover trigger="click" content={<PopOverSettingPrint />} title="ตั้งค่าการพิมพ์"><Button type='primary' icon={<SettingOutlined />}></Button></Popover></>),
+            //     dataIndex: 'details',
+            //     key: 'details',
+            //     width: 120,
+            //     align: "center",
+            //     render: (text, record) => {
+            //         console.log("authUser", authUser)
+            //         let query = {
+            //             pages: "test",
+            //             documentId: record?.id,
+            //             docTypeId: docTypeId,
+            //             docTypeAPIName: "shopTemporaryDeliveryOrderDoc",
+            //             shopId: authUser?.UsersProfile?.ShopsProfile?.id
+            //         }
+
+            //         return (
+            //             <Button onClick={() => window.open(`/pdfview?${new URLSearchParams(query).toString()}`)}>
+            //                 ปริ้น
+            //             </Button>
+            //         )
+            //     },
+            // },
+            // {
             //     title: () => GetIntlMessages(`เลขที่${configPage("table-status-2")}`),
             //     dataIndex: 'details',
             //     key: 'details',
@@ -636,8 +660,19 @@ const TemporaryDeliveryOrderDoc = ({ docTypeId, title = null, callBack, }) => {
                 width: 120,
                 align: "center",
                 render: (text, record) => {
+
+                    let { upload_car_list, upload_payment_list, upload_product_list } = record.details
+                    let checkCarImage = isArray(upload_car_list) ? upload_car_list.length > 0 : false
+                    let checkPaymentImage = isArray(upload_payment_list) ? upload_payment_list.length > 0 : false
+                    let checkProductImage = isArray(upload_product_list) ? upload_product_list.length > 0 : false
+
+                    let checkHaveImage = checkCarImage || checkPaymentImage || checkProductImage
                     return (
-                        <Button type='text' onClick={() => handleOpenEditImageModal(record)} icon={<FileImageOutlined style={{ fontSize: "18px" }} />}></Button>
+                        <>
+                            <Badge dot={checkHaveImage}>
+                                <Button type='text' onClick={() => handleOpenEditImageModal(record)} icon={<FileImageOutlined style={{ fontSize: "18px" }} />}></Button>
+                            </Badge>
+                        </>
                     )
                 },
 
@@ -2060,7 +2095,8 @@ const TemporaryDeliveryOrderDoc = ({ docTypeId, title = null, callBack, }) => {
             setLoading(true)
             setCarPreLoading(true)
             console.log("vl", values)
-
+            let idEdit = values.id
+            
             let shopId = authUser?.UsersProfile?.shop_id
             let directory = "shopRetailDocument"
             let upload_car_list = [], upload_product_list = [], upload_payment_list = []
