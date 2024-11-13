@@ -8,6 +8,7 @@ import { RoundingNumber, NoRoundingNumber, takeOutComma } from '../../../../shar
 import API from '../../../../../util/Api';
 import Swal from "sweetalert2";
 import CarPreloader from '../../../../_App/CarPreloader';
+import moment from 'moment';
 
 const ComponentsPayWithCash = ({ icon, textButton, disabled, callback, total = 0, loading, initForm, isPartialPayment = false }) => {
 

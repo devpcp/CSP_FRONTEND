@@ -215,7 +215,8 @@ const PaymentDocsV2 = ({ docId, title, loading, handleCancelModal, initForm, car
                             change: value.change,
                             actual_paid: value.cash,
                             remark: value.remark ?? null,
-                        }
+                        },
+                        payment_paid_date: value.payment_paid_date,
                     }
                     break;
                 case 2:
@@ -227,7 +228,8 @@ const PaymentDocsV2 = ({ docId, title, loading, handleCancelModal, initForm, car
                         payment_price_paid: value.payment_price_paid,
                         is_partial_payment: isPartialPayment,
                         bank_name_list_id: value.bank_id,
-                        details: value.details
+                        details: value.details,
+                        payment_paid_date: value.payment_paid_date,
                     }
                     break;
                 case 3:
@@ -239,7 +241,8 @@ const PaymentDocsV2 = ({ docId, title, loading, handleCancelModal, initForm, car
                         payment_price_paid: value.payment_price_paid,
                         is_partial_payment: isPartialPayment,
                         bank_name_list_id: value.bank_id,
-                        details: value.details
+                        details: value.details,
+                        payment_paid_date: value.payment_paid_date,
                     }
                     break;
                 case 4:
@@ -249,7 +252,8 @@ const PaymentDocsV2 = ({ docId, title, loading, handleCancelModal, initForm, car
                         doc_date,
                         payment_method: type,
                         is_partial_payment: isPartialPayment,
-                        ...value
+                        ...value,
+                        payment_paid_date: value.payment_paid_date,
                     }
                     break;
                 case 6:
@@ -259,7 +263,8 @@ const PaymentDocsV2 = ({ docId, title, loading, handleCancelModal, initForm, car
                         payment_method: type,
                         payment_price_paid: value.payment_price_paid,
                         is_partial_payment: false,
-                        ...value
+                        ...value,
+                        payment_paid_date: value.payment_paid_date,
                     }
                     break;
 
