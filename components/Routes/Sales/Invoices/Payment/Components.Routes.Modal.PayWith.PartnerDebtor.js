@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Button, Form, Input, Modal, message, Row, Col, InputNumber } from 'antd'
+import { Button, Form, Input, Modal, message, Row, Col, InputNumber, DatePicker } from 'antd'
 import { useSelector } from 'react-redux';
 import GetIntlMessages from '../../../../../util/GetIntlMessages';
 import { isFunction, isPlainObject } from 'lodash';
@@ -22,7 +22,7 @@ const ComponentsPayWithCash = ({ icon, textButton, disabled, callback, total = 0
     const { permission_obj } = useSelector(({ permission }) => permission)
 
     useEffect(() => {
-        form.setFieldsValue({ price_grand_total: total, cash: total })
+        form.setFieldsValue({ price_grand_total: total, cash: total, payment_paid_date: moment(Date.now()), })
         setDisableSubmitCash(false)
     }, [isModalVisible])
 
@@ -254,6 +254,14 @@ const ComponentsPayWithCash = ({ icon, textButton, disabled, callback, total = 0
                                 hidden
                             >
                                 <Input readOnly style={{ textAlign: "end" }} addonAfter={`บาท`} />
+                            </Form.Item>
+
+                            <Form.Item
+                                rules={[{ required: true }]}
+                                label={GetIntlMessages("วันเวลารับชำระ")}
+                                name="payment_paid_date"
+                            >
+                                <DatePicker style={{ width: "100%" }} format={"DD/MM/YYYY HH:mm"} showTime={{ format: 'HH:mm' }} />
                             </Form.Item>
 
                             <Form.Item
