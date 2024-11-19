@@ -24,7 +24,7 @@
     "@fullcalendar/interaction": "5.10.1",
     "@fullcalendar/react": "5.10.1",
     "@fullcalendar/timegrid": "5.10.1",
-    "@react-pdf/renderer": "^4.0.0",
+    "@react-pdf/renderer": "4.0.0",
     "antd": "4.24.12",
     "axios": "0.24.0",
     "bootstrap": "5.2.1",
@@ -74,6 +74,7 @@
     "redux": "4.1.2",
     "redux-thunk": "2.4.1",
     "sweetalert2": "11.3.0",
+    "thai-baht-text": "^2.0.5",
     "uuid": "8.3.2"
   },
   "devDependencies": {

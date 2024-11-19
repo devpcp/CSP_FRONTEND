@@ -1,5 +1,5 @@
-import { CarOutlined, FileAddOutlined, UserOutlined, DownOutlined, FileImageOutlined, InfoCircleTwoTone } from '@ant-design/icons'
-import { Button, Col, Form, message, Row, Tabs, Dropdown, Space, Menu, Checkbox, Input, Modal, Result, Select, Tooltip, Typography, Badge } from 'antd'
+import { CarOutlined, FileAddOutlined, UserOutlined, DownOutlined, FileImageOutlined, InfoCircleTwoTone, SettingOutlined } from '@ant-design/icons'
+import { Button, Col, Form, message, Row, Tabs, Dropdown, Space, Menu, Checkbox, Input, Modal, Result, Select, Tooltip, Typography, Badge, Popover } from 'antd'
 import { get, isArray, isEmpty, isPlainObject, isFunction } from 'lodash'
 import moment from 'moment'
 import React, { useEffect, useState } from 'react'
@@ -57,8 +57,11 @@ const ShopTemporaryDeliveryOrderDocWholeSale = ({ docTypeId, title = null, callB
 
 
     const [form] = Form.useForm();
+    const [formSettingPrint] = Form.useForm();
     const [formEditImage] = Form.useForm();
     const [idEdit, setIsIdEdit] = useState(null);
+
+    const [settingPrint, setSettingPrint] = useState({})
 
     useEffect(() => {
         getDataSearch({
@@ -380,6 +383,29 @@ const ShopTemporaryDeliveryOrderDocWholeSale = ({ docTypeId, title = null, callB
                     return index + 1
                 },
             },
+            {
+                title: () => (<>{GetIntlMessages("พิมพ์")}  <Popover trigger="click" content={<PopOverSettingPrint />} title="ตั้งค่าการพิมพ์"><Button type='primary' icon={<SettingOutlined />}></Button></Popover></>),
+                dataIndex: 'details',
+                key: 'details',
+                width: 120,
+                align: "center",
+                render: (text, record) => {
+                    console.log("authUser", authUser)
+                    let query = {
+                        pages: "test",
+                        documentId: record?.id,
+                        docTypeId: docTypeId,
+                        docTypeAPIName: "shopTemporaryDeliveryOrderDoc",
+                        shopId: authUser?.UsersProfile?.ShopsProfile?.id
+                    }
+
+                    return (
+                        <Button onClick={() => window.open(`/pdfview?${new URLSearchParams(query).toString()}`)}>
+                            ปริ้น
+                        </Button>
+                    )
+                },
+            },
             // {
             //     title: () => GetIntlMessages(`เลขที่${configPage("table-status-2")}`),
             //     dataIndex: 'details',
@@ -618,14 +644,14 @@ const ShopTemporaryDeliveryOrderDocWholeSale = ({ docTypeId, title = null, callB
                 },
             },
             {
-                title: () => GetIntlMessages("พิมพ์"),
+                title: () => (<>{GetIntlMessages("พิมพ์")}  <Popover trigger="click" content={<PopOverSettingPrint />} title="ตั้งค่าการพิมพ์"><Button type='primary' icon={<SettingOutlined />}></Button></Popover></>),
                 dataIndex: 'details',
                 key: 'details',
                 width: 120,
                 align: "center",
                 render: (text, record) => {
                     return (
-                        <PrintOut customPriceUse={1} customFootSign={(authUser?.UsersProfile?.ShopsProfile?.id === "db945efe-17c8-4c43-a437-31204fe3b8af") ? { left: `ผู้รับสินค้า`, right: `ผู้ส่งสินค้า` } : null} textButton={"พิมพ์"} printOutHeadTitle={(authUser?.UsersProfile?.ShopsProfile?.id === "1a523ad4-682e-4db2-af49-d54f176a84ad") ? `ใบส่งสินค้า` : (authUser?.UsersProfile?.ShopsProfile?.id === "db945efe-17c8-4c43-a437-31204fe3b8af") ? "ใบส่งสินค้าชั่วคราว" : "ใบส่งสินค้า/ใบแจ้งหนี้"} documentId={record?.id} style={{ width: "100%", display: "flex", justifyContent: "center", alignItems: "center" }} docTypeId={docTypeId} />
+                        <PrintOut customPriceUse={1} customFootSign={(authUser?.UsersProfile?.ShopsProfile?.id === "db945efe-17c8-4c43-a437-31204fe3b8af") ? { left: `ผู้รับสินค้า`, right: `ผู้ส่งสินค้า` } : null} textButton={"พิมพ์"} printOutHeadTitle={(authUser?.UsersProfile?.ShopsProfile?.id === "1a523ad4-682e-4db2-af49-d54f176a84ad") ? `ใบส่งสินค้า` : (authUser?.UsersProfile?.ShopsProfile?.id === "db945efe-17c8-4c43-a437-31204fe3b8af") ? "ใบส่งสินค้าชั่วคราว" : "ใบส่งสินค้า/ใบแจ้งหนี้"} documentId={record?.id} style={{ width: "100%", display: "flex", justifyContent: "center", alignItems: "center" }} docTypeId={docTypeId} settingPrint={settingPrint} />
                     )
                 },
             },
@@ -690,18 +716,78 @@ const ShopTemporaryDeliveryOrderDocWholeSale = ({ docTypeId, title = null, callB
         setColumns(_column.filter(x => x.use === true));
     }
 
+    const PopOverSettingPrint = () => {
+        return (
+            <Form
+                form={formSettingPrint}
+                layout={"vertical"}
+                initialValues={{
+                    doc_date_show: true,
+                    vehicle_data_show: true
+                }}
+            >
+                <Row gutter={16}>
+                    <Col span={12}>
+                        <Form.Item name={"doc_date_show"} label="แสดงวันที่">
+                            <Select
+                                onChange={() => handleChangeSettingPrint("doc_date")}
+                                style={{ width: "100%" }}
+                                options={[
+                                    {
+                                        value: true,
+                                        label: 'แสดง',
+                                    },
+                                    {
+                                        value: false,
+                                        label: 'ไม่แสดง',
+                                    },
+                                ]}
+                            />
+                        </Form.Item>
+                    </Col>
+                    <Col span={12}>
+                        {/* <Form.Item name={"vehicle_data_show"} label="แสดงข้อมูลรถยนต์">
+                            <Select
+                                onChange={() => handleChangeSettingPrint("doc_date")}
+                                style={{ width: "100%" }}
+                                options={[
+                                    {
+                                        value: true,
+                                        label: 'แสดง',
+                                    },
+                                    {
+                                        value: false,
+                                        label: 'ไม่แสดง',
+                                    },
+                                ]}
+                            />
+                        </Form.Item> */}
+                    </Col>
+                </Row>
+                <Text style={{ color: "red" }}>***เมื่อมีการปรับเปลี่ยนข้อมูลแล้วกดค้นหาอีก 1 ครั้งเพื่อใช้งานการตั้งค่า</Text>
+            </Form>
+        )
+    }
 
+    const handleChangeSettingPrint = () => {
+        try {
+            const { vehicle_data_show, doc_date_show } = formSettingPrint.getFieldsValue()
+            let model = {
+                vehicle_data_show,
+                doc_date_show
+            }
+            setSettingPrint(model)
+        } catch (error) {
+            console.log("error", error)
+        }
+
+    }
 
     /* ค้นหา */
     const getDataSearch = async ({ search = modelSearch.search ?? "", limit = configTable.limit, page = configTable.page, sort = configSort.sort, order = (configSort.order === "descend" ? "desc" : "asc"), _status = "active", doc_date_startDate = isArray(modelSearch.select_date) ? modelSearch.select_date[0] ?? "" : null, doc_date_endDate = isArray(modelSearch.select_date) ? modelSearch.select_date[1] ?? "" : null, payment_paid_status = modelSearch.payment_paid_status }) => {
         try {
             if (page === 1) setLoading(true)
-            // const res = await API.get(`/shopSalesTransactionDoc/all?limit=${limit}&page=${page}&sort=${sort}&order=${order}&status=${_status}&search=${search}&doc_type_id=${_status == 3 ? "b39bcb5d-6c72-4979-8725-c384c80a66c3" : docTypeId }`)
-            // const res = await API.get(`/shopSalesTransactionDoc/all?limit=${limit}&page=${page}&sort=${sort}&order=${order}&status=${_status}&search=${search}&doc_type_id=${docTypeId}`)
-            // const res = await API.get(`/shopServiceOrderDoc/all?search=${search}&status=${_status}&page=${page}&limit=${limit}&sort=${sort}&order=${order}&doc_sales_type=2`)
             const res = await API.get(`/shopTemporaryDeliveryOrderDoc/all?search=${search}&status=${_status}&ShopServiceOrderDoc__doc_sales_type=2&page=${page}&limit=${limit}&sort=${sort}&order=${order}${doc_date_startDate ? `&doc_date_startDate=${moment(doc_date_startDate).format("YYYY-MM-DD")}` : ""}${doc_date_endDate ? `&doc_date_endDate=${moment(doc_date_endDate).format("YYYY-MM-DD")}` : ""}${payment_paid_status ? `&ShopServiceOrderDoc__payment_paid_status=${payment_paid_status}` : ""}`)
-            // const { currentCount, currentPage, pages, totalCount, data } = res.data.data;
-            // console.log('res :>> ', res);
             if (res.data.status === "success") {
                 const { currentCount, currentPage, pages, totalCount, data } = res.data.data;
                 data = data.map(e => {
