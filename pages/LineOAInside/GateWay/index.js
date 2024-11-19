@@ -17,6 +17,10 @@ const GateWay = () => {
   const { mainColor, locale } = useSelector(({ settings }) => settings);
   useEffect(async () => {
     if (code && state) {
+      cookies.remove("access_token", { path: '/' });
+      cookies.remove("refresh_token", { path: '/' });
+      cookies.remove("line_data", { path: '/' });
+
       let shop_name = state?.split("_")[0]
       let redirect_uri = state?.split("_")[1]
       let apiLine = axios.create({

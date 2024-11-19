@@ -825,7 +825,8 @@ const ImportDocuments = ({ view_doc_id, select_shop_ids, title = null, }) => {
                         new_data_status: false
                     }
                 }) ?? [] : []
-                product_list[index]?.warehouse_detail = product_list[index]?.warehouse_detail.slice(0, 10)
+                // let sort = product_list[index]?.warehouse_detail.sort((a, b) => b.current_amount - a.current_amount)
+                // product_list[index]?.warehouse_detail = sort.slice(0, 15)
                 formModal.setFieldsValue({ product_list });
             } else {
                 null
@@ -1298,14 +1299,11 @@ const ImportDocuments = ({ view_doc_id, select_shop_ids, title = null, }) => {
                                                                 validateTrigger={['onChange', 'onBlur']}
                                                                 name={[field.name, "warehouse"]}
                                                                 fieldKey={[field.fieldKey, "warehouse"]}
-                                                                // label={GetIntlMessages("warehouses")}
                                                                 noStyle
                                                             >
-                                                                {/* <Input placeholder="คลังที่อยู่" disabled={configModal.mode == "view"} /> */}
                                                                 <Select
                                                                     placeholder="เลือกข้อมูล"
                                                                     optionFilterProp="children"
-                                                                    // disabled
                                                                     disabled={configModal.mode !== "add" || formModal.getFieldValue().product_list[index]?.warehouse_detail[i]?.new_data_status === false}
                                                                     onChange={(value) => onChangeWarehouse(index, i, value)}
                                                                 >
@@ -1325,15 +1323,12 @@ const ImportDocuments = ({ view_doc_id, select_shop_ids, title = null, }) => {
                                                                 validateTrigger={['onChange', 'onBlur']}
                                                                 name={[field.name, "shelf"]}
                                                                 fieldKey={[field.fieldKey, "shelf"]}
-                                                                // label={GetIntlMessages("shelf")}
                                                                 noStyle
                                                             >
                                                                 <Select
                                                                     placeholder="เลือกข้อมูล"
                                                                     optionFilterProp="children"
-                                                                    // disabled
                                                                     disabled={configModal.mode !== "add" || formModal.getFieldValue().product_list[index]?.warehouse_detail[i]?.new_data_status === false}
-                                                                //  onChange={(value)=>onChangeWareHouse(index,index2,value)}
                                                                 >
                                                                     {getArrWarehouse(index, i).map(e => <Select.Option value={e.code}>{e.name[locale.locale]}</Select.Option>)}
                                                                 </Select>
@@ -1348,7 +1343,6 @@ const ImportDocuments = ({ view_doc_id, select_shop_ids, title = null, }) => {
                                                                 validateTrigger={['onChange', 'onBlur']}
                                                                 name={[field.name, "purchase_unit_id"]}
                                                                 fieldKey={[field.fieldKey, "purchase_unit_id"]}
-                                                                // label={GetIntlMessages("จำนวนคงเหลือ")}
                                                                 noStyle
                                                             >
                                                                 <Select
@@ -1364,13 +1358,11 @@ const ImportDocuments = ({ view_doc_id, select_shop_ids, title = null, }) => {
                                                             </Form.Item>
                                                         </td>
                                                         <td>
-                                                            {/* <Col xxl={8} lg={8} md={12} xs={24} style={{ width: "100%" }}> */}
                                                             <Form.Item
                                                                 {...tailformItemLayout}
                                                                 validateTrigger={['onChange', 'onBlur']}
                                                                 name={[field.name, "status"]}
                                                                 fieldKey={[field.fieldKey, "status"]}
-                                                                // label={GetIntlMessages("สถานะปรับเพิ่ม / ลด")}
                                                                 noStyle
                                                             >
                                                                 <Radio.Group options={[
@@ -1387,21 +1379,16 @@ const ImportDocuments = ({ view_doc_id, select_shop_ids, title = null, }) => {
                                                                     buttonStyle="solid"
                                                                     disabled={configModal.mode !== "add"}
                                                                     onChange={(val) => onChangeEachProductStatus(val, index, i)}
-                                                                    // checked={formModal.getFieldValue()?.product_list[index]?.warehouse_detail[i]?.status}
                                                                     value={formModal.getFieldValue()?.product_list[index]?.warehouse_detail[i]?.status}
                                                                 />
-                                                                {/* <Switch style={{width : "100%"}} checkedChildren={GetIntlMessages("ปรับเพิ่ม")} unCheckedChildren={GetIntlMessages("ปรับลด")} checked={formModal.getFieldValue()?.product_list[index]?.warehouse_detail[i]?.status ?? true} onChange={(bool) => onChangeEachProductStatus(bool, index, i)} disabled={configModal.mode !== "add"} /> */}
                                                             </Form.Item>
-                                                            {/* </Col> */}
                                                         </td>
                                                         <td>
-                                                            {/* <Col xxl={8} lg={8} md={12} xs={24} style={{ width: "100%" }}> */}
                                                             <Form.Item
                                                                 {...tailformItemLayout}
                                                                 validateTrigger={['onChange', 'onBlur']}
                                                                 name={[field.name, "remark_adjust"]}
                                                                 fieldKey={[field.fieldKey, "remark_adjust"]}
-                                                                // label={GetIntlMessages("remark")}
                                                                 noStyle
                                                                 rules={[{ required: form.getFieldValue().amount !== null && form.getFieldValue().amount > 0, message: "กรุณากรอกข้อมูล" }]}
                                                             >
@@ -1429,14 +1416,12 @@ const ImportDocuments = ({ view_doc_id, select_shop_ids, title = null, }) => {
                                                                     placeholder={GetIntlMessages("เลือกข้อมูลหรือเพิ่มข้อมูลใหม่")}
                                                                 />
                                                             </Form.Item>
-                                                            {/* </Col> */}
                                                         </td>
                                                         {formModal.getFieldValue()?.References_import_doc ? <td>
                                                             <Form.Item
                                                                 validateTrigger={['onChange', 'onBlur']}
                                                                 name={[field.name, "balance"]}
                                                                 fieldKey={[field.fieldKey, "balance"]}
-                                                                // label={GetIntlMessages("จำนวนคงเหลือ")}
                                                                 noStyle
                                                             >
                                                                 <Input disabled type="number" placeholder="จำนวน" />
@@ -1447,7 +1432,6 @@ const ImportDocuments = ({ view_doc_id, select_shop_ids, title = null, }) => {
                                                                 validateTrigger={['onChange', 'onBlur']}
                                                                 name={[field.name, "old_current_amount"]}
                                                                 fieldKey={[field.fieldKey, "old_current_amount"]}
-                                                                // label={GetIntlMessages("จำนวนคงเหลือ")}
                                                                 noStyle
                                                             >
                                                                 <Input disabled type="number" placeholder="จำนวน" />
@@ -1459,7 +1443,6 @@ const ImportDocuments = ({ view_doc_id, select_shop_ids, title = null, }) => {
                                                                 validateTrigger={['onChange', 'onBlur']}
                                                                 name={[field.name, "current_amount"]}
                                                                 fieldKey={[field.fieldKey, "current_amount"]}
-                                                                // label={GetIntlMessages("จำนวนคงเหลือ")}
                                                                 noStyle
                                                             >
                                                                 <Input disabled />
@@ -1470,7 +1453,6 @@ const ImportDocuments = ({ view_doc_id, select_shop_ids, title = null, }) => {
                                                                 validateTrigger={['onChange', 'onBlur']}
                                                                 name={[field.name, "amount"]}
                                                                 fieldKey={[field.fieldKey, "amount"]}
-                                                                // label={GetIntlMessages("จำนวนคงเหลือ")}
                                                                 noStyle
                                                             >
                                                                 <Input type={`number`} disabled={configModal.mode !== "add"} min={0} placeholder="จำนวน" onChange={(value) => debounceEachProductAmount(index, i, value.target.value)} />
@@ -1481,7 +1463,6 @@ const ImportDocuments = ({ view_doc_id, select_shop_ids, title = null, }) => {
                                                                 validateTrigger={['onChange', 'onBlur']}
                                                                 name={[field.name, "adjust_amount"]}
                                                                 fieldKey={[field.fieldKey, "adjust_amount"]}
-                                                                // label={GetIntlMessages("จำนวนคงเหลือ")}
                                                                 noStyle
                                                             >
                                                                 <Input disabled />
