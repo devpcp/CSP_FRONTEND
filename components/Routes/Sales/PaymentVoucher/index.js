@@ -187,7 +187,7 @@ const PaymentVoucherDoc = ({ docTypeId }) => {
         button: {
             create: true,
             name: {
-                add: GetIntlMessages(`สร้าง${`ใบชำระค่าใช้จ่าย` ?? documentTypesName}`),
+                add: GetIntlMessages(`สร้าง`),
             },
             download: false,
             import: false,

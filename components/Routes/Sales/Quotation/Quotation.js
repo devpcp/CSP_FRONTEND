@@ -792,7 +792,7 @@ const Quotationcomponent = ({ docTypeId }) => {
         col: 8,
         button: {
             name: {
-                add: GetIntlMessages(`สร้าง${documentTypesName}`),
+                add: GetIntlMessages(`สร้าง`),
             },
             download: false,
             import: false,

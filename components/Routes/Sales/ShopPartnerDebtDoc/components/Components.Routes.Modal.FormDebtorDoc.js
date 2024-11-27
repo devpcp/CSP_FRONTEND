@@ -174,7 +174,7 @@ const FormTemporaryDeliveryOrderDoc = ({ mode, calculateResult, disabledWhenDeli
                         <Input disabled />
                     </Form.Item>
                 </Col>
-                <Col lg={8} md={12} sm={12} xs={24}>
+                {/* <Col lg={8} md={12} sm={12} xs={24}>
                     <Form.Item
                         name="partner_name"
                         label="ชื่อผู้จำหน่าย"
@@ -196,6 +196,37 @@ const FormTemporaryDeliveryOrderDoc = ({ mode, calculateResult, disabledWhenDeli
                             </Button>
                         } />
                     </Form.Item>
+                </Col> */}
+
+                <Col lg={8} md={12} sm={12} xs={24}>
+                    <Row>
+                        <Col lg={20} md={20} sm={18} xs={18}>
+                            <Form.Item
+                                name="partner_name"
+                                label="ชื่อผู้จำหน่าย"
+                                rules={[
+                                    {
+                                        required: true,
+                                        message: "กรุณาเลือกลูกค้า"
+                                    },
+                                ]}
+                            >
+                                <Input disabled style={{ width: "98%" }} />
+                            </Form.Item>
+                        </Col>
+
+                        <Col lg={4} md={4} sm={6} xs={6} style={{ paddingTop: "30.8px", justifyContent: "end" }}>
+                            <Form.Item >
+                                <Button
+                                    type='primary'
+                                    style={{ width: "100%", borderRadius: "10px" }}
+                                    onClick={() => setIsBusinessPartnersDataModalVisible(true)}
+                                >
+                                    เลือก
+                                </Button>
+                            </Form.Item>
+                        </Col>
+                    </Row>
                 </Col>
 
 

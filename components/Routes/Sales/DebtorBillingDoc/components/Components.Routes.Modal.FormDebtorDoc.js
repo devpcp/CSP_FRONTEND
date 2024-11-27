@@ -1,5 +1,5 @@
 import { PlusOutlined } from '@ant-design/icons'
-import { Form, Input, Row, Col, Select, DatePicker, InputNumber, Divider, Space, message } from 'antd'
+import { Form, Input, Row, Col, Select, DatePicker, InputNumber, Divider, Space, message, Button, Modal } from 'antd'
 import { debounce, get, isArray, isEmpty, isPlainObject } from 'lodash'
 import moment from 'moment'
 import React, { useEffect, useState } from 'react'
@@ -11,6 +11,8 @@ import ModalBothCustomersAndCar from '../../../Modal/Components.Add.Modal.BothCu
 import ModalBusinessCustomers from '../../../Modal/Components.Select.Modal.BusinessCustomers'
 import ModalPersonalCustomers from '../../../Modal/Components.Select.Modal.PersonalCustomers'
 import Swal from "sweetalert2";
+import BusinessCustomersData from '../../../../../routes/MyData/BusinessCustomersData'
+import PersonalCustomersData from '../../../../../routes/MyData/PersonalCustomersData'
 
 const FormTemporaryDeliveryOrderDoc = ({ mode, calculateResult, disabledWhenDeliveryDocActive = false }) => {
 
@@ -22,6 +24,7 @@ const FormTemporaryDeliveryOrderDoc = ({ mode, calculateResult, disabledWhenDeli
 
     const [userList, setUserList] = useState([])
     const [repairManList, setRepairManList] = useState([])
+    const [isCustomerDataModalVisible, setIsCustomerDataModalVisible] = useState(false);
     const customerPhoneList = Form.useWatch("customer_phone_list", { form, preserve: true })
 
     useEffect(() => {
@@ -172,7 +175,7 @@ const FormTemporaryDeliveryOrderDoc = ({ mode, calculateResult, disabledWhenDeli
                             text: GetIntlMessages("ไม่พบจำนวนวันเครดิต กรุณาแก้ไขข้อมูลที่เมนู ข้อมูลลูกค้า"),
                         })
                     }
-
+                    console.log("ff", find)
                     form.setFieldsValue({
                         customer_type: find?.customer_type ?? "person",
                         customer_id: find.id,
@@ -196,25 +199,6 @@ const FormTemporaryDeliveryOrderDoc = ({ mode, calculateResult, disabledWhenDeli
         }
     }
 
-    const callbackCustomers = async (val) => {
-        try {
-            const { details } = val
-            await handleEasySearch(details.registration, "search")
-            const { easy_search_list } = form.getFieldValue()
-            const find = easy_search_list.find(where => where.details.registration === details.registration)
-            if (isPlainObject(find)) {
-                await handleEasySearch(find.id, "select")
-            }
-
-        } catch (error) {
-
-        }
-    }
-
-    const checkValueCustomerType = () => {
-        const { customer_type } = form.getFieldValue();
-        return customer_type;
-    }
 
     const [open, setOpen] = useState(true);
     const controlOpen = (value) => {
@@ -225,50 +209,34 @@ const FormTemporaryDeliveryOrderDoc = ({ mode, calculateResult, disabledWhenDeli
         }
     }
 
+    const callBackPickCustomer = async (data) => {
+        try {
+            await handleEasySearch(data.master_customer_code_id, "search")
+            await handleEasySearch(data.id, "select")
+            handleCancelCustomerDataModal()
+        } catch (error) {
+            console.log("callBackPickCustomer", error)
+        }
+    }
+
+    const handleOpenCustomerDataModal = () => {
+        try {
+            setIsCustomerDataModalVisible(true)
+        } catch (error) {
+
+        }
+    }
+    const handleCancelCustomerDataModal = () => {
+        try {
+            setIsCustomerDataModalVisible(false)
+        } catch (error) {
+
+        }
+    }
+
     return (
         <>
             <Row gutter={[20, 0]}>
-                {mode === "add" ?
-                    <>
-                        <Form.Item name="easy_search_list" shouldUpdate={(prevValue, curValue) => prevValue !== curValue} hidden />
-
-                        <Col span={12} hidden>
-                            <Form.Item
-                                name="easy_search"
-                                label={GetIntlMessages("search")}
-                                labelAlign='left'
-                                colon={false}
-                                wrapperCol={{ xl: { span: 24 }, lg: { span: 16 }, md: { span: 18 }, xs: { span: 24 } }}
-                            // extra={GetIntlMessages("พิมพ์อย่างน้อย 1 ตัวเพื่อค้นหา")}
-                            >
-                                <Select
-                                    showSearch
-                                    showArrow={false}
-                                    onSearch={(value) => debounceEasySearch(value, "search")}
-                                    onChange={(value) => handleEasySearch(value, "select")}
-                                    filterOption={false}
-                                    notFoundContent={loadingEasySearch ? "กำลังค้นหาข้อมูล...กรุณารอสักครู่..." : "ไม่พบข้อมูล"}
-                                    // notFoundContent={checkSearching ? "ค้นหาข้อมูลชื่อลูกค้า ทะเบียนรถ หรือเบอร์โทรศัพท์" : "ไม่พบข้อมูล เพิ่มข้อมูลได้ที่ปุ่มด้านขวา"}
-                                    style={{ width: "100%" }}
-                                    disabled={mode !== "add"}
-                                    loading={loadingEasySearch}
-                                    placeholder={GetIntlMessages("พิมพ์อย่างน้อย 1 ตัวเพื่อค้นหา")}
-                                >
-                                    {getArrValue("easy_search_list").map(e => <Select.Option value={e.id} key={`easy-search-${e.id}`}>{e.value_name}</Select.Option>)}
-                                    {/* {easySearchList.map(e => <Select.Option value={e.id} key={`easy-search-${e.id}`}>{e.value_name}</Select.Option>)} */}
-
-                                </Select>
-                            </Form.Item>
-                        </Col>
-                        <Col span={12} hidden>
-                            <Form.Item label={" "}>
-                                <ModalBothCustomersAndCar textButton={GetIntlMessages("เพิ่มข้อมูลทะเบียนรถ/ลูกค้า")} callback={callbackCustomers} />
-                            </Form.Item>
-                        </Col>
-                    </>
-
-                    : null}
-
                 <Col lg={8} md={12} sm={12} xs={24}>
                     <Form.Item
                         name="customer_type"
@@ -284,50 +252,63 @@ const FormTemporaryDeliveryOrderDoc = ({ mode, calculateResult, disabledWhenDeli
                 {/* <Form.Item name="customer_list" hidden /> */}
 
                 <Col lg={8} md={12} sm={12} xs={24}>
-                    <Form.Item
-                        name="customer_id"
-                        label="ชื่อลูกค้า"
-                        rules={[
-                            {
-                                required: true,
-                                message: "กรุณาเลือกลูกค้า"
-                            },
-                        ]}
-                    >
-                        <Select
-                            showSearch
-                            showArrow={false}
-                            filterOption={false}
-                            autoFocus
-                            notFoundContent={loadingEasySearch ? "กำลังค้นหาข้อมูล...กรุณารอสักครู่..." : "ไม่พบข้อมูล"}
-                            placeholder="กรุณาพิมพ์อย่าง 1 ตัวเพื่อค้นหา"
-                            style={{ width: "100%" }}
-                            // disabled
-                            open={open}
-                            onDropdownVisibleChange={(visible) => controlOpen(visible)}
-                            disabled={mode === "view"}
-                            loading={loadingEasySearch}
-                            onSearch={(value) => debounceEasySearch(value, "search")}
-                            onSelect={(value) => handleEasySearch(value, "select")}
-                            dropdownRender={menu => (
-                                <>
-                                    {menu}
-                                    <Divider style={{ margin: '8px 0' }} />
-                                    <Space align="center" style={{ padding: '0 8px 4px' }}>
-                                        {
-                                            checkValueCustomerType() === "business" ?
-                                                <ModalBusinessCustomers controlOpen={controlOpen} textButton={GetIntlMessages(`เพิ่มข้อมูลลูกค้าธุรกิจ`)} icon={<PlusOutlined />} callback={callbackCustomers} /> :
-                                                <ModalPersonalCustomers controlOpen={controlOpen} textButton={GetIntlMessages(`เพิ่มข้อมูลลูกค้าบุคคลธรรมดา`)} icon={<PlusOutlined />} callback={callbackCustomers} />
-                                        }
-                                    </Space>
-                                </>
-                            )}
-                        >
-                            {getArrValue("customer_list").map(e => <Select.Option value={e.id} key={`customer-id-${e.id}`}>{e.customer_full_name}</Select.Option>)}
-                            {/* {easySearchList.map(e => <Select.Option value={e.id} key={`easy-search-${e.id}`}>{e.value_name}</Select.Option>)} */}
-
-                        </Select>
-                    </Form.Item>
+                    <Row gutter={8}>
+                        <Col span={mode === "view" ? 24 : 20}>
+                            <Form.Item
+                                name="customer_id"
+                                label="ชื่อลูกค้า"
+                                rules={[
+                                    {
+                                        required: true,
+                                        message: "กรุณาเลือกลูกค้า"
+                                    },
+                                ]}
+                            >
+                                <Select
+                                    showSearch
+                                    showArrow={false}
+                                    filterOption={false}
+                                    autoFocus
+                                    notFoundContent={loadingEasySearch ? "กำลังค้นหาข้อมูล...กรุณารอสักครู่..." : "ไม่พบข้อมูล"}
+                                    placeholder="กรุณาพิมพ์อย่าง 1 ตัวเพื่อค้นหา"
+                                    style={{ width: "100%" }}
+                                    // disabled
+                                    open={open}
+                                    onDropdownVisibleChange={(visible) => controlOpen(visible)}
+                                    disabled={mode === "view"}
+                                    loading={loadingEasySearch}
+                                    onSearch={(value) => debounceEasySearch(value, "search")}
+                                    onSelect={(value) => handleEasySearch(value, "select")}
+                                // dropdownRender={menu => (
+                                //     <>
+                                //         {menu}
+                                //         <Divider style={{ margin: '8px 0' }} />
+                                //         <Space align="center" style={{ padding: '0 8px 4px' }}>
+                                //             {
+                                //                 checkValueCustomerType() === "business" ?
+                                //                     <ModalBusinessCustomers controlOpen={controlOpen} textButton={GetIntlMessages(`เพิ่มข้อมูลลูกค้าธุรกิจ`)} icon={<PlusOutlined />} callback={callbackCustomers} /> :
+                                //                     <ModalPersonalCustomers controlOpen={controlOpen} textButton={GetIntlMessages(`เพิ่มข้อมูลลูกค้าบุคคลธรรมดา`)} icon={<PlusOutlined />} callback={callbackCustomers} />
+                                //             }
+                                //         </Space>
+                                //     </>
+                                // )}
+                                >
+                                    {getArrValue("customer_list").map(e => <Select.Option value={e.id} key={`customer-id-${e.id}`}>{e.customer_full_name}</Select.Option>)}
+                                </Select>
+                            </Form.Item>
+                        </Col>
+                        <Col span={mode === "view" ? 0 : 4} style={{ justifyContent: "end" }}>
+                            <Form.Item label={" "}>
+                                <Button
+                                    type='primary'
+                                    style={{ width: "100%", borderRadius: "10px" }}
+                                    onClick={() => handleOpenCustomerDataModal()}
+                                >
+                                    เลือก
+                                </Button>
+                            </Form.Item>
+                        </Col>
+                    </Row>
                 </Col>
 
                 <Col lg={8} md={12} sm={12} xs={24} hidden>
@@ -525,7 +506,20 @@ const FormTemporaryDeliveryOrderDoc = ({ mode, calculateResult, disabledWhenDeli
                     </Form.Item>
                 </Col>
             </Row>
-
+            <Modal
+                maskClosable={false}
+                open={isCustomerDataModalVisible}
+                onCancel={handleCancelCustomerDataModal}
+                width="90vw"
+                style={{ top: 5 }}
+                footer={(
+                    <>
+                        <Button onClick={() => handleCancelCustomerDataModal()}>{GetIntlMessages("กลับ")}</Button>
+                    </>
+                )}
+            >
+                {form.getFieldValue().customer_type === "person" ? <PersonalCustomersData title="จัดการข้อมูลลูกค้าบุคคลธรรมดา" callBack={callBackPickCustomer} /> : <BusinessCustomersData title="จัดการข้อมูลลูกค้าธุรกิจ" callBack={callBackPickCustomer} />}
+            </Modal>
         </>
 
     )

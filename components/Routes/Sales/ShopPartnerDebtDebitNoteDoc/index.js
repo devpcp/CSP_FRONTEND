@@ -241,7 +241,7 @@ const DebtorDoc = ({ docTypeId }) => {
         button: {
             create: true,
             name: {
-                add: GetIntlMessages(`สร้าง${`ใบเพิ่มหนี้เจ้าหนี้` ?? documentTypesName}`),
+                add: GetIntlMessages(`สร้าง`),
             },
             download: false,
             import: false,
