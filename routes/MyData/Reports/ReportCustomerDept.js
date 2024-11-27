@@ -465,7 +465,7 @@ const ReportCustomerDept = () => {
 
     /* Download Template */
     const downloadTemplate = () => {
-        window.open('../../../templates/excel/CSP_Template_ข้อมูลการขายเก่า.xlsx', '_blank');
+        console.log("downloadTemplate",downloadTemplate)
     }
 
     /** 

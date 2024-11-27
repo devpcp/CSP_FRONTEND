@@ -96,6 +96,13 @@ const ReportShopLegacySalesOut = () => {
                 key: 'document_date',
                 width: 150,
                 align: "center",
+                render: (text, record) => {
+                    return (
+                        <>
+                            <span>{text ? moment(text).format("DD/MM/YYYY") : ""} </span>
+                        </>
+                    )
+                },
             },
             {
                 title: 'ชื่อลูกค้า',
@@ -325,7 +332,15 @@ const ReportShopLegacySalesOut = () => {
 
                 }
             })
-            getDataSearch({ search: value.search, _status: value.status, page: init.configTable.page, documentdate: value.documentdate, businessPartner: value.businessPartner ,filter_by})
+            let searchModel = {
+                search: value.search,
+                _status: value.status,
+                page: init.configTable.page,
+                documentdate: value.documentdate,
+                businessPartner: value.businessPartner,
+                filter_by
+            }
+            getDataSearch(searchModel)
         } catch (error) {
 
         }
@@ -478,7 +493,7 @@ const ReportShopLegacySalesOut = () => {
 
     /* Download Template */
     const downloadTemplate = () => {
-        window.open('../../../templates/excel/CSP_Template_ข้อมูลการขายเก่า.xlsx', '_blank');
+        window.open('../../../templates/excel/template_ข้อมูลการขายเก่า.xlsx', '_blank');
     }
 
     /* Download File Error */

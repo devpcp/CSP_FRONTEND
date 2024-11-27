@@ -123,6 +123,7 @@ const SettingShop = () => {
                                 _model.holidays = _model.shop_config.holidays
                                 _model.default_warehouse_id = _model.shop_config.default_warehouse_id
                                 _model.default_shelf_id = _model.shop_config.default_shelf_id
+                                _model.enable_title_name_print_out = _model.shop_config.enable_title_name_print_out ?? false
                             }
                             try {
                                 _model.business_hours.map((e) => {
@@ -205,6 +206,7 @@ const SettingShop = () => {
                     holidays: value.holidays,
                     default_warehouse_id: value.default_warehouse_id,
                     default_shelf_id: value.default_shelf_id,
+                    enable_title_name_print_out: value.enable_title_name_print_out
                 }
             }
 
@@ -395,9 +397,9 @@ const SettingShop = () => {
                             <Col span={20}>
                                 <div className="title">{GetIntlMessages("ซ่อนต้นทุนสินค้าใบสั่งซ่อม กับใบสั่งขาย")}</div>
                             </Col>
-                            <Col span={20}>
+                            {/* <Col span={20}>
                                 <div className="title">{GetIntlMessages("ใช้งานกระบวนการสร้างใบสั่งซ่อม กับใบสั่งขาย/ใบจองสินค้า แบบดั้งเดิม")}</div>
-                            </Col>
+                            </Col> */}
                             <Col span={4}>
                                 <div className="text" style={{ color: myDealers.shop_config.enable_ShopSalesTransaction_legacyStyle ? "#03ba00" : "#d10000" }}>{myDealers.shop_config.enable_ShopSalesTransaction_legacyStyle == true ? "ใช้งาน" : "ไม่ใช้งาน"}</div>
                             </Col>
@@ -513,14 +515,31 @@ const SettingShop = () => {
                                                         />
                                                     </Form.Item>
                                                 </Col>
-                                                <Col span={20}>
+                                                {/* <Col span={20}>
                                                     ใช้งานกระบวนการสร้างใบสั่งซ่อม กับใบสั่งขาย/ใบจองสินค้า แบบดั้งเดิม
                                                     <br></br>
-                                                    {/* <Label className='second'>เปิดเมื่อ</Label> */}
                                                 </Col>
                                                 <Col span={4}>
                                                     <Form.Item
                                                         name="enable_ShopSalesTransaction_legacyStyle"
+                                                    >
+                                                        <Select
+                                                            style={{ width: 120 }}
+                                                            options={[
+                                                                { value: true, label: 'ใช้งาน' },
+                                                                { value: false, label: 'ไม่ใช้งาน' },
+                                                            ]}
+                                                        />
+                                                    </Form.Item>
+                                                </Col> */}
+                                                <Col span={20}>
+                                                    ใช้งาน คำนำหน้านาม/ประเภทกิจการ ก่อนชื่อ ใน Printout
+                                                    <br></br>
+                                                    <Label className='second'>จะแสดงคำนำหน้านาม/ประเภทกิจการก่อนชื่อ ลูกค้าที่ Printout</Label>
+                                                </Col>
+                                                <Col span={4}>
+                                                    <Form.Item
+                                                        name="enable_title_name_print_out"
                                                     >
                                                         <Select
                                                             style={{ width: 120 }}
