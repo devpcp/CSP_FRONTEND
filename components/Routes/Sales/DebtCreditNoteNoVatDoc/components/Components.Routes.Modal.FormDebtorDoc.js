@@ -196,21 +196,21 @@ const FormTemporaryDeliveryOrderDoc = ({ mode, calculateResult, disabledWhenDeli
                 case "select":
                     if (isFunction(getStatusCarLoading)) getStatusCarLoading(true);
                     const { easy_search_list } = form.getFieldValue(), findSelected = easy_search_list.find(where => where.id === value);
-
+                    console.log("findSelected", findSelected)
+                    const { data } = await API.get(`/shopTemporaryDeliveryOrderDoc/byId/${findSelected?.id}`)
                     if (!!findSelected) {
 
                         form.setFieldsValue({
                             customer_type: findSelected.customer_type,
-                            options_list: findSelected.ShopTemporaryDeliveryOrderLists ?? [],
+                            options_list: data.data.product_list ?? [],
                             // customer_list,
                             // customer_id,
                             ref_doc_list: easy_search_list,
                             ref_doc: findSelected.id,
                             arr_debt_list: [],
-                            // options_list : []
                         })
-                        await handleSearchCustomer(findSelected.customer_id, 'search', 'easy_search')
-                        await handleSearchCustomer(findSelected.customer_id, 'select', 'easy_search')
+                        // await handleSearchCustomer(findSelected.customer_id, 'search', 'easy_search')
+                        // await handleSearchCustomer(findSelected.customer_id, 'select', 'easy_search')
                     }
                     if (isFunction(getStatusCarLoading)) getStatusCarLoading(false);
                     break;
@@ -377,7 +377,6 @@ const FormTemporaryDeliveryOrderDoc = ({ mode, calculateResult, disabledWhenDeli
                                 label={GetIntlMessages("ค้นหาเอกสาร")}
                                 labelAlign='left'
                                 colon={false}
-                            // extra={GetIntlMessages("พิมพ์อย่างน้อย 1 ตัวเพื่อค้นหา")}
                             >
                                 <Select
                                     showSearch
@@ -387,15 +386,12 @@ const FormTemporaryDeliveryOrderDoc = ({ mode, calculateResult, disabledWhenDeli
                                     onChange={(value) => handleEasySearch(value, "select")}
                                     filterOption={false}
                                     notFoundContent={loadingEasySearch ? "กำลังค้นหาข้อมูล...กรุณารอสักครู่..." : "ไม่พบข้อมูล"}
-                                    // notFoundContent={checkSearching ? "ค้นหาข้อมูลชื่อลูกค้า ทะเบียนรถ หรือเบอร์โทรศัพท์" : "ไม่พบข้อมูล เพิ่มข้อมูลได้ที่ปุ่มด้านขวา"}
                                     style={{ width: "100%" }}
                                     disabled={mode === "view"}
                                     loading={loadingEasySearch}
                                     placeholder={GetIntlMessages("พิมพ์อย่างน้อย 1 ตัวเพื่อค้นหา")}
                                 >
                                     {getArrValue("easy_search_list").map(e => <Select.Option value={e.id} key={`easy-search-${e.id}`}>{`${e.code_id} -> ${e.customer_full_name}`}</Select.Option>)}
-                                    {/* {easySearchList.map(e => <Select.Option value={e.id} key={`easy-search-${e.id}`}>{e.value_name}</Select.Option>)} */}
-
                                 </Select>
                             </Form.Item>
                         </Col>
@@ -410,10 +406,6 @@ const FormTemporaryDeliveryOrderDoc = ({ mode, calculateResult, disabledWhenDeli
                     </>
 
                     : null}
-
-
-
-                {/* <Form.Item name="customer_list" hidden /> */}
 
                 <Col lg={8} md={12} sm={12} xs={24}>
                     <Form.Item
@@ -468,16 +460,17 @@ const FormTemporaryDeliveryOrderDoc = ({ mode, calculateResult, disabledWhenDeli
                             )}
                         >
                             {getArrValue("customer_list").map(e => <Select.Option value={e.id} key={`customer-id-${e.id}`}>{e.customer_full_name}</Select.Option>)}
-
                         </Select>
                     </Form.Item>
                 </Col>
+
 
 
                 <Col lg={8} md={12} sm={12} xs={24}>
                     <Form.Item
                         name="customer_credit_debt_unpaid_balance"
                         label="จำนวนเงินค้างชำระ"
+
                     >
                         <InputNumber disabled stringMode step={"0.01"} min={0} precision={2} style={{ width: "100%" }} formatter={(value) => !!value && value.length > 0 ? `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',') : ""}
                             parser={(value) => value.replace(/\$\s?|(,*)/g, '')} />
@@ -506,6 +499,8 @@ const FormTemporaryDeliveryOrderDoc = ({ mode, calculateResult, disabledWhenDeli
                         </Select>
                     </Form.Item>
                 </Col>
+
+
 
                 <Col lg={8} md={12} sm={12} xs={24}>
                     <Form.Item
@@ -543,6 +538,7 @@ const FormTemporaryDeliveryOrderDoc = ({ mode, calculateResult, disabledWhenDeli
                     </Form.Item>
                 </Col>
 
+
                 <Col lg={8} md={12} sm={12} xs={24}>
                     <Form.Item
                         name="debt_credit_note_type"
@@ -574,7 +570,6 @@ const FormTemporaryDeliveryOrderDoc = ({ mode, calculateResult, disabledWhenDeli
                             loading={loadingEasySearch}
                         >
                             {documentTypes.map((e, index) => <Select.Option value={e.id} key={`doc-type-${e.id}`}>{e?.type_name[locale.locale]}</Select.Option>)}
-                            {/* {getArrValue("vehicles_customers_list").map((e, index) => <Select.Option value={e.id} key={`customer-phone-${index}`}>{e}</Select.Option>)} */}
                         </Select>
                     </Form.Item>
                 </Col>
@@ -588,7 +583,7 @@ const FormTemporaryDeliveryOrderDoc = ({ mode, calculateResult, disabledWhenDeli
                             showArrow={false}
                             filterOption={false}
                             style={{ width: "100%" }}
-                            disabled
+                            disabled={mode === "view"}
                             loading={loadingEasySearch}
                             onSelect={() => calculateResult()}
                         >

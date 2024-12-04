@@ -25,7 +25,6 @@ const ComponentsRoutesDocumentDebtLists = ({ onFinish, calculateResult, mode }) 
     const [loadingSearch, setLoadingSearch] = useState(false)
 
     const checkTaxId = Form.useWatch("tax_type_id", form)
-    console.log("checkta", checkTaxId)
     const isModalVisible = Form.useWatch("isModalVisible", { form, preserve: true })
 
     // useEffect(() => {
@@ -298,8 +297,8 @@ const ComponentsRoutesDocumentDebtLists = ({ onFinish, calculateResult, mode }) 
                     <Form.Item key={`price-unit-${index}`} style={{ margin: 0 }} name={["arr_debt_list", index, "price_unit"]}>
                         <InputNumber
                             disabled={mode === "view"}
-                            step="1"
-                            stringMode
+                            step="1" 
+                            stringMode 
                             precision={2}
                             style={{ width: "100%" }}
                             formatter={(value) => !!value && value.length > 0 ? `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',') : ""}
@@ -813,7 +812,7 @@ const ComponentsRoutesDocumentDebtLists = ({ onFinish, calculateResult, mode }) 
     }
 
     const MatchRound = (value) => (Math.round(+value * 100) / 100).toFixed(2)
-
+    
     return (
         <>
             <Row justify={"end"} hidden={mode === "view"}>

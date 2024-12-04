@@ -475,7 +475,6 @@ const PaymentDocsV2 = ({ docId, title, loading, handleCancelDebtDoc, initForm, c
     };
 
     /* End Dropdown Cancel Payment Doc */
-
     const MatchRound = (value) => (Math.round(+value * 100) / 100).toFixed(2)
     
     return (
