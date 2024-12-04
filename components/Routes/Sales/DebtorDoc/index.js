@@ -1,5 +1,5 @@
-import { CarOutlined, FileAddOutlined, UserOutlined, DownOutlined, DollarOutlined } from '@ant-design/icons'
-import { Button, Col, Form, message, Row, Tabs, Dropdown, Space, Menu } from 'antd'
+import { CarOutlined, FileAddOutlined, UserOutlined, DownOutlined, DollarOutlined, FileImageOutlined } from '@ant-design/icons'
+import { Button, Col, Form, message, Row, Tabs, Dropdown, Space, Menu, Badge, Modal } from 'antd'
 import { forEach, get, isArray, isEmpty, isPlainObject } from 'lodash'
 import moment from 'moment'
 import React, { useEffect, useState } from 'react'
@@ -17,7 +17,8 @@ import FormTemporaryDeliveryOrderDoc from './components/Components.Routes.Modal.
 import Tab1ServiceAndProductV2 from './components/Components.Routes.Modal.Tab1.DocumentDebtLists'
 import TabPaymentInfo from './components/Components.Routes.Modal.Tab.PaymentInfo'
 import PaymentDocs from './components/Components.Routes.Modal.PaymentDocsV2'
-
+import Tab4DocImage from './components/Components.Routes.Modal.Tab4.DocImage'
+import { UploadImageCustomPathMultiple, DeleteImageCustomPathMultiple } from '../../../shares/FormUpload/API'
 
 const DebtorDoc = ({ docTypeId }) => {
 
@@ -36,8 +37,11 @@ const DebtorDoc = ({ docTypeId }) => {
     const [disabledWhenDeliveryDocActive, setDisabledWhenDeliveryDocActive] = useState(false)
     const [disabledWhenTaxInvoiceDocActive, setDisabledWhenTaxInvoiceDocActive] = useState(false)
     const [paymentTransactions, setPaymentTransactions] = useState([])
+    const [isEditImageModalVisible, setIsEditImageModalVisible] = useState(false);
 
     const [form] = Form.useForm();
+    const [formEditImage] = Form.useForm();
+    const [idEdit, setIsIdEdit] = useState(null);
 
     useEffect(() => {
         getDataSearch({
@@ -424,7 +428,28 @@ const DebtorDoc = ({ docTypeId }) => {
                     )
                 },
             },
+            {
+                title: () => GetIntlMessages("รูป"),
+                dataIndex: 'details',
+                key: 'details',
+                width: 120,
+                align: "center",
+                render: (text, record) => {
 
+                    let { upload_payment_list } = record.details
+                    let checkPaymentImage = isArray(upload_payment_list) ? upload_payment_list.length > 0 : false
+
+                    let checkHaveImage = checkPaymentImage
+                    return (
+                        <>
+                            <Badge dot={checkHaveImage}>
+                                <Button type='text' onClick={() => handleOpenEditImageModal(record)} icon={<FileImageOutlined style={{ fontSize: "18px" }} />}></Button>
+                            </Badge>
+                        </>
+                    )
+                },
+
+            },
             // {
             //     title: () => GetIntlMessages("หมายเหตุ(ภายใน)"),
             //     dataIndex: 'details',
@@ -569,6 +594,7 @@ const DebtorDoc = ({ docTypeId }) => {
         setDisabledWhenDeliveryDocActive(false)
         setDisabledWhenTaxInvoiceDocActive(false)
         setActiveKeyTab("1")
+        setIsIdEdit(null)
         form.setFieldsValue({
             isModalVisible: false
         })
@@ -597,6 +623,7 @@ const DebtorDoc = ({ docTypeId }) => {
                 // console.log('data addEditViewModal :>> ', data);
                 if (data.status == "success") {
                     // setDataSendToComponeteToPrint(data.data)
+                    setIsIdEdit(id)
                     setFormValueData(data.data)
                 }
             } else {
@@ -616,6 +643,8 @@ const DebtorDoc = ({ docTypeId }) => {
                     // repair_man_list : [],
                     easy_search_list: [],
                     debtor_billing_list: [],
+                    upload_payment_list: [],
+                    upload_remove_list: []
                 })
             }
             // setActiveKeyTab("1")
@@ -670,6 +699,8 @@ const DebtorDoc = ({ docTypeId }) => {
                 customer_id: customer_type === "person" ? per_customer_id : bus_customer_id,
                 remark: details.remark ?? null,
                 remark_inside: details.remark_inside ?? null,
+                upload_payment_list: details?.upload_payment_list ?? [],
+                upload_remove_list: [],
             }
 
             if (isArray(filterPayment) && filterPayment.length > 0) {
@@ -899,6 +930,60 @@ const DebtorDoc = ({ docTypeId }) => {
                 customer_credit_debt_payment_period,
             } = values;
 
+
+            let shopId = authUser?.UsersProfile?.shop_id
+            let directory = "shopDebtorDocument"
+            let upload_payment_list = []
+
+            if (values.upload_payment_list) {
+                if (values?.upload_payment_list?.fileList?.length > 0) {
+                    await Promise.all(values.upload_payment_list.fileList.map(async (e, index) => {
+                        await UploadImageCustomPathMultiple(e, { shopId: shopId, idEdit: idEdit, directory: directory, subject: "payment" }).then(({ data }) => {
+                            if (data.status === "success") {
+                                try {
+                                    upload_payment_list.push(
+                                        {
+                                            uid: index,
+                                            name: e.name,
+                                            status: 'done',
+                                            url: process.env.NEXT_PUBLIC_DIRECTORY + data.data.path,
+                                            path: data.data.path
+                                        }
+                                    )
+                                    e.url = process.env.NEXT_PUBLIC_DIRECTORY + data.data.path
+                                    e.path = data.data.path
+                                } catch (error) {
+                                    console.log("error: ", error)
+                                }
+                            } else if (data.status === "failed") {
+                                e.path = e.url.split(process.env.NEXT_PUBLIC_DIRECTORY)[1]
+                                // message.error(`รูปที่ ${index + 1} : ${data.data}`)
+                            }
+                        })
+                    })
+                    )
+                }
+            }
+
+            if (values.upload_remove_list) {
+                if (values?.upload_remove_list?.length > 0) {
+                    await Promise.all(values.upload_remove_list.map(async (e, index) => {
+                        await DeleteImageCustomPathMultiple(e.path).then(({ data }) => {
+                            if (data.status === "success") {
+                                try {
+
+                                } catch (error) {
+                                    console.log("error: ", error)
+                                }
+                            } else if (data.status === "failed") {
+                            }
+                        })
+                    })
+                    )
+                }
+            }
+
+
             const model = {
                 shop_id: authUser.UsersProfile.shop_id,
                 doc_type_id: docTypeId,
@@ -914,6 +999,7 @@ const DebtorDoc = ({ docTypeId }) => {
                     ref_doc: values.ref_doc ?? null,
                     remark,
                     remark_inside,
+                    upload_payment_list: await values.upload_payment_list.fileList === undefined ? await values.upload_payment_list : values.upload_payment_list.fileList,
                 },
                 shopCustomerDebtLists: !!shopCustomerDebtLists && shopCustomerDebtLists.length > 0 ?
                     shopCustomerDebtLists.map((e, index) => {
@@ -1212,6 +1298,130 @@ const DebtorDoc = ({ docTypeId }) => {
 
     const MatchRound = (value) => (Math.round(+value * 100) / 100).toFixed(2)
 
+    const handleCancelEditImageModal = () => {
+        try {
+            formEditImage.resetFields()
+            setIsEditImageModalVisible(false)
+        } catch (error) {
+
+        }
+    }
+
+    const handleOpenEditImageModal = (value) => {
+        try {
+            console.log("value", value)
+            formEditImage.resetFields()
+
+            formEditImage.setFieldsValue({
+                id: value.id,
+                upload_payment_list: value.details?.upload_payment_list ?? [],
+                upload_remove_list: [],
+                ShopCustomerDebtLists: value.ShopCustomerDebtLists,
+                details: value.details
+            })
+            setIsEditImageModalVisible(true)
+        } catch (error) {
+
+        }
+    }
+
+    const handleOkEditImageModal = () => {
+        formEditImage.submit()
+    }
+
+    const onFinishEditImage = async (values) => {
+        try {
+            setLoading(true)
+            setCarPreLoading(true)
+            console.log("vl", values)
+            let idEdit = values.id
+
+            let shopId = authUser?.UsersProfile?.shop_id
+            let directory = "shopDebtorDocument"
+            let upload_payment_list = []
+           
+
+            if (values.upload_payment_list) {
+                if (values?.upload_payment_list?.fileList?.length > 0) {
+                    await Promise.all(values.upload_payment_list.fileList.map(async (e, index) => {
+                        await UploadImageCustomPathMultiple(e, { shopId: shopId, idEdit: idEdit, directory: directory, subject: "payment" }).then(({ data }) => {
+                            if (data.status === "success") {
+                                try {
+                                    upload_payment_list.push(
+                                        {
+                                            uid: index,
+                                            name: e.name,
+                                            status: 'done',
+                                            url: process.env.NEXT_PUBLIC_DIRECTORY + data.data.path,
+                                            path: data.data.path
+                                        }
+                                    )
+                                    e.url = process.env.NEXT_PUBLIC_DIRECTORY + data.data.path
+                                    e.path = data.data.path
+                                } catch (error) {
+                                    console.log("error: ", error)
+                                }
+                            } else if (data.status === "failed") {
+                                e.path = e.url.split(process.env.NEXT_PUBLIC_DIRECTORY)[1]
+                                // message.error(`รูปที่ ${index + 1} : ${data.data}`)
+                            }
+                        })
+                    })
+                    )
+                }
+            }
+
+            if (values.upload_remove_list) {
+                if (values?.upload_remove_list?.length > 0) {
+                    await Promise.all(values.upload_remove_list.map(async (e, index) => {
+                        await DeleteImageCustomPathMultiple(e.path).then(({ data }) => {
+                            if (data.status === "success") {
+                                try {
+
+                                } catch (error) {
+                                    console.log("error: ", error)
+                                }
+                            } else if (data.status === "failed") {
+                            }
+                        })
+                    })
+                    )
+                }
+            }
+
+
+            const model = {
+                shopTemporaryDeliveryOrderLists: values.ShopTemporaryDeliveryOrderLists,
+                details: values.details,
+            }
+            delete model.details.meta_data
+            model.details.upload_payment_list = await values.upload_payment_list.fileList === undefined ? await values.upload_payment_list : values.upload_payment_list.fileList
+            console.log(model)
+            let res
+            res = await API.put(`/shopCustomerDebtDoc/put/${values.id}`, model)
+            if (res) {
+                setLoading(false)
+                setCarPreLoading(false)
+                handleCancelEditImageModal()
+                getDataSearch({
+                    search: init.modelSearch.search ?? "",
+                    _status: init.modelSearch.status,
+                    limit: init.configTable.limit,
+                    page: init.configTable.page,
+                    sort: init.configSort.sort,
+                    order: (init.configSort.order === "descend" ? "desc" : "asc"),
+                    doc_date_startDate: isArray(init.modelSearch.select_date) ? init.modelSearch.select_date[0] ?? null : null,
+                    doc_date_endDate: isArray(init.modelSearch.select_date) ? init.modelSearch.select_date[1] ?? null : null,
+                    payment_paid_status: init.modelSearch.payment_paid_status,
+                })
+            }
+
+        } catch (error) {
+            console.log("finish edit image error", error)
+        }
+    }
+
+
     return (
         <>
             <SearchInput configSearch={configSearch} configModal={configModal} loading={loading} onAdd={() => addEditViewModal("add", null)} value={modelSearch} />
@@ -1309,6 +1519,11 @@ const DebtorDoc = ({ docTypeId }) => {
                                                 key: '2',
                                                 children: <TabPaymentInfo data={paymentTransactions} />,
                                             },
+                                            {
+                                                label: (<span><FileImageOutlined style={{ fontSize: 18 }} /> รูปภาพ</span>),
+                                                key: '3',
+                                                children: <Tab4DocImage mode={configModal.mode} disabledWhenDeliveryDocActive={disabledWhenDeliveryDocActive} />,
+                                            },
                                         ]}
                                     />
 
@@ -1316,9 +1531,46 @@ const DebtorDoc = ({ docTypeId }) => {
                                 </div>
                             </div>
                     }
+                    <Form.Item name="upload_payment_list">
 
+                    </Form.Item>
+                    <Form.Item name="upload_remove_list">
+
+                    </Form.Item>
                 </Form>
             </ModalFullScreen>
+
+            <Modal
+                maskClosable={false}
+                open={isEditImageModalVisible}
+                onCancel={handleCancelEditImageModal}
+                width="90vw"
+                style={{ top: 5 }}
+                footer={(
+                    <>
+                        <Button onClick={() => handleOkEditImageModal()}>{GetIntlMessages("บันทึก")}</Button>
+                        <Button onClick={() => handleCancelEditImageModal()}>{GetIntlMessages("กลับ")}</Button>
+                    </>
+                )}
+            >
+                <Form
+                    form={formEditImage}
+                    labelCol={{ span: 24 }}
+                    wrapperCol={{ span: 24 }}
+                    layout={"vertical"}
+                    labelWrap
+                    onFinish={onFinishEditImage}
+                    // onFinishFailed={onFinishFailed}
+                    scrollToFirstError={true}
+                >
+                    <Form.Item name="id" hidden></Form.Item>
+                    <Form.Item name="details" hidden> </Form.Item>
+                    <Form.Item name="upload_payment_list" hidden></Form.Item>
+                    <Form.Item name="upload_remove_list" hidden></Form.Item>
+                    <Form.Item name="ShopCustomerDebtLists" hidden></Form.Item>
+                    <Tab4DocImage mode={"edit"} />
+                </Form>
+            </Modal>
         </>
     )
 }

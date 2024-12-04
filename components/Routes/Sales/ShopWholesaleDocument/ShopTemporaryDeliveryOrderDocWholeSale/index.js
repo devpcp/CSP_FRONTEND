@@ -383,29 +383,29 @@ const ShopTemporaryDeliveryOrderDocWholeSale = ({ docTypeId, title = null, callB
                     return index + 1
                 },
             },
-            {
-                title: () => (<>{GetIntlMessages("พิมพ์")}  <Popover trigger="click" content={<PopOverSettingPrint />} title="ตั้งค่าการพิมพ์"><Button type='primary' icon={<SettingOutlined />}></Button></Popover></>),
-                dataIndex: 'details',
-                key: 'details',
-                width: 120,
-                align: "center",
-                render: (text, record) => {
-                    console.log("authUser", authUser)
-                    let query = {
-                        pages: "test",
-                        documentId: record?.id,
-                        docTypeId: docTypeId,
-                        docTypeAPIName: "shopTemporaryDeliveryOrderDoc",
-                        shopId: authUser?.UsersProfile?.ShopsProfile?.id
-                    }
+            // {
+            //     title: () => (<>{GetIntlMessages("พิมพ์")}  <Popover trigger="click" content={<PopOverSettingPrint />} title="ตั้งค่าการพิมพ์"><Button type='primary' icon={<SettingOutlined />}></Button></Popover></>),
+            //     dataIndex: 'details',
+            //     key: 'details',
+            //     width: 120,
+            //     align: "center",
+            //     render: (text, record) => {
+            //         console.log("authUser", authUser)
+            //         let query = {
+            //             pages: "test",
+            //             documentId: record?.id,
+            //             docTypeId: docTypeId,
+            //             docTypeAPIName: "shopTemporaryDeliveryOrderDoc",
+            //             shopId: authUser?.UsersProfile?.ShopsProfile?.id
+            //         }
 
-                    return (
-                        <Button onClick={() => window.open(`/pdfview?${new URLSearchParams(query).toString()}`)}>
-                            ปริ้น
-                        </Button>
-                    )
-                },
-            },
+            //         return (
+            //             <Button onClick={() => window.open(`/pdfview?${new URLSearchParams(query).toString()}`)}>
+            //                 ปริ้น
+            //             </Button>
+            //         )
+            //     },
+            // },
             // {
             //     title: () => GetIntlMessages(`เลขที่${configPage("table-status-2")}`),
             //     dataIndex: 'details',
