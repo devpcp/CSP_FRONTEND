@@ -12,11 +12,11 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     backgroundColor: "#fff",
     fontFamily: 'THSarabunNew',
-    fontSize: 16,
-    paddingTop: 50,
-    paddingLeft: 30,
-    paddingRight: 30,
-    lineHeight: 1.2,
+    fontSize: 15,
+    paddingTop: 55,
+    paddingLeft: 25,
+    paddingRight: 20,
+    lineHeight: 1,
     flexFlow: "row wrap",
   },
   section: {
@@ -53,11 +53,23 @@ const styles = StyleSheet.create({
     maxWidth: "40%",
     // backgroundColor: "red"
   },
+  Col35: {
+    display: "block",
+    flex: "0 0 35%",
+    maxWidth: "35%",
+    // backgroundColor: "green"
+  },
   Col33: {
     display: "block",
     flex: "0 0 33.33333333%",
     maxWidth: "33.33333333%",
     // backgroundColor: "green"
+  },
+  Col30: {
+    display: "block",
+    flex: "0 0 30%",
+    maxWidth: "30%",
+    // backgroundColor: "red"
   },
   Col25: {
     display: "block",
@@ -95,52 +107,52 @@ const styles = StyleSheet.create({
   },
   table: {
     area: {
-      minHeight: "60vh",
+      minHeight: "46vh",
       // backgroundColor: "orange",
       padding: "30px 0"
     },
     seqNumber: {
       // border: "1px",
-      width: "5%",
-      textAlign: "center"
+      width: "3%",
+      textAlign: "start"
     },
     productName: {
       // border: "1px",
-      width: "40%"
+      width: "44%"
     },
     dot: {
       // border: "1px",
-      width: "5%",
+      width: "7%",
       textAlign: "center"
     },
     amount: {
       // border: "1px",
-      width: "5%",
-      textAlign: "right"
+      width: "30px",
+      textAlign: "center"
     },
     priceUnit: {
       // border: "1px",
-      width: "10%",
+      width: "40px",
       textAlign: "right"
     },
     priceDiscount: {
       // border: "1px",
-      width: "10%",
+      width: "40px",
       textAlign: "right"
     },
     priceDiscount2: {
       // border: "1px",
-      width: "10%",
+      width: "40px",
       textAlign: "right"
     },
     priceDiscount3: {
       // border: "1px",
-      width: "10%",
+      width: "40px",
       textAlign: "right"
     },
     priceGrandTotal: {
       // border: "1px",
-      width: "10%",
+      width: "14%",
       textAlign: "right"
     },
   },
@@ -166,9 +178,9 @@ const MyDocument = ({ docData }) => {
     <Document>
       <Page size="A4" style={styles.page} wrap={"true"}>
         <View style={styles.row}>
-          <View style={styles.Col5}>
+          <View style={styles.Col10}>
           </View>
-          <View style={styles.Col45}>
+          <View style={styles.Col40}>
             <Text>{docData?.customerData?.customer_name}</Text>
             <Text>{docData?.customerData?.customer_address}</Text>
             <Text>{docData?.customerData?.customer_address_2}</Text>
@@ -176,12 +188,12 @@ const MyDocument = ({ docData }) => {
             <Text>{docData?.customerData?.customer_mobile}</Text>
             <Text>{docData?.customerData?.customer_tax_id}</Text>
           </View>
-          <View style={styles.Col25}>
+          <View style={styles.Col35}>
             <View style={styles.invoiceDateContainer}>
               {/* <Text>{docData?.customerName}</Text> */}
             </View>
           </View>
-          <View style={styles.Col25}>
+          <View style={styles.Col15}>
             <View style={styles.invoiceDateContainer}>
               <Text>{docData?.documentData?.code_id}</Text>
             </View>
