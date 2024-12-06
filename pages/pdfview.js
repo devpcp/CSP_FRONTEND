@@ -89,7 +89,228 @@ const PDFView = () => {
         let doc_time = moment(model?.created_date).format("HH:mm")
         let due_date = moment(model?.doc_date).add('days', debt_due_date).format("DD/MM/YYYY")
         let sales_man = shopUser?.find(x => x?.id === details?.sales_man[0])?.UsersProfile?.fname[locale.locale]
-
+        let pp = [
+            {
+                "seq_number": 1,
+                "product_name": "OT 245/40R18 KC2000",
+                "dot_mfd": "4024",
+                "amount": "4",
+                "price_unit": "2,176.00",
+                "price_discount": "2.00",
+                "price_discount_2": "96.00",
+                "price_discount_3": "754.00",
+                "price_grand_total": "8,704.00"
+            },
+            {
+                "seq_number": 2,
+                "product_name": "OT 245/70R16/10PR SA2000",
+                "dot_mfd": "3924",
+                "amount": "2",
+                "price_unit": "2,295.00",
+                "price_discount": "0.00",
+                "price_discount_2": "0.00",
+                "price_discount_3": "0.00",
+                "price_grand_total": "4,590.00"
+            },
+            {
+                "seq_number": 3,
+                "product_name": "OT 225/60R18 EK1000",
+                "dot_mfd": "4024",
+                "amount": "4",
+                "price_unit": "1,827.00",
+                "price_discount": "0.00",
+                "price_discount_2": "0.00",
+                "price_discount_3": "0.00",
+                "price_grand_total": "7,308.00"
+            },
+            {
+                "seq_number": 4,
+                "product_name": "OT 215/50R17 KC2000",
+                "dot_mfd": "3924",
+                "amount": "10",
+                "price_unit": "1,449.00",
+                "price_discount": "0.00",
+                "price_discount_2": "0.00",
+                "price_discount_3": "0.00",
+                "price_grand_total": "14,490.00"
+            },
+            {
+                "seq_number": 5,
+                "product_name": "OT 195/50R15 EK1000",
+                "dot_mfd": "2724",
+                "amount": "3",
+                "price_unit": "999.00",
+                "price_discount": "0.00",
+                "price_discount_2": "0.00",
+                "price_discount_3": "0.00",
+                "price_grand_total": "2,997.00"
+            },
+            {
+                "seq_number": 6,
+                "product_name": "OT 205/55R16 KC1000",
+                "dot_mfd": "4024",
+                "amount": "20",
+                "price_unit": "1,488.00",
+                "price_discount": "0.00",
+                "price_discount_2": "0.00",
+                "price_discount_3": "0.00",
+                "price_grand_total": "29,760.00"
+            },
+            {
+                "seq_number": 7,
+                "product_name": "OT 205/55R16 KC1000",
+                "dot_mfd": "4024",
+                "amount": "8",
+                "price_unit": "2,808.00",
+                "price_discount": "0.00",
+                "price_discount_2": "0.00",
+                "price_discount_3": "0.00",
+                "price_grand_total": "22,464.00"
+            },
+            {
+                "seq_number": 8,
+                "product_name": "OT 205/55R16 KC2000",
+                "dot_mfd": "4024",
+                "amount": "4",
+                "price_unit": "1,610.00",
+                "price_discount": "0.00",
+                "price_discount_2": "0.00",
+                "price_discount_3": "0.00",
+                "price_grand_total": "6,440.00"
+            },
+            {
+                "seq_number": 9,
+                "product_name": "OT 215/45R17 KC2000",
+                "dot_mfd": "2724",
+                "amount": "8",
+                "price_unit": "1,377.00",
+                "price_discount": "0.00",
+                "price_discount_2": "0.00",
+                "price_discount_3": "0.00",
+                "price_grand_total": "11,016.00"
+            },
+            {
+                "seq_number": 10,
+                "product_name": "OT 215/55R17 KC2000",
+                "dot_mfd": "4724",
+                "amount": "20",
+                "price_unit": "1,610.00",
+                "price_discount": "0.00",
+                "price_discount_2": "0.00",
+                "price_discount_3": "0.00",
+                "price_grand_total": "32,200.00"
+            },
+            {
+                "seq_number": 11,
+                "product_name": "OT 225/55R17 KC2000",
+                "dot_mfd": "2724",
+                "amount": "10",
+                "price_unit": "1,680.00",
+                "price_discount": "0.00",
+                "price_discount_2": "0.00",
+                "price_discount_3": "0.00",
+                "price_grand_total": "16,800.00"
+            },
+            {
+                "seq_number": 12,
+                "product_name": "OT 235/45R18 KC2000",
+                "dot_mfd": "4024",
+                "amount": "11",
+                "price_unit": "2,180.00",
+                "price_discount": "0.00",
+                "price_discount_2": "0.00",
+                "price_discount_3": "0.00",
+                "price_grand_total": "23,980.00"
+            },
+            {
+                "seq_number": 13,
+                "product_name": "OT 265/65R17 SA1000",
+                "dot_mfd": "2724",
+                "amount": "10",
+                "price_unit": "2,520.00",
+                "price_discount": "0.00",
+                "price_discount_2": "0.00",
+                "price_discount_3": "0.00",
+                "price_grand_total": "25,200.00"
+            },
+            {
+                "seq_number": 14,
+                "product_name": "OT 265/65R17 SA1000",
+                "dot_mfd": "2724",
+                "amount": "10",
+                "price_unit": "2,520.00",
+                "price_discount": "0.00",
+                "price_discount_2": "0.00",
+                "price_discount_3": "0.00",
+                "price_grand_total": "25,200.00"
+            },
+            {
+                "seq_number": 15,
+                "product_name": "OT 265/65R17 SA1000",
+                "dot_mfd": "2724",
+                "amount": "10",
+                "price_unit": "2,520.00",
+                "price_discount": "0.00",
+                "price_discount_2": "0.00",
+                "price_discount_3": "0.00",
+                "price_grand_total": "25,200.00"
+            },
+            {
+                "seq_number": 16,
+                "product_name": "OT 265/65R17 SA1000",
+                "dot_mfd": "2724",
+                "amount": "10",
+                "price_unit": "2,520.00",
+                "price_discount": "0.00",
+                "price_discount_2": "0.00",
+                "price_discount_3": "0.00",
+                "price_grand_total": "25,200.00"
+            },
+            {
+                "seq_number": 17,
+                "product_name": "OT 265/65R17 SA1000",
+                "dot_mfd": "2724",
+                "amount": "10",
+                "price_unit": "2,520.00",
+                "price_discount": "0.00",
+                "price_discount_2": "0.00",
+                "price_discount_3": "0.00",
+                "price_grand_total": "25,200.00"
+            },
+            {
+                "seq_number": 18,
+                "product_name": "OT 265/65R17 SA1000",
+                "dot_mfd": "2724",
+                "amount": "10",
+                "price_unit": "2,520.00",
+                "price_discount": "0.00",
+                "price_discount_2": "0.00",
+                "price_discount_3": "0.00",
+                "price_grand_total": "25,200.00"
+            },
+            {
+                "seq_number": 19,
+                "product_name": "OT 265/65R17 SA1000",
+                "dot_mfd": "2724",
+                "amount": "10",
+                "price_unit": "2,520.00",
+                "price_discount": "0.00",
+                "price_discount_2": "0.00",
+                "price_discount_3": "0.00",
+                "price_grand_total": "25,200.00"
+            },
+            {
+                "seq_number": 20,
+                "product_name": "OT 265/65R17 SA1000",
+                "dot_mfd": "2724",
+                "amount": "10",
+                "price_unit": "2,520.00",
+                "price_discount": "0.00",
+                "price_discount_2": "0.00",
+                "price_discount_3": "0.00",
+                "price_grand_total": "25,200.00"
+            }
+        ]
         let newDocData = {
             customerData: {
                 customer_name: `${customer_full_name}${customer_branch}`,
@@ -106,8 +327,9 @@ const PDFView = () => {
                 sales_man: sales_man,
                 warehouse: shop_local_name,
                 doc_time: doc_time,
-                product_list: product_list,
-                remark: model?.details?.remark,
+                product_list: pp,
+                // remark: model?.details?.remark,
+                remark: "ส่งขนส่ง Kerry",
                 price_sub_total: MatchRoundComma(model?.price_sub_total),
                 price_discount_total: MatchRoundComma(model?.price_discount_total),
                 price_grand_total: MatchRoundComma(model?.price_grand_total),
