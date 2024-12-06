@@ -170,7 +170,7 @@ const FormTemporaryDeliveryOrderDoc = ({ mode, calculateResult, disabledWhenDeli
                     if (!!value) {
                         const { doc_sales_type } = form.getFieldValue();
 
-                        const { data } = await API.get(`/shopTemporaryDeliveryOrderDoc/all?search=${value}&is_draft=not_draft&status=active&ShopServiceOrderDoc__is_draft=not_draft&page=1&limit=25&sort=doc_date&order=desc&ShopServiceOrderDoc__doc_sales_type=${doc_sales_type}`)
+                        const { data } = await API.get(`/shopTemporaryDeliveryOrderDoc/all?search=${value}&is_draft=not_draft&status=active&ShopServiceOrderDoc__is_draft=not_draft&page=1&limit=10&sort=doc_date&order=desc&ShopServiceOrderDoc__doc_sales_type=${doc_sales_type}`)
 
                         if (data.status === "success") {
 
@@ -202,15 +202,21 @@ const FormTemporaryDeliveryOrderDoc = ({ mode, calculateResult, disabledWhenDeli
 
                         form.setFieldsValue({
                             customer_type: findSelected.customer_type,
-                            options_list: data.data.product_list ?? [],
+                            options_list: findSelected.ShopTemporaryDeliveryOrderLists.map((e, i) => {
+                                let model = {
+                                    ...e,
+                                    ShopProduct: e?.details?.meta_data?.ShopProduct
+                                }
+                                return model
+                            }) ?? [],
                             // customer_list,
                             // customer_id,
                             ref_doc_list: easy_search_list,
                             ref_doc: findSelected.id,
                             arr_debt_list: [],
                         })
-                        // await handleSearchCustomer(findSelected.customer_id, 'search', 'easy_search')
-                        // await handleSearchCustomer(findSelected.customer_id, 'select', 'easy_search')
+                        await handleSearchCustomer(findSelected.customer_id, 'search', 'easy_search')
+                        await handleSearchCustomer(findSelected.customer_id, 'select', 'easy_search')
                     }
                     if (isFunction(getStatusCarLoading)) getStatusCarLoading(false);
                     break;

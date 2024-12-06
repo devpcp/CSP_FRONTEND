@@ -579,9 +579,7 @@ const DebtorDoc = ({ docTypeId, title = null, callBack, }) => {
             setCarPreLoading(true)
             console.log('value setFormValueData:>> ', value);
             const { ShopCustomerDebtCreditNoteListT2s, details, bus_customer_id, per_customer_id, ShopPersonalCustomer, ShopBusinessCustomer, shop_temporary_delivery_order_doc_id, debt_credit_note_type } = value, customer_type = !!per_customer_id ? "person" : "business";
-            // const filterPayment = value.ShopPaymentTransactions.filter(where => !where.canceled_payment_by && !where.canceled_payment_date);
-            // setPaymentTransactions(filterPayment)
-            // // console.log("filterPayment", filterPayment)
+          
             function customCustomerName(arr, type) {
                 if (type === "person") {
                     return arr.map(e => { return { ...e, customer_full_name: `${e.customer_name.first_name[locale.locale]} ${e.customer_name.last_name[locale.locale]}` } })
@@ -589,15 +587,37 @@ const DebtorDoc = ({ docTypeId, title = null, callBack, }) => {
                     return arr.map(e => { return { ...e, customer_full_name: `${e.customer_name[locale.locale]}` } })
                 }
             }
-            // if (!!details.ref_doc) {
-            //     const { data } = await API.get(`/shopCustomerDebtBillingNoteDoc/byId/${details.ref_doc}`)
-            //     if (data.status === "success") {
-            //         debtor_billing_list = [data.data]
-            //     }
-
-            // }
 
             let options_list = []
+            if (!!ShopCustomerDebtCreditNoteListT2s && isArray(ShopCustomerDebtCreditNoteListT2s) && ShopCustomerDebtCreditNoteListT2s.length > 0) {
+                options_list = ShopCustomerDebtCreditNoteListT2s.map((e, index) => {
+                    if (e.details.meta_data.Product) {
+                        return {
+                            ...e,
+                            list_id: e.details.meta_data.Product.master_path_code_id,
+                            list_name: e.details.meta_data.Product.product_name[locale.locale]
+                        }
+                    } else {
+                        return {
+                            ...e,
+                        }
+                    }
+
+                })
+                ShopCustomerDebtCreditNoteListT2s = ShopCustomerDebtCreditNoteListT2s.map((e, index) => {
+                    if (e.details.meta_data.Product) {
+                        return {
+                            ...e,
+                            list_id: e.details.meta_data.Product.master_path_code_id,
+                            list_name: e.details.meta_data.Product.product_name[locale.locale]
+                        }
+                    } else {
+                        return {
+                            ...e,
+                        }
+                    }
+                })
+            }
             if (!!shop_temporary_delivery_order_doc_id) {
                 const { data } = await API.get(`/shopInventory/bydocinventoryid/${shop_temporary_delivery_order_doc_id}`)
                 options_list = data?.data?.product_list
@@ -854,7 +874,7 @@ const DebtorDoc = ({ docTypeId, title = null, callBack, }) => {
         try {
             // form.submit()
             setLoading(() => true)
-            // console.log('modeKey :>> ', modeKey);
+            // console.log('modeKey :>> ', modeKey);s
             setConfigModal({ ...configModal, modeKey })
             // form.validateFields().then(async (values) => {
             //     console.log('values validateFields:>> ', values);

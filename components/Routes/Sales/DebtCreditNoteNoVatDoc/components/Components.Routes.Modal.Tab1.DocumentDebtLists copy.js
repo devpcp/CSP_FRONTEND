@@ -408,7 +408,7 @@ const ComponentsRoutesDocumentDebtLists = ({ onFinish, calculateResult, mode }) 
                     product_id: data.ShopProduct.Product.id,
                     shop_product_id: data.ShopProduct.id,
                     amount: data.amount,
-                    price_unit: data.details.price,
+                    price_unit: data.price_unit,
                 }
                 break;
             default:

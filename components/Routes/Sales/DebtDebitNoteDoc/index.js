@@ -14,7 +14,7 @@ import SearchInput from '../../../shares/SearchInput'
 import TableList from '../../../shares/TableList'
 import CarPreloader from '../../../_App/CarPreloader'
 import FormTemporaryDeliveryOrderDoc from './components/Components.Routes.Modal.FormDebtorDoc'
-import Tab1ServiceAndProductV2 from './components/Components.Routes.Modal.Tab1.DocumentDebtLists'
+import Tab1ServiceAndProductV2 from './components/Components.Routes.Modal.Tab1.DocumentDebtLists copy'
 import TabPaymentInfo from './components/Components.Routes.Modal.Tab.PaymentInfo'
 import PaymentDocs from './components/Components.Routes.Modal.PaymentDocsV2'
 
@@ -630,9 +630,7 @@ const DebtorDoc = ({ docTypeId }) => {
             setCarPreLoading(true)
             console.log('value setFormValueData:>> ', value);
             const { ShopCustomerDebtDebitNoteLists, details, bus_customer_id, per_customer_id, ShopPersonalCustomer, ShopBusinessCustomer, shop_temporary_delivery_order_doc_id } = value, customer_type = !!per_customer_id ? "person" : "business";
-            // const filterPayment = value.ShopPaymentTransactions.filter(where => !where.canceled_payment_by && !where.canceled_payment_date);
-            // setPaymentTransactions(filterPayment)
-            // // console.log("filterPayment", filterPayment)
+
             function customCustomerName(arr, type) {
                 if (type === "person") {
                     return arr.map(e => { return { ...e, customer_full_name: `${e.customer_name.first_name[locale.locale]} ${e.customer_name.last_name[locale.locale]}` } })
@@ -641,25 +639,15 @@ const DebtorDoc = ({ docTypeId }) => {
                 }
 
             }
-            // if (!!details.ref_doc) {
-            //     const { data } = await API.get(`/shopCustomerDebtBillingNoteDoc/byId/${details.ref_doc}`)
-            //     if (data.status === "success") {
-            //         debtor_billing_list = [data.data]
-            //     }
-
-            // }
 
             let options_list = []
             if (!!ShopCustomerDebtDebitNoteLists && isArray(ShopCustomerDebtDebitNoteLists) && ShopCustomerDebtDebitNoteLists.length > 0) {
                 options_list = ShopCustomerDebtDebitNoteLists.map((e, index) => {
-                    // if(!!e.ShopTemporaryDeliveryOrderDoc){
-                    //     options_list.push(e.ShopTemporaryDeliveryOrderDoc)
-                    // }
                     if (e.details.meta_data.Product) {
                         return {
                             ...e,
-                            list_id: e.id,
-                            list_name: e.id
+                            list_id: e.details.meta_data.Product.master_path_code_id,
+                            list_name: e.details.meta_data.Product.product_name[locale.locale]
                         }
                     } else {
                         return {
@@ -670,25 +658,19 @@ const DebtorDoc = ({ docTypeId }) => {
 
                 })
                 ShopCustomerDebtDebitNoteLists = ShopCustomerDebtDebitNoteLists.map((e, index) => {
-                    // if(!!e.ShopTemporaryDeliveryOrderDoc){
-                    //     options_list.push(e.ShopTemporaryDeliveryOrderDoc)
-                    // }
                     if (e.details.meta_data.Product) {
                         return {
                             ...e,
-                            list_id: e.id,
-                            list_name: e.id
+                            list_id: e.details.meta_data.Product.master_path_code_id,
+                            list_name: e.details.meta_data.Product.product_name[locale.locale]
                         }
                     } else {
                         return {
                             ...e,
-
                         }
                     }
                 })
             }
-            // options_list = [...ShopCustomerDebtDebitNoteLists]
-
             const model = {
                 ...value,
                 ref_doc: shop_temporary_delivery_order_doc_id ?? null,
@@ -705,68 +687,6 @@ const DebtorDoc = ({ docTypeId }) => {
                 remark_inside: details.remark_inside ?? null,
             }
 
-            // if (isArray(filterPayment) && filterPayment.length > 0) {
-
-            //     function getPaymentData(arr, key) {
-            //         switch (key) {
-            //             case "payment_method":
-            //                 return arr.map(e => {
-            //                     switch (e[key]) {
-            //                         case 1:
-            //                             return "เงินสด"
-            //                         case 2:
-            //                             return "เครดิต/เดบิต"
-            //                         case 3:
-            //                             return "โอนเงินสด"
-            //                         case 4:
-            //                             return "เช็ค"
-
-            //                         default:
-            //                             return "-"
-            //                     }
-            //                 })
-            //             // return arr.map(e => e[key] === 1 ? "เงินสด" : e.payment_method === 2 ? "เครดิต/เดบิต" : "โอนเงินสด")
-
-            //             case "payment_price_paid":
-            //                 if (filterPayment.length === 1) {
-            //                     return arr.map(e => RoundingNumber(e?.["details"]?.["actual_paid"] ?? e?.[key]) ?? null).filter(where => where !== null) ?? null
-            //                 } else {
-            //                     return arr.map(e => e["payment_method"] === 1 ? `${RoundingNumber(e[key])} (เงินสด)` : e.payment_method === 2 ? `${RoundingNumber(e[key])} (เครดิต/เดบิต)` : `${RoundingNumber(e[key])} (โอนเงินสด)`)
-            //                 }
-            //             case "change":
-            //                 if (filterPayment.length === 1) {
-            //                     return arr.map(e => RoundingNumber(e?.["details"][key]) ?? null).filter(where => where !== null) ?? null
-            //                 }
-            //             case "payment_paid_date":
-            //                 return !!arr[arr.length - 1][key] ? moment(arr[arr.length - 1][key]) : null
-            //             case "remark":
-            //                 return arr.map(e => e["payment_method"] === 1 ? e["details"][key] : e.payment_method === 2 ? e["details"][key] : e["details"][key]).filter(where => where !== null).join(" , ")
-            //             default:
-            //                 break;
-            //         }
-
-            //     }
-
-            //     let payment_type = getPaymentData(
-            //         filterPayment,
-            //         "payment_method"
-            //     ),
-            //         price = getPaymentData(filterPayment, "payment_price_paid"),
-            //         change = getPaymentData(filterPayment, "change"),
-            //         payment_date = getPaymentData(
-            //             filterPayment,
-            //             "payment_paid_date"
-            //         ),
-            //         remark = getPaymentData(filterPayment, "remark");
-            //     model.payment = {
-            //         payment_type,
-            //         price,
-            //         payment_date,
-            //         remark,
-            //         change,
-            //     }
-            //     model.filterPayment = filterPayment
-            // }
             // console.log("modelmodel", model)
             form.setFieldsValue({ ...model })
             setCarPreLoading(false)
@@ -1372,7 +1292,7 @@ const DebtorDoc = ({ docTypeId }) => {
                                             <Button loading={loading} onClick={() => handleOk()} style={{ width: "100%" }} type='primary'>{GetIntlMessages("บันทึก")}</Button>
                                         </Col>
                                         <Col xxl={4} lg={6} md={12} xs={24} hidden={configModal.mode === "add" || form.getFieldValue("status") != 1}>
-                                            <PrintOut textButton={GetIntlMessages("print")} loading={loading} documentId={form.getFieldValue("id")} style={{ width: "100%", display: "flex", justifyContent: "center", alignItems: "center", padding: 10 }} docTypeId={docTypeId}/>
+                                            <PrintOut textButton={GetIntlMessages("print")} loading={loading} documentId={form.getFieldValue("id")} style={{ width: "100%", display: "flex", justifyContent: "center", alignItems: "center", padding: 10 }} docTypeId={docTypeId} />
                                         </Col>
                                         {/* <Col xxl={4} lg={6} md={12} xs={24} hidden={configModal.mode !== "edit" || form.getFieldValue("is_draft") === false || form.getFieldValue("status") != 1} >
                                             <Button loading={loading} onClick={() => confirmOrder()} type="text" style={{ width: "100%", borderColor: "black", overflow: "hidden", padding: 0 }}>{GetIntlMessages("ยืนยันใบส่งสินค้าชั่วคราว")}</Button>

@@ -397,6 +397,7 @@ const ComponentsRoutesDocumentDebtLists = ({ onFinish, calculateResult, mode }) 
     }
 
     const callback = (data, indexCallBack, from = "") => {
+        console.log("aaa")
         setIsInventoryBalanceModalVisible(false)
         const { arr_debt_list } = form.getFieldValue();
         switch (from) {

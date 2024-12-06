@@ -10,6 +10,7 @@ import RegexMultiPattern from '../../../../shares/RegexMultiPattern'
 import ModalBothCustomersAndCar from '../../../Modal/Components.Add.Modal.BothCustomersAndCar'
 import ModalBusinessCustomers from '../../../Modal/Components.Select.Modal.BusinessCustomers'
 import ModalPersonalCustomers from '../../../Modal/Components.Select.Modal.PersonalCustomers'
+import { RoundingNumber, takeOutComma } from '../../../../shares/ConvertToCurrency'
 
 const FormTemporaryDeliveryOrderDoc = ({ mode, calculateResult, disabledWhenDeliveryDocActive = false, getStatusCarLoading }) => {
 
@@ -170,7 +171,7 @@ const FormTemporaryDeliveryOrderDoc = ({ mode, calculateResult, disabledWhenDeli
                     if (!!value) {
                         const { doc_sales_type } = form.getFieldValue();
 
-                        const { data } = await API.get(`/shopTemporaryDeliveryOrderDoc/all??search=${value}&is_draft=not_draft&status=active&ShopServiceOrderDoc__is_draft=not_draft&page=1&limit=25&sort=doc_date&order=desc&ShopServiceOrderDoc__doc_sales_type=${doc_sales_type}`)
+                        const { data } = await API.get(`/shopTemporaryDeliveryOrderDoc/all??search=${value}&is_draft=not_draft&status=active&ShopServiceOrderDoc__is_draft=not_draft&page=1&limit=10&sort=doc_date&order=desc&ShopServiceOrderDoc__doc_sales_type=${doc_sales_type}`)
 
                         if (data.status === "success") {
 
@@ -198,17 +199,23 @@ const FormTemporaryDeliveryOrderDoc = ({ mode, calculateResult, disabledWhenDeli
                     const { easy_search_list } = form.getFieldValue(), findSelected = easy_search_list.find(where => where.id === value);
 
                     if (!!findSelected) {
-
-                        form.setFieldsValue({
+                        let model = {
                             customer_type: findSelected.customer_type,
-                            options_list: findSelected.ShopTemporaryDeliveryOrderLists ?? [],
+                            options_list: findSelected.ShopTemporaryDeliveryOrderLists.map((e, i) => {
+                                let model = {
+                                    ...e,
+                                    ShopProduct: e?.details?.meta_data?.ShopProduct
+                                }
+                                return model
+                            }) ?? [],
                             // customer_list,
                             // customer_id,
                             ref_doc_list: easy_search_list,
                             ref_doc: findSelected.id,
                             arr_debt_list: [],
-                            // options_list : []
-                        })
+                        }
+                        console.log("modd", model)
+                        form.setFieldsValue(model)
                         await handleSearchCustomer(findSelected.customer_id, 'search', 'easy_search')
                         await handleSearchCustomer(findSelected.customer_id, 'select', 'easy_search')
                     }

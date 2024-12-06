@@ -116,12 +116,11 @@ const ComponentsProductDataInImportDoc = ({ title = null, callBack, listData, li
             },
             {
                 title: "ราคาต่อหน่วย",
-                dataIndex: "details",
-                key: "details",
+                dataIndex: "price_unit",
+                key: "price_unit",
                 width: 100,
                 use: true,
-                render: (text, record) => <div style={{ textAlign: "end" }}>{(+get(text, `price`, "-")).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>,
-
+                render: (text, record) => <div style={{ textAlign: "end" }}>{(+text).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>,
             },
             {
                 title: "จำนวน",
@@ -133,19 +132,19 @@ const ComponentsProductDataInImportDoc = ({ title = null, callBack, listData, li
             },
             {
                 title: "ส่วนลดต่อรายการ (บาท)",
-                dataIndex: "details",
-                key: "details",
+                dataIndex: "price_discount",
+                key: "price_discount",
                 width: 100,
                 use: true,
-                render: (text, record) => <div style={{ textAlign: "end" }}>{(+get(text, `price_discount`, "-")).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>,
+                render: (text, record) => <div style={{ textAlign: "end" }}>{(+text).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>,
             },
             {
                 title: "รวมเงิน",
-                dataIndex: "details",
-                key: "details",
+                dataIndex: "price_grand_total",
+                key: "price_grand_total",
                 width: 100,
                 use: true,
-                render: (text, record) => <div style={{ textAlign: "end" }}>{(+get(text, `price_grand_total`, "-")).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>,
+                render: (text, record) => <div style={{ textAlign: "end" }}>{(+text).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>,
             },
             {
                 title: () => <Button onClick={callBackSelectAll}>{GetIntlMessages("เลือกทั้งหมด")}</Button>,
