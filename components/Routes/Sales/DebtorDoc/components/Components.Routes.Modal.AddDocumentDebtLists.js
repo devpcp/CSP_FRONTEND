@@ -661,7 +661,7 @@ const ComponentsRoutesModalAddDocumentDebtLists = ({ textButton, style, docTypeI
 
     const handleAddDebtDoc = (value) => {
         try {
-            // console.log('value :>> ', value);
+            console.log('value :>> ', value);
             const { shopCustomerDebtLists, customer_type } = form.getFieldValue();
             const isObj = isPlainObject(shopCustomerDebtLists?.find(where => where.id === value.id));
             const checkSalesDoc = shopCustomerDebtLists?.find(where => where.doc_type_id === '80235edb-53e0-43ee-9b3b-768e3e2e7777' || where.doc_type_id === '7ef3840f-3d7f-43de-89ea-dce215703c16')
@@ -686,9 +686,9 @@ const ComponentsRoutesModalAddDocumentDebtLists = ({ textButton, style, docTypeI
                 };
 
             if (value.doc_type_code_id === 'CCN' || value.doc_type_code_id === 'NCN') {
-                newValue = { ...newValue, debt_price_paid_total: -Number(value.price_grand_total), debt_price_amount_left: -Number(value.price_grand_total), debt_price_amount: -Number(value.price_grand_total) }
+                newValue = { ...newValue, debt_price_paid_total: -Number(value.price_grand_total), debt_price_amount_left: -Number(value.price_grand_total), debt_price_amount: -Number(value.price_grand_total), debt_price_paid_adjust: 0 }
             } else if (value.doc_type_code_id === 'CDN') {
-                newValue = { ...newValue, debt_price_paid_total: Number(value.price_grand_total), debt_price_amount_left: Number(value.price_grand_total), debt_price_amount: Number(value.price_grand_total) }
+                newValue = { ...newValue, debt_price_paid_total: Number(value.price_grand_total), debt_price_amount_left: Number(value.price_grand_total), debt_price_amount: Number(value.price_grand_total), debt_price_paid_adjust: 0 }
             }
 
 

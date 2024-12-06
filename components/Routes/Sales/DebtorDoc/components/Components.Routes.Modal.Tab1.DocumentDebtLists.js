@@ -75,28 +75,6 @@ const ComponentsRoutesDocumentDebtLists = ({ onFinish, calculateResult, mode }) 
 
     }, [isFieldEditing.status])
 
-    const takeOutDuplicateValue = (arr, key) => {
-        try {
-            // console.log('arr :>> ', arr);
-            const newArr = arr.map(e => {
-                return e[key] ?? e[`shelf`][key]
-            }).filter((item, index, array) => array.indexOf(item) === index);
-            return newArr ?? []
-        } catch (error) {
-
-        }
-    }
-
-    const getArrValue = (index, type) => {
-        try {
-            const { list_service_product } = form.getFieldValue()
-            // console.log(`list_service_product getArrValue ${type}:>> `, list_service_product[index].warehouse_list);
-            return !!list_service_product && isArray(list_service_product) ? list_service_product[index][type] ?? [] : []
-        } catch (error) {
-            console.log('error getArrValue:>> ', error);
-        }
-    }
-
     const formatNumber = (val, isUseDecimals = true) => {
         try {
             if (isUseDecimals) {
@@ -329,6 +307,7 @@ const ComponentsRoutesDocumentDebtLists = ({ onFinish, calculateResult, mode }) 
 
     const copyToDebtPricePaidTotal = (record, index, isCal = true) => {
         let debt_price_amount_left = extractDataDocSaleType(record, 'debt_price_amount_left')
+        console.log("debt_price_amount_left", debt_price_amount_left)
         const { shopCustomerDebtLists } = form.getFieldValue()
         shopCustomerDebtLists[index].debt_price_paid_total = +takeOutComma(debt_price_amount_left)
         shopCustomerDebtLists[index].debt_price_paid_adjust = 0
@@ -359,9 +338,9 @@ const ComponentsRoutesDocumentDebtLists = ({ onFinish, calculateResult, mode }) 
                             case "debt_price_amount":
                             case "debt_price_amount_left":
                                 if (!!form.getFieldValue("ref_doc")) {
-                                    return `${mode !== "add" ? `-${RoundingNumber(-record.price_grand_total)}` : `${RoundingNumber(-record.price_grand_total)}`}`
+                                    return `${mode !== "add" ? `${RoundingNumber(-record.price_grand_total)}` : `${RoundingNumber(-record.price_grand_total)}`}`
                                 } else {
-                                    return `${mode !== "add" ? `-${RoundingNumber(-record.price_grand_total)}` : `${RoundingNumber(-record.price_grand_total)}`}`
+                                    return `${mode !== "add" ? `${RoundingNumber(-record.price_grand_total)}` : `${RoundingNumber(-record.price_grand_total)}`}`
                                 }
                             default:
                                 if (!!form.getFieldValue("ref_doc")) {
@@ -375,9 +354,9 @@ const ComponentsRoutesDocumentDebtLists = ({ onFinish, calculateResult, mode }) 
                             case "debt_price_amount":
                             case "debt_price_amount_left":
                                 if (!!form.getFieldValue("ref_doc")) {
-                                    return `${mode !== "add" ? `-${RoundingNumber(-record.price_grand_total)}` : `${RoundingNumber(-record.price_grand_total)}`}`
+                                    return `${mode !== "add" ? `${RoundingNumber(-record.price_grand_total)}` : `${RoundingNumber(-record.price_grand_total)}`}`
                                 } else {
-                                    return `${mode !== "add" ? `-${RoundingNumber(-record.price_grand_total)}` : `${RoundingNumber(-record.price_grand_total)}`}`
+                                    return `${mode !== "add" ? `${RoundingNumber(-record.price_grand_total)}` : `${RoundingNumber(-record.price_grand_total)}`}`
                                 }
                             default:
                                 if (!!form.getFieldValue("ref_doc")) {
@@ -488,225 +467,6 @@ const ComponentsRoutesDocumentDebtLists = ({ onFinish, calculateResult, mode }) 
             form.setFieldsValue({ list_service_product, [index]: { changed_name } })
         } catch (error) {
 
-        }
-    }
-
-    const debounceSearchShopStock = debounce((value, index, type) => handleSearchShopStock(value, index, type), 800)
-    const handleSearchShopStock = async (value, index, type) => {
-        try {
-            setLoadingSearch(true)
-            const { list_service_product } = form.getFieldValue()
-            switch (type) {
-                case "search":
-                    const { data } = await API.get(`/shopStock/all?search=${value}&limit=10&page=1&sort=balance_date&order=asc&status=active&filter_wyz_code=false&filter_available_balance=false&min_balance=1`)
-                    // console.log('data :>> ', data);
-                    if (data.status === "success") {
-                        list_service_product[index]["shop_stock_list"] = SortingData(data.data.data, `ShopProduct.Product.product_name.${locale.locale}`)
-                    }
-                    break;
-                case "select":
-                    list_service_product[index]["shop_stock_id"] = value
-                    const find = list_service_product[index]["shop_stock_list"].find(where => where.id === value)
-                    if (isPlainObject(find)) {
-                        // console.log('find :>> ', find);
-                        const { product_cost } = find
-                        const warehouse_detail = find?.warehouse_detail.map(e => { return { ...e, shelf: e.shelf.item, ...e.shelf } }) ?? []
-                        const warehouseArr = takeOutDuplicateValue(warehouse_detail, "warehouse")
-                        const shefArr = takeOutDuplicateValue(warehouse_detail, "item")
-
-                        if (warehouseArr.length === 1 && shefArr.length === 1) {
-                            let unit_list = find?.ShopProduct.Product.ProductType.ProductPurchaseUnitTypes ?? []
-                            callbackSelectProduct({ ...find, product_list: [{ warehouse_detail, unit_list }] }, 0, 0, null, index)
-                            // list_service_product[index]["product_cost"] = !!product_cost && product_cost !== "null" ? product_cost : null
-                        } else {
-                            list_service_product[index]["price_unit"] = null
-                            list_service_product[index]["product_cost"] = null
-                            // list_service_product[index]["product_cost"] = !!product_cost && product_cost !== "null" ? product_cost : null
-                            list_service_product[index]["price_grand_total"] = null
-                            list_service_product[index]["dot_mfd"] = null
-                            list_service_product[index]["dot_mfd_list"] = []
-                            list_service_product[index]["warehouse"] = null
-                            list_service_product[index]["warehouse_list"] = []
-                            list_service_product[index]["shelf"] = null
-                            list_service_product[index]["shelf_list"] = []
-                            list_service_product[index]["purchase_unit_id"] = null
-                            list_service_product[index]["purchase_unit_list"] = []
-                            list_service_product[index]["amount"] = null
-                            form.setFieldsValue({
-                                [index]: {
-                                    price_unit: null,
-                                    dot_mfd: null,
-                                    warehouse: null,
-                                    shelf: null,
-                                    purchase_unit_id: null,
-                                    amount: null
-                                }
-                            })
-                        }
-                    }
-
-
-                    toggleEdit()
-                    break;
-
-                default:
-                    break;
-            }
-            form.setFieldsValue({ list_service_product })
-            setLoadingSearch(false)
-        } catch (error) {
-            console.log('error :>> ', error);
-        }
-    }
-
-    const callbackSelectProduct = (value, index1, index2, amount, rowIndex) => {
-        try {
-            let product_cost
-            const { list_service_product } = form.getFieldValue(),
-                { product_list, product_cost_product_stocks } = value,
-                selectedProduct = product_list[index1].warehouse_detail[index2];
-            const suggestedPrice = list_service_product[rowIndex]["shop_stock_list"].find(where => where.id === list_service_product[rowIndex]["shop_stock_id"]).ShopProduct?.price?.suggasted_re_sell_price?.retail ?? null
-            if (!!selectedProduct["dot_mfd"]) {
-                product_cost = !!product_cost_product_stocks ? product_cost_product_stocks.find(where => selectedProduct["warehouse"] === where.shop_warehouse_id && selectedProduct["shelf"] === where.shop_warehouse_shelf_item_id && selectedProduct["dot_mfd"] === where.dot_mfd && selectedProduct["purchase_unit_id"] === where.purchase_unit_id)?.product_cost_latest ?? null : null
-            } else {
-                product_cost = !!product_cost_product_stocks ? product_cost_product_stocks.find(where => selectedProduct["warehouse"] === where.shop_warehouse_id && selectedProduct["shelf"] === where.shop_warehouse_shelf_item_id && selectedProduct["purchase_unit_id"] === where.purchase_unit_id)?.product_cost_latest ?? null : null
-            }
-
-            let dot_mfd_list = [], warehouse_list = [], shelf_list = [], purchase_unit_list = []
-            dot_mfd_list = takeOutDuplicateValue(product_list[index1].warehouse_detail, "dot_mfd")
-            purchase_unit_list = product_list[index1].unit_list
-
-            warehouse_list = shopWarehouseAllList.filter(where => where.id === selectedProduct["warehouse"])
-            shelf_list = warehouse_list[0]["shelf"].filter(where => where.code === selectedProduct["shelf"])
-
-            list_service_product[rowIndex]["price_unit"] = !!suggestedPrice ? MatchRound(suggestedPrice) : null
-            list_service_product[rowIndex]["product_cost"] = !!product_cost ? RoundingNumber(product_cost) : null
-            list_service_product[rowIndex]["dot_mfd"] = selectedProduct["dot_mfd"] ?? "-"
-            list_service_product[rowIndex]["dot_mfd_list"] = dot_mfd_list
-            list_service_product[rowIndex]["purchase_unit_id"] = selectedProduct["purchase_unit_id"] ?? null
-            list_service_product[rowIndex]["purchase_unit_list"] = purchase_unit_list
-            list_service_product[rowIndex]["amount"] = amount
-            list_service_product[rowIndex]["warehouse_list"] = warehouse_list
-            list_service_product[rowIndex]["shelf_list"] = shelf_list
-            list_service_product[rowIndex]["warehouse"] = selectedProduct["warehouse"]
-            list_service_product[rowIndex]["shelf"] = selectedProduct["shelf"]
-
-
-            form.setFieldsValue({
-                list_service_product,
-                [rowIndex]: {
-                    amount,
-                    dot_mfd: selectedProduct["dot_mfd"] ?? "-",
-                    purchase_unit_id: selectedProduct["purchase_unit_id"] ?? null,
-                    price_unit: !!suggestedPrice ? MatchRound(suggestedPrice) : null,
-                    warehouse: selectedProduct["warehouse"],
-                    shelf: selectedProduct["shelf"]
-                }
-            })
-            calculateTable()
-            calculateResult()
-        } catch (error) {
-            console.log('error callbackSelectProduct:>> ', error);
-        }
-    }
-
-    const calculateTable = (value, index, type) => {
-        try {
-            // console.log('value calculateTable:>> ', value);
-            const { list_service_product } = form.getFieldValue();
-            console.log("list_service_product", list_service_product)
-            // const price_unit = list_service_product[index]["price_unit"] , price_discount = list_service_product[index]["price_discount"]
-
-            let price_grand_total = 0, amount = 0, price_discount = 0, price_discount_percent = 0, price_unit = 0, price_discount_bill = 0
-            switch (type) {
-                case "price_unit":
-                    price_unit = Number(value)
-                    amount = Number(list_service_product[index]["amount"] ?? 0)
-                    price_discount = null
-                    price_discount_percent = null
-                    // price_discount = Number(list_service_product[index]["price_discount"] ?? 0)
-                    // price_discount_percent = Number(list_service_product[index]["price_discount_percent"] ?? 0)
-                    // price_discount = price_unit * (price_discount_percent/100)
-                    price_grand_total = (price_unit - price_discount) * amount
-
-                    list_service_product[index]["price_grand_total"] = MatchRound(price_grand_total)
-                    list_service_product[index]["price_unit"] = MatchRound(price_unit)
-                    list_service_product[index]["price_discount"] = null
-                    list_service_product[index]["price_discount_percent"] = null
-                    // console.log('price_grand_total :>> ', price_grand_total);
-                    break;
-                case "amount":
-                    price_unit = Number(list_service_product[index]["price_unit"] ?? 0)
-                    amount = Number(value)
-                    price_discount = Number(list_service_product[index]["price_discount"] ?? 0)
-                    price_discount_percent = Number(list_service_product[index]["price_discount_percent"] ?? 0)
-                    price_grand_total = (price_unit - price_discount) * amount
-
-                    list_service_product[index]["price_grand_total"] = MatchRound(price_grand_total)
-                    list_service_product[index]["amount"] = amount.toString()
-                    // console.log('price_grand_total :>> ', price_grand_total);
-                    break;
-                case "price_discount":
-                    amount = Number(list_service_product[index]["amount"] ?? 0)
-                    price_unit = Number(list_service_product[index]["price_unit"] ?? 0)
-                    price_discount = Number(value)
-                    price_grand_total = (price_unit - price_discount) * amount
-                    price_discount_percent = ((price_discount / price_unit) * 100) //แปลงเป็น %
-
-                    if ((!!price_discount_percent && Number(price_discount_percent) < 0.01) || price_unit === 0) {
-                        list_service_product[index]["price_discount"] = null
-                        list_service_product[index]["price_discount_percent"] = null
-                        price_discount = null
-                        price_discount_percent = null
-                        Swal.fire({
-                            icon: 'warning',
-                            title: GetIntlMessages("warning"),
-                            text: GetIntlMessages("จำนวนเปอร์เซ็นมีค่าน้อยกว่า 0.01 หรือ ราคาต่อหน่วยเป็น 0"),
-                        })
-                        // form.setFieldsValue({ [index]: { price_discount: null, price_discount_percent: null } })
-                    } else {
-                        list_service_product[index]["price_discount"] = MatchRound(price_discount)
-                        list_service_product[index]["price_discount_percent"] = MatchRound(price_discount_percent)
-                        list_service_product[index]["price_grand_total"] = MatchRound(price_grand_total)
-                    }
-
-                    break;
-                case "price_discount_percent":
-                    amount = Number(list_service_product[index]["amount"] ?? 0)
-                    price_unit = Number(list_service_product[index]["price_unit"] ?? 0)
-                    price_discount_percent = Number(value)
-                    price_discount = ((price_unit * price_discount_percent) / 100) // แปลง % เป็น บาท type -> number
-                    price_grand_total = (price_unit - price_discount) * amount
-
-                    list_service_product[index]["price_discount"] = MatchRound(price_discount)
-                    list_service_product[index]["price_discount_percent"] = MatchRound(price_discount_percent)
-                    list_service_product[index]["price_grand_total"] = MatchRound(price_grand_total)
-                    break;
-
-                default:
-                    for (let i = 0; i < list_service_product.length; i++) {
-                        amount = Number(list_service_product[i]["amount"] ?? 0)
-                        price_unit = Number(list_service_product[i]["price_unit"] ?? 0)
-                        price_discount = Number(list_service_product[i]["price_discount"] ?? 0)
-                        price_grand_total = (price_unit * amount) - price_discount
-                        list_service_product[i]["price_grand_total"] = MatchRound(price_grand_total)
-                    }
-                    break;
-            }
-            if (isArray(list_service_product) && list_service_product.length === 0) price_discount_bill = null
-            form.setFieldsValue({
-                list_service_product, [index]: {
-                    price_discount: !!price_discount
-                        ? MatchRound(price_discount)
-                        : 0,
-                    price_discount_percent: !!price_discount_percent
-                        ? MatchRound(price_discount_percent)
-                        : 0,
-                }, price_discount_bill
-            })
-            calculateResult()
-        } catch (error) {
-            console.log('error :>> ', error);
         }
     }
 

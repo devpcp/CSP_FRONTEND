@@ -1035,82 +1035,13 @@ const DebtorDoc = ({ docTypeId }) => {
                                     ? "shop_customer_debt_dn_doc_id"
                                     : e.doc_type_code_id === "NCN" ?
                                         "shop_customer_debt_cn_doc_id_t2"
-                                        : "shop_service_order_doc_id"]: docValue(e, index)
+                                        : "shop_service_order_doc_id"]: docValue(e, index, values.ref_doc)
                         };
 
                         return _model
                     })
                     : []
             }
-
-            function docValue(e, index) {
-                let result
-                if (configModal.mode === 'add') {
-                    if (!!values.ref_doc) {
-                        if (e?.is_new_item === true) {
-                            result = e?.id
-                        } else {
-                            if (!!e.ShopCustomerDebtCreditNoteDoc) {
-                                result = e?.shop_customer_debt_cn_doc_id
-                            } else if (!!e.ShopCustomerDebtDebitNoteDoc) {
-                                result = e?.shop_customer_debt_dn_doc_id
-                            } else if (e.shop_customer_debt_cn_doc_id_t2) {
-                                result = e?.shop_customer_debt_cn_doc_id_t2
-                            } else {
-                                result = e?.shop_service_order_doc_id
-                            }
-                        }
-                    } else {
-                        if (e?.is_new_item === true) {
-                            result = e?.id
-                        } else {
-                            if (!!e.ShopCustomerDebtCreditNoteDoc) {
-                                result = e?.shop_customer_debt_cn_doc_id
-                            } else if (!!e.ShopCustomerDebtDebitNoteDoc) {
-                                result = e?.shop_customer_debt_dn_doc_id
-                            } else if (e.ShopCustomerDebtCreditNoteDocT2) {
-                                result = e?.shop_customer_debt_cn_doc_id_t2
-                            } else {
-                                result = e?.shop_service_order_doc_id
-                            }
-                        }
-                    }
-                }
-                if (configModal.mode === 'edit') {
-                    if (!!values.ref_doc) {
-                        if (e?.is_new_item === true) {
-                            result = e?.id
-                        } else {
-                            if (!!e.ShopCustomerDebtCreditNoteDoc) {
-                                result = e?.shop_customer_debt_cn_doc_id
-                            } else if (!!e.ShopCustomerDebtDebitNoteDoc) {
-                                result = e?.shop_customer_debt_dn_doc_id
-                            } else if (e.ShopCustomerDebtCreditNoteDocT2) {
-                                result = e?.shop_customer_debt_cn_doc_id_t2
-                            } else {
-                                result = e?.shop_service_order_doc_id
-                            }
-                        }
-                    } else {
-
-                        if (e?.is_new_item === true) {
-                            result = e?.id
-                        } else {
-                            if (!!e.ShopCustomerDebtCreditNoteDoc) {
-                                result = e?.shop_customer_debt_cn_doc_id
-                            } else if (!!e.ShopCustomerDebtDebitNoteDoc) {
-                                result = e?.shop_customer_debt_dn_doc_id
-                            } else if (e.ShopCustomerDebtCreditNoteDocT2) {
-                                result = e?.shop_customer_debt_cn_doc_id_t2
-                            } else {
-                                result = e?.shop_service_order_doc_id
-                            }
-                        }
-                    }
-                }
-                return result
-            }
-
             // console.log("configModal.mode", configModal.mode)
             console.log('model :>> ', model);
             // console.log('test', model.shopCustomerDebtLists.shop_service_order_doc_id)
@@ -1317,7 +1248,9 @@ const DebtorDoc = ({ docTypeId }) => {
                 upload_payment_list: value.details?.upload_payment_list ?? [],
                 upload_remove_list: [],
                 ShopCustomerDebtLists: value.ShopCustomerDebtLists,
-                details: value.details
+                customer_credit_debt_payment_period: value.customer_credit_debt_payment_period,
+                details: value.details,
+                ref_doc: value?.details?.ref_doc ?? null
             })
             setIsEditImageModalVisible(true)
         } catch (error) {
@@ -1339,7 +1272,7 @@ const DebtorDoc = ({ docTypeId }) => {
             let shopId = authUser?.UsersProfile?.shop_id
             let directory = "shopDebtorDocument"
             let upload_payment_list = []
-           
+
 
             if (values.upload_payment_list) {
                 if (values?.upload_payment_list?.fileList?.length > 0) {
@@ -1391,9 +1324,44 @@ const DebtorDoc = ({ docTypeId }) => {
 
 
             const model = {
-                shopTemporaryDeliveryOrderLists: values.ShopTemporaryDeliveryOrderLists,
+                shopCustomerDebtLists: values.ShopCustomerDebtLists.map((e, index) => {
+                    let doc_type_code_id = findDocType(e)
+                    const _model = {
+                        id: e.id,
+                        seq_number: e.seq_number,
+                        doc_date: moment(e.doc_date).format("YYYY-MM-DD"),
+                        debt_due_date: !!e.debt_due_date
+                            ? moment(e.debt_due_date).format("YYYY-MM-DD")
+                            : moment(
+                                moment(e?.doc_date).add(
+                                    Number(
+                                        form.getFieldValue(
+                                            "customer_credit_debt_payment_period"
+                                        )
+                                    ),
+                                    "d"
+                                )
+                            ).format("YYYY-MM-DD"),
+                        debt_price_amount: MatchRound(+e.debt_price_amount) ?? "0.00",
+                        debt_price_amount_left: MatchRound(+e.debt_price_amount_left) ?? "0.00",
+                        debt_price_paid_total: !!e.debt_price_paid_total ? MatchRound(e?.debt_price_paid_total ?? 0) : "0.00",
+                        debt_price_paid_adjust: !!e.debt_price_paid_adjust ? MatchRound(e?.debt_price_paid_adjust ?? 0) : "0.00",
+                        [doc_type_code_id === "CCN"
+                            ? "shop_customer_debt_cn_doc_id"
+                            : doc_type_code_id === "CDN"
+                                ? "shop_customer_debt_dn_doc_id"
+                                : doc_type_code_id === "NCN" ?
+                                    "shop_customer_debt_cn_doc_id_t2"
+                                    : "shop_service_order_doc_id"]: docValue(e, index, values.ref_doc)
+                    };
+
+                    return _model
+
+                }),
                 details: values.details,
             }
+
+
             delete model.details.meta_data
             model.details.upload_payment_list = await values.upload_payment_list.fileList === undefined ? await values.upload_payment_list : values.upload_payment_list.fileList
             console.log(model)
@@ -1421,6 +1389,85 @@ const DebtorDoc = ({ docTypeId }) => {
         }
     }
 
+    const findDocType = (e) => {
+        if (e?.ShopServiceOrderDoc) {
+            return e?.ShopServiceOrderDoc?.code_id_prefix
+        } else if (e?.ShopCustomerDebtDebitNoteDoc) {
+            return e?.ShopCustomerDebtDebitNoteDoc?.code_id_prefix
+        } else if (e?.ShopCustomerDebtCreditNoteDoc) {
+            return e?.ShopCustomerDebtCreditNoteDoc?.code_id_prefix
+        } else if (e?.ShopCustomerDebtCreditNoteDocT2) {
+            return e?.ShopCustomerDebtCreditNoteDocT2?.code_id_prefix
+        }
+    }
+
+    const docValue = (e, index, ref_doc) => {
+        let result
+        if (configModal.mode === 'add') {
+            if (!!ref_doc) {
+                if (e?.is_new_item === true) {
+                    result = e?.id
+                } else {
+                    if (!!e.ShopCustomerDebtCreditNoteDoc) {
+                        result = e?.shop_customer_debt_cn_doc_id
+                    } else if (!!e.ShopCustomerDebtDebitNoteDoc) {
+                        result = e?.shop_customer_debt_dn_doc_id
+                    } else if (e.shop_customer_debt_cn_doc_id_t2) {
+                        result = e?.shop_customer_debt_cn_doc_id_t2
+                    } else {
+                        result = e?.shop_service_order_doc_id
+                    }
+                }
+            } else {
+                if (e?.is_new_item === true) {
+                    result = e?.id
+                } else {
+                    if (!!e.ShopCustomerDebtCreditNoteDoc) {
+                        result = e?.shop_customer_debt_cn_doc_id
+                    } else if (!!e.ShopCustomerDebtDebitNoteDoc) {
+                        result = e?.shop_customer_debt_dn_doc_id
+                    } else if (e.ShopCustomerDebtCreditNoteDocT2) {
+                        result = e?.shop_customer_debt_cn_doc_id_t2
+                    } else {
+                        result = e?.shop_service_order_doc_id
+                    }
+                }
+            }
+        }
+        if (configModal.mode === 'edit') {
+            if (!!ref_doc) {
+                if (e?.is_new_item === true) {
+                    result = e?.id
+                } else {
+                    if (!!e.ShopCustomerDebtCreditNoteDoc) {
+                        result = e?.shop_customer_debt_cn_doc_id
+                    } else if (!!e.ShopCustomerDebtDebitNoteDoc) {
+                        result = e?.shop_customer_debt_dn_doc_id
+                    } else if (e.ShopCustomerDebtCreditNoteDocT2) {
+                        result = e?.shop_customer_debt_cn_doc_id_t2
+                    } else {
+                        result = e?.shop_service_order_doc_id
+                    }
+                }
+            } else {
+
+                if (e?.is_new_item === true) {
+                    result = e?.id
+                } else {
+                    if (!!e.ShopCustomerDebtCreditNoteDoc) {
+                        result = e?.shop_customer_debt_cn_doc_id
+                    } else if (!!e.ShopCustomerDebtDebitNoteDoc) {
+                        result = e?.shop_customer_debt_dn_doc_id
+                    } else if (e.ShopCustomerDebtCreditNoteDocT2) {
+                        result = e?.shop_customer_debt_cn_doc_id_t2
+                    } else {
+                        result = e?.shop_service_order_doc_id
+                    }
+                }
+            }
+        }
+        return result
+    }
 
     return (
         <>
@@ -1568,6 +1615,7 @@ const DebtorDoc = ({ docTypeId }) => {
                     <Form.Item name="upload_payment_list" hidden></Form.Item>
                     <Form.Item name="upload_remove_list" hidden></Form.Item>
                     <Form.Item name="ShopCustomerDebtLists" hidden></Form.Item>
+                    <Form.Item name="customer_credit_debt_payment_period" hidden></Form.Item>
                     <Tab4DocImage mode={"edit"} />
                 </Form>
             </Modal>
