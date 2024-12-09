@@ -68,7 +68,7 @@ const VehicleRegistrationData = ({ title = null, callBack }) => {
   // const [vehicleModelType, setVehicleModelType] = useState([]); //รุ่น ยานพาหนะ
   const [vehicleColor, setVehicleColorType] = useState([]); //รุ่น ยานพาหนะ
   const [showModalSalesHistoryData, setShowModalSalesHistoryData] = useState(false);
-
+  const [vehicleModelType2, setVehicleModelType] = useState(vehicleModelType)
 
   /**
    * ค่าเริ่มต้นของ
@@ -562,8 +562,7 @@ const VehicleRegistrationData = ({ title = null, callBack }) => {
           _model.serial_number = _model.details.serial_number ?? "";
           _model.chassis_number = _model.details.chassis_number ?? "";
           _model.cc_engine_size = _model.details.cc_engine_size ?? "";
-          _model.avg_registration_day =
-            _model.details.avg_registration_day ?? "";
+          _model.avg_registration_day = _model.details.avg_registration_day ?? "";
           _model.isuse = _model.isuse == 1 ? true : false;
           setCheckedIsuse(_model.isuse);
 
@@ -648,7 +647,7 @@ const VehicleRegistrationData = ({ title = null, callBack }) => {
   const handleCancel = () => {
     form.resetFields();
     setConfigModal({ ...configModal, mode: "add" });
-    // setVehicleModelType(() => []);
+    setVehicleModelType(() => vehicleModelType);
     setIsModalVisible(false);
   };
 
@@ -699,10 +698,7 @@ const VehicleRegistrationData = ({ title = null, callBack }) => {
 
       if (res.data.status == "success") {
         message.success("บันทึกสำเร็จ");
-        setIsModalVisible(false);
-
-        setConfigModal({ ...configModal, mode: "add" });
-        form.resetFields();
+        handleCancel()
         let search = modelSearch.search
         if (isFunction(callBack)) {
           search = res.data.data.details.registration
@@ -1058,7 +1054,7 @@ const VehicleRegistrationData = ({ title = null, callBack }) => {
           value,
           vehicle_type_id
         );
-      // setVehicleModelType(() => modelTypeList);
+      setVehicleModelType(() => modelTypeList);
     } catch (error) {
       console.log("error", error);
     }
@@ -1439,7 +1435,7 @@ const VehicleRegistrationData = ({ title = null, callBack }) => {
                         optionFilterProp="children"
                         style={{ width: "100%" }}
                       >
-                        {vehicleModelType.map((e) => (
+                        {vehicleModelType2.map((e) => (
                           <Select.Option key={e.id} value={e.id}>
                             {e.model_name[locale.locale]}
                           </Select.Option>

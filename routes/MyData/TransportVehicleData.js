@@ -5,7 +5,7 @@ import { useSelector } from 'react-redux';
 import SearchInput from '../../components/shares/SearchInput'
 import TableList from '../../components/shares/TableList'
 import { FormInputLanguage, } from '../../components/shares/FormLanguage';
-import { get } from 'lodash';
+import { get, isArray } from 'lodash';
 import GetIntlMessages from '../../util/GetIntlMessages';
 import ImageSingleShares from '../../components/shares/FormUpload/ImageSingle';
 import { CheckImage, UploadImageSingle } from '../../components/shares/FormUpload/API';
@@ -26,6 +26,8 @@ const TransportVehicleData = ({ title = null }) => {
   const { vehicleColors, vehicleType, vehicleBrand, vehicleModelType, province } = useSelector(({ master }) => master);
   const [productCompleteSize, setProductCompleteSizeList] = useState([])
   const [isBankAccountDataModalVisible, setIsBankAccountDataModalVisible] = useState(false);
+
+  const [vehicleModelType2, setVehicleModelType] = useState(vehicleModelType)
 
   const validateNumberandEn = "^[a-zA-Z0-9_.-]*$";
   const validateNumber = "^[0-9]*$";
@@ -90,31 +92,31 @@ const TransportVehicleData = ({ title = null }) => {
 
       {
         title: () => GetIntlMessages("ทะเบียนรถ"),
-        dataIndex: 'tag_name',
-        key: 'tag_name',
+        dataIndex: 'details',
+        key: 'details',
         width: "200",
-        render: (text, record) => get(text, `${locale.locale}`, "-"),
+        render: (text, record) => get(text, `registration`, "-"),
       },
       {
         title: () => GetIntlMessages("จังหวัด"),
-        dataIndex: 'tag_name',
-        key: 'tag_name',
+        dataIndex: 'details',
+        key: 'details',
         width: "200",
-        render: (text, record) => get(text, `${locale.locale}`, "-"),
+        render: (text, record) => get(text, `province_name`, "-"),
       },
       {
         title: () => GetIntlMessages("ยี่ห้อ"),
-        dataIndex: 'tag_name',
-        key: 'tag_name',
+        dataIndex: 'VehicleBrand',
+        key: 'VehicleBrand',
         width: "200",
-        render: (text, record) => get(text, `${locale.locale}`, "-"),
+        render: (text, record) => get(text, `brand_name.${locale.locale}`, "-"),
       },
       {
         title: () => GetIntlMessages("รุ่น"),
-        dataIndex: 'tag_name',
-        key: 'tag_name',
+        dataIndex: 'VehicleModelType',
+        key: 'VehicleModelType',
         width: "200",
-        render: (text, record) => get(text, `${locale.locale}`, "-"),
+        render: (text, record) => get(text, `model_name.${locale.locale}`, "-"),
       },
 
     ];
@@ -128,10 +130,9 @@ const TransportVehicleData = ({ title = null }) => {
       page: configTable.page,
       search: modelSearch.search,
       _status: modelSearch.status,
-      department_id: modelSearch.department_id
     })
 
-    getMasterData()
+    // getMasterData()
   }, [])
 
   useEffect(() => {
@@ -150,11 +151,11 @@ const TransportVehicleData = ({ title = null }) => {
   }
 
   /* ค้นหา */
-  const getDataSearch = async ({ search = modelSearch.search ?? "", department_id = modelSearch.department_id ?? "", limit = configTable.limit, page = configTable.page, sort = configSort.sort, order = (configSort.order === "descend" ? "desc" : "asc"), _status = modelSearch.status }) => {
+  const getDataSearch = async ({ search = modelSearch.search ?? "", limit = configTable.limit, page = configTable.page, sort = configSort.sort, order = (configSort.order === "descend" ? "desc" : "asc"), _status = modelSearch.status }) => {
     try {
       if (page === 1) setLoading(true)
 
-      let url = `/tags/all?limit=${limit}&page=${page}&sort=${sort}&order=${order}&status=${_status}&search=${search}${department_id ? `&department_id=${department_id}` : ""}`
+      let url = `/shopVehicle/all?limit=${limit}&page=${page}&sort=${sort}&order=${order}&status=${_status}&search=${search}`
 
       const res = await API.get(url)
       if (res.data.status === "success") {
@@ -182,7 +183,7 @@ const TransportVehicleData = ({ title = null }) => {
       const status = isuse == 1 ? "active" : isuse == 0 ? "block" : "delete"
       // console.log('changeStatus :>> ', status, id);
 
-      const { data } = await API.put(`/tags/put/${id}`, { status })
+      const { data } = await API.put(`/shopVehicle/put/${id}`, { status })
       if (data.status != "success") {
         message.warning("ไม่สามารถบันทึกข้อมูลมูลได้ มีบางอย่างผิดพลาด");
       } else {
@@ -207,15 +208,23 @@ const TransportVehicleData = ({ title = null }) => {
       setConfigModal({ ...configModal, mode })
       if (id) {
         setIsIdEdit(id)
-        const { data } = await API.get(`/tags/byid/${id}`)
+        const { data } = await API.get(`/shopVehicle/byid/${id}`)
         if (data.status == "success") {
-          const _model = data.data
-          const urlImg = await CheckImage({
-            directory: "tags",
-            name: id,
-            fileDirectoryId: id,
-          })
-          setImgEmpUrl(urlImg)
+          const _model = isArray(data.data) && data.data.length > 0 ? data.data[0] : {};
+          console.log(_model)
+
+          _model.mileage = _model.details.mileage
+          _model.province_name = _model.details.province_name
+          _model.registration = _model.details.registration
+          _model.mileage_first = _model.details.mileage_first
+          _model.remark = _model.details.remark
+          _model.serial_number = _model.details.serial_number ?? ""
+          _model.chassis_number = _model.details.chassis_number ?? ""
+          _model.cc_engine_size = _model.details.cc_engine_size ?? ""
+          _model.vehicle_color_id = _model.details.vehicle_color_id ?? null
+          _model.employee_driver_id = _model.details.employee_driver_id ?? null
+          _model.employee_driver_name = _model.details.employee_driver_name ?? null
+
           form.setFieldsValue(_model)
         }
 
@@ -246,49 +255,50 @@ const TransportVehicleData = ({ title = null }) => {
   const handleCancel = () => {
     form.resetFields()
     setConfigModal({ ...configModal, mode: 'add' })
+    setVehicleModelType(() => vehicleModelType);
     setIsModalVisible(false)
   }
 
   const onFinish = async (value) => {
     try {
       console.log(value)
-
-      if (value.upload) {
-        // await UploadImageSingle(value.upload.file, { name: idEdit, directory: "tags" })
-
-        // const urlImg = await CheckImage({
-        //   directory: "tags",
-        //   name: idEdit,
-        //   fileDirectoryId: idEdit,
-        // })
-        setImgEmpUrl(urlImg)
-        // dispatch(setImageProfile(urlImg));
-      }
-
       const _model = {
-        tag_name: value.tag_name,
-        tag_type: 0,
+        details: {
+          province_name: value.province_name ?? null,
+          registration: value.registration ?? null,
+          remark: value.remark ?? null,
+          serial_number: value.serial_number ?? null,
+          chassis_number: value.chassis_number ?? null,
+          cc_engine_size: value.cc_engine_size ?? null,
+          mileage_first: value.mileage_first ?? null,
+          mileage: value.mileage ?? null,
+          employee_driver_id: value.employee_driver_id ?? null,
+          employee_driver_name: value.employee_driver_name ?? null,
+          vehicle_color_id: value.vehicle_color_id,
+        },
+        vehicle_type_id: value.vehicle_type_id,
+        vehicle_brand_id: value.vehicle_brand_id,
+        vehicle_model_id: value.vehicle_model_id,
+
+      };
+      // console.log(_model)
+      let res
+      if (configModal.mode === "add") {
+        res = await API.post(`/shopVehicle/add`, _model)
+      } else if (configModal.mode === "edit") {
+        res = await API.put(`/shopVehicle/put/${idEdit}`, _model)
       }
 
-      // let res
-      // if (configModal.mode === "add") {
-      //   res = await API.post(`/tags/add`, _model)
-      // } else if (configModal.mode === "edit") {
-      //   res = await API.put(`/tags/put/${idEdit}`, _model)
-      // }
-
-      // if (res.data.status == "success") {
-      //   message.success('บันทึกสำเร็จ');
-      //   setIsModalVisible(false)
-      //   setConfigModal({ ...configModal, mode: "add" })
-      //   form.resetFields()
-      //   getDataSearch({
-      //     page: configTable.page,
-      //     search: modelSearch.search,
-      //   })
-      // } else {
-      //   message.error('มีบางอย่างผิดพลาด !!');
-      // }
+      if (res.data.status == "success") {
+        message.success('บันทึกสำเร็จ');
+        handleCancel()
+        getDataSearch({
+          page: configTable.page,
+          search: modelSearch.search,
+        })
+      } else {
+        message.error('มีบางอย่างผิดพลาด !!');
+      }
 
     } catch (error) {
       message.error('มีบางอย่างผิดพลาด !!');
@@ -440,7 +450,7 @@ const TransportVehicleData = ({ title = null }) => {
           value,
           vehicle_type_id
         );
-      // setVehicleModelType(() => modelTypeList);
+      setVehicleModelType(() => modelTypeList);
     } catch (error) {
       console.log("error", error);
     }
@@ -460,13 +470,7 @@ const TransportVehicleData = ({ title = null }) => {
     }
   };
 
-  const onChangeVehicleColor = async (value) => {
-    try {
-      const { vehicle_color_id } = form.getFieldValue();
-    } catch (error) {
-      console.log("error", error);
-    }
-  };
+
   const handleCancelCarInfoModal = () => {
     try {
       setIsBankAccountDataModalVisible(false)
@@ -520,7 +524,28 @@ const TransportVehicleData = ({ title = null }) => {
                   width={200}
                   src={imgEmpUrl}
                 /> */}
-
+                <Form.Item
+                  name='employee_driver_id'
+                  label={GetIntlMessages("พนักงานประจำรถ")}
+                  hidden
+                >
+                  <Input hidden />
+                </Form.Item>
+                <Form.Item
+                  name='employee_driver_name'
+                  label={GetIntlMessages("พนักงานประจำรถ")}
+                >
+                  <Input disabled addonAfter={
+                    <Button
+                      type='text'
+                      size='small'
+                      style={{ border: 0 }}
+                      onClick={() => setIsBankAccountDataModalVisible(true)}
+                    >
+                      เลือก
+                    </Button>
+                  } />
+                </Form.Item>
                 <Form.Item
                   name="registration"
                   rules={[
@@ -550,28 +575,6 @@ const TransportVehicleData = ({ title = null }) => {
                   provinceValue="name"
                   validatename={{ Province: true }}
                 />
-                <Form.Item
-                  name='employee_driver_id'
-                  label={GetIntlMessages("พนักงานประจำรถ")}
-                  hidden
-                >
-                  <Input hidden />
-                </Form.Item>
-                <Form.Item
-                  name='employee_driver_name'
-                  label={GetIntlMessages("พนักงานประจำรถ")}
-                >
-                  <Input disabled addonAfter={
-                    <Button
-                      type='text'
-                      size='small'
-                      style={{ border: 0 }}
-                      onClick={() => setIsBankAccountDataModalVisible(true)}
-                    >
-                      เลือก
-                    </Button>
-                  } />
-                </Form.Item>
                 <Form.Item
                   name="vehicle_type_id"
                   label={GetIntlMessages(`vehicle-type`)}
@@ -654,14 +657,14 @@ const TransportVehicleData = ({ title = null }) => {
                     style={{ width: "100%" }}
                     placeholder='เลือกข้อมูล'
                   >
-                    {vehicleModelType.map((e) => (
+                    {vehicleModelType2.map((e) => (
                       <Select.Option key={e.id} value={e.id}>
                         {e.model_name[locale.locale]}
                       </Select.Option>
                     ))}
                   </Select>
                 </Form.Item>
-                <Form.Item
+                {/* <Form.Item
                   name="tyre_size_front"
                   label={GetIntlMessages(`ไซต์ยางหน้า`)}
                   rules={[
@@ -698,8 +701,46 @@ const TransportVehicleData = ({ title = null }) => {
                     optionFilterProp="children">
                     {productCompleteSize.map((e, index) => (<Select.Option key={`size-${index}-${e.id}`} value={e.id}>{e.complete_size_name[locale.locale]}</Select.Option>))}
                   </Select>
+                </Form.Item> */}
+                <Form.Item
+                  name="mileage_first"
+                  label={GetIntlMessages(`เลขไมค์ครั้งแรก`)}
+                  rules={[
+                    {
+                      required: true,
+                      message: GetIntlMessages("please-fill-out")
+                    },
+                    {
+                      pattern: validateNumber,
+                      message: GetIntlMessages(`only-number`),
+                    },
+                  ]}
+                >
+                  <Input
+                    type={"text"}
+                    maxLength={8}
+                    disabled={configModal.mode === "add" ? false : true}
+                    placeholder='กรอกข้อมูล'
+                  />
                 </Form.Item>
 
+                <Form.Item
+                  name="mileage"
+                  label={GetIntlMessages(`เลขไมค์ครั้งล่าสุด`)}
+                  rules={[
+                    {
+                      pattern: validateNumber,
+                      message: GetIntlMessages(`enter-your-last-mic-number`),
+                    },
+                  ]}
+                >
+                  <Input
+                    type={"text"}
+                    maxLength={8}
+                    disabled={true}
+                    placeholder='กรอกข้อมูล'
+                  />
+                </Form.Item>
               </Col>
               <Col xs={24} xl={12}>
                 <Form.Item
@@ -758,7 +799,7 @@ const TransportVehicleData = ({ title = null }) => {
                 </Form.Item>
 
                 <Form.Item
-                  name="color"
+                  name="vehicle_color_id"
                   label={GetIntlMessages(`color-car`)}
                   rules={[
                     {
@@ -776,7 +817,6 @@ const TransportVehicleData = ({ title = null }) => {
                       option.children.toLowerCase().indexOf(input.toLowerCase()) >=
                       0
                     }
-                    onChange={onChangeVehicleColor}
                     style={{ width: "100%" }}
                     placeholder='เลือกข้อมูล'
                   >
@@ -786,46 +826,6 @@ const TransportVehicleData = ({ title = null }) => {
                       </Select.Option>
                     ))}
                   </Select>
-                </Form.Item>
-
-                <Form.Item
-                  name="mileage_first"
-                  label={GetIntlMessages(`เลขไมค์ครั้งแรก`)}
-                  rules={[
-                    {
-                      required: true,
-                      message: GetIntlMessages("please-fill-out")
-                    },
-                    {
-                      pattern: validateNumber,
-                      message: GetIntlMessages(`only-number`),
-                    },
-                  ]}
-                >
-                  <Input
-                    type={"text"}
-                    maxLength={8}
-                    disabled={configModal.mode === "add" ? false : true}
-                    placeholder='กรอกข้อมูล'
-                  />
-                </Form.Item>
-
-                <Form.Item
-                  name="mileage"
-                  label={GetIntlMessages(`เลขไมค์ครั้งล่าสุด`)}
-                  rules={[
-                    {
-                      pattern: validateNumber,
-                      message: GetIntlMessages(`enter-your-last-mic-number`),
-                    },
-                  ]}
-                >
-                  <Input
-                    type={"text"}
-                    maxLength={8}
-                    disabled={true}
-                    placeholder='กรอกข้อมูล'
-                  />
                 </Form.Item>
 
 
