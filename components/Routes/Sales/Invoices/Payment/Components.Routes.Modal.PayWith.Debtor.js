@@ -10,7 +10,7 @@ import Swal from "sweetalert2";
 import CarPreloader from '../../../../_App/CarPreloader';
 import moment from 'moment';
 
-const ComponentsPayWithCash = ({ icon, textButton, disabled, callback, total = 0, loading, initForm, isPartialPayment = false }) => {
+const ComponentsPayWithDebtor = ({ icon, textButton, disabled, callback, total = 0, loading, initForm, isPartialPayment = false }) => {
 
     const [form] = Form.useForm()
     // const form = Form.useFormInstance()
@@ -25,7 +25,7 @@ const ComponentsPayWithCash = ({ icon, textButton, disabled, callback, total = 0
         form.setFieldsValue(
             {
                 price_grand_total: total,
-                cash: total,
+                cash: (+total).toFixed(2),
                 payment_paid_date: moment(Date.now()),
             }
         )
@@ -51,7 +51,8 @@ const ComponentsPayWithCash = ({ icon, textButton, disabled, callback, total = 0
     const onFinish = async (value) => {
         try {
             // console.log('value', value)
-            let cash = takeOutComma(value.cash), change = takeOutComma(value.change), payment_price_paid = value.price_grand_total;
+            let cash = takeOutComma(value.cash), change = takeOutComma(value.change)
+            let payment_price_paid = isPartialPayment ? value.cash : value.price_grand_total;
             const model = {
                 cash,
                 remark: value.remark ?? null,
@@ -408,4 +409,4 @@ const ComponentsPayWithCash = ({ icon, textButton, disabled, callback, total = 0
     )
 }
 
-export default ComponentsPayWithCash
+export default ComponentsPayWithDebtor

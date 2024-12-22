@@ -804,6 +804,7 @@ const PaymentDocsV2 = ({ docId, title, loading, handleCancelDebtDoc, initForm, c
                                                         callback={callbackPayment}
                                                         loading={loading || paymentLoading}
                                                         isPartialPayment
+                                                        isShowDebtor
                                                     // disabled
                                                     />
                                                 </div>

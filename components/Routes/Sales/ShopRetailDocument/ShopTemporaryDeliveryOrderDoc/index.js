@@ -1034,7 +1034,8 @@ const TemporaryDeliveryOrderDoc = ({ docTypeId, title = null, callBack, }) => {
                                         return "โอนเงินสด"
                                     case 4:
                                         return "เช็ค"
-
+                                    case 5:
+                                        return "ลูกหนี้"
                                     default:
                                         return "-"
                                 }
@@ -1043,7 +1044,7 @@ const TemporaryDeliveryOrderDoc = ({ docTypeId, title = null, callBack, }) => {
                             if (filterPayment.length === 1) {
                                 return arr.map(e => RoundingNumber(e?.["details"]?.["actual_paid"] ?? e?.[key]) ?? null).filter(where => where !== null) ?? null
                             } else {
-                                return arr.map(e => e["payment_method"] === 1 ? `${RoundingNumber(e[key])} (เงินสด)` : e.payment_method === 2 ? `${RoundingNumber(e[key])} (เครดิต/เดบิต)` : e.payment_method === 3 ? `${RoundingNumber(e[key])} (โอนเงินสด)` : `${RoundingNumber(e[key])} (เช็ค)`)
+                                return arr.map(e => e["payment_method"] === 1 ? `${RoundingNumber(e[key])} (เงินสด)` : e.payment_method === 2 ? `${RoundingNumber(e[key])} (เครดิต/เดบิต)` : e.payment_method === 3 ? `${RoundingNumber(e[key])} (โอนเงินสด)` : e.payment_method === 4 ? `${RoundingNumber(e[key])} (เช็ค)` : e.payment_method === 5 ? `${RoundingNumber(e[key])} (ลูกหนี้)` : "ไม่ระบุ")
                             }
                         case "change":
                             if (filterPayment.length === 1) {
@@ -2096,7 +2097,7 @@ const TemporaryDeliveryOrderDoc = ({ docTypeId, title = null, callBack, }) => {
             setCarPreLoading(true)
             console.log("vl", values)
             let idEdit = values.id
-            
+
             let shopId = authUser?.UsersProfile?.shop_id
             let directory = "shopRetailDocument"
             let upload_car_list = [], upload_product_list = [], upload_payment_list = []

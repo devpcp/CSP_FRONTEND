@@ -83,6 +83,7 @@ module.exports = {
       '/Sales/ShopPartnerDebtCreditNoteDoc': { page: '/Sales/ShopPartnerDebtCreditNoteDoc' },
       '/Sales/PaymentVoucherDoc': { page: '/Sales/PaymentVoucherDoc' },
       '/Sales/DebtCreditNoteNoVatDoc': { page: '/Sales/DebtCreditNoteNoVatDoc' },
+      '/Sales/TransportDoc': { page: '/Sales/TransportDoc' },
 
       '/LineOA/GateWay': { page: '/LineOA/GateWay' },
       '/LineOA/InventoryBalance': { page: '/LineOA/InventoryBalance' },

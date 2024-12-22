@@ -218,15 +218,29 @@ const ComponentsPayWithCashTransfer = ({ icon, textButton, disabled, initForm, t
     // const debounceCash = debounce((value, type) => handleChangeOrBlurCash(value, type), 800)
     const handleChangeOrBlurCash = (value, type) => {
         try {
-            console.log('value :>> ', value);
-            const { cash } = form.getFieldValue()
+            const { cash, change } = form.getFieldValue()
             setCheckCash(cash)
-
+            function replaceAllComma(commaValue) {
+                if (commaValue && commaValue.length > 0) {
+                    return commaValue.replaceAll(",", "")
+                } else {
+                    return 0
+                }
+            }
             const checkValue = value.match(new RegExp(/^(?!,$)[\d,.]+$/))
 
             switch (type) {
                 case "change":
-                    if (!!value && value == 0) setDisablePaymentBtn(true)
+                    if (checkValue === null) {
+                        change = null
+                    } else {
+                        if (value && value.length > 0) {
+                            const result = Number(replaceAllComma(NoRoundingNumber(value))) - Number(replaceAllComma(NoRoundingNumber(total)))
+                            change = RoundingNumber(result) === null ? "0.00" : RoundingNumber(result)
+                        } else {
+                            change = null
+                        }
+                    }
                     break;
                 case "blur":
                     if (value && value.length > 0) {
@@ -236,11 +250,13 @@ const ComponentsPayWithCashTransfer = ({ icon, textButton, disabled, initForm, t
 
                         if (isNegativeNumber == true) {
                             cash = null
+                            change = null
                             Swal.fire(GetIntlMessages("warning"), "จำนวนที่ท่านใส่เป็นจำนวนติดลบ !!", "warning")
                         } else {
                             cash = NoRoundingNumber(value)
                         }
                     } else {
+                        change = null
                     }
                     break;
 
@@ -248,10 +264,10 @@ const ComponentsPayWithCashTransfer = ({ icon, textButton, disabled, initForm, t
                     break;
             }
 
-            form.setFieldsValue({ cash })
+            form.setFieldsValue({ cash, change })
 
         } catch (error) {
-            // console.log('error :>> ', error);
+            console.log('error :>> ', error);
         }
 
     }
@@ -355,11 +371,10 @@ const ComponentsPayWithCashTransfer = ({ icon, textButton, disabled, initForm, t
                                 name="cash"
                                 rules={[{ pattern: /^(?!,$)[\d,.]+$/, required: true, message: GetIntlMessages("ตัวเลขเท่านั้น !!"), validator: checkPrice }]}
                             >
-                                <InputNumber stringMode style={{ fontSize: "24px", textAlign: "end", width: "100%" }}
-                                    formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
-                                    parser={(value) => value.replace(/\$\s?|(,*)/g, '')}
-                                    onChange={(value) => handleChangeOrBlurCash(value, 'change')}
-                                    min={0}
+                                <Input style={{ textAlign: "end" }} addonAfter={`บาท`} onPressEnter={() => form.submit()} onChange={(e) => {
+                                    handleChangeOrBlurCash(e.target.value, "change")
+                                }}
+                                    onBlur={(e) => handleChangeOrBlurCash(e.target.value, "blur")}
                                 />
                                 {/* <Input disabled={loading} addonAfter={`บาท`} style={{ textAlign: "end" }} onChange={(value) => handleChangeOrBlurCash(value.target.value, 'change')} onBlur={(value) => handleChangeOrBlurCash(value.target.value, 'blur')} /> */}
                             </Form.Item>

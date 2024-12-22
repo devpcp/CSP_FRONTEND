@@ -5,7 +5,7 @@ import { useSelector } from 'react-redux';
 import SearchInput from '../../components/shares/SearchInput'
 import TableList from '../../components/shares/TableList'
 import { FormInputLanguage, } from '../../components/shares/FormLanguage';
-import { get, isArray } from 'lodash';
+import { get, isArray, isFunction } from 'lodash';
 import GetIntlMessages from '../../util/GetIntlMessages';
 import ImageSingleShares from '../../components/shares/FormUpload/ImageSingle';
 import { CheckImage, UploadImageSingle } from '../../components/shares/FormUpload/API';
@@ -13,7 +13,7 @@ import FormProvinceDistrictSubdistrict from "../../components/shares/FormProvinc
 import Fieldset from '../../components/shares/Fieldset';
 import EmployeeData from './EmployeeData';
 
-const TransportVehicleData = ({ title = null }) => {
+const TransportVehicleData = ({ title = null, callBack, }) => {
 
   const [loading, setLoading] = useState(false);
   // const { authUser, imageProfile } = useSelector(({ auth }) => auth);
@@ -118,10 +118,21 @@ const TransportVehicleData = ({ title = null }) => {
         width: "200",
         render: (text, record) => get(text, `model_name.${locale.locale}`, "-"),
       },
-
+      {
+        title: () => GetIntlMessages("เลือก"),
+        dataIndex: 'cheque_number',
+        key: 'cheque_number',
+        width: 100,
+        align: "center",
+        use: isFunction(callBack) ?? false,
+        render: (text, record) => (
+          <Button onClick={() => callBack(record)}>เลือก</Button>
+        ),
+      },
     ];
 
-    setColumns(_column)
+    _column.map((x) => { x.use === undefined ? x.use = true : null })
+    setColumns(_column.filter(x => x.use === true));
   }
 
 

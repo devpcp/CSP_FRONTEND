@@ -9,12 +9,12 @@ import ModalFullScreen from '../../../../shares/ModalFullScreen';
 import RegexMultiPattern from '../../../../shares/RegexMultiPattern';
 import API from '../../../../../util/Api'
 import { isFunction, isPlainObject } from 'lodash';
-import { RoundingNumber } from '../../../../shares/ConvertToCurrency';
+import { RoundingNumber, takeOutComma, NoRoundingNumber } from '../../../../shares/ConvertToCurrency';
 import moment from 'moment';
 import Swal from 'sweetalert2';
 import ChequeData from '../../../../../routes/MyData/ChequeData';
 
-const ComponentsPayWithCheque = ({ icon, textButton, initForm, total, callback, loading, disabled }) => {
+const ComponentsPayWithCheque = ({ icon, textButton, initForm, total, callback, loading, disabled, isPartialPayment = false }) => {
 
     const { bankNameList } = useSelector(({ master }) => master);
     const { locale, mainColor } = useSelector(({ settings }) => settings);
@@ -45,48 +45,50 @@ const ComponentsPayWithCheque = ({ icon, textButton, initForm, total, callback, 
 
     const onFinish = async (value) => {
         try {
-            // console.log('value', value)
-            const model = {
-                bank_name_list_id: value.bank_name_list_id ?? null,
-                // doc_date : moment(new Date()).format("YYYY-MM-DD"),
-                payment_price_paid: value?.payment_price_paid ?? "0.00",
-                details: {
-                    remark: value.remark ?? null,
-                    received_payment_account: value.received_payment_account ?? null,
-                    bank_branch: value.bank_branch ?? null,
-                    cheque_number: value.cheque_number ?? null,
-                    cheque_date: moment(value.cheque_date).format("YYYY-MM-DD") ?? null,
-                    cheque_received_date: moment(value.cheque_received_date).format("YYYY-MM-DD") ?? null,
-                    cheque_id: value.cheque_id ?? null,
-                    check_amount: value.check_amount ?? "0.00",
-                    cheque_amount_remaining: value.cheque_amount_remaining ?? "0.00"
-                },
-                payment_paid_date: moment(value.payment_paid_date).format("YYYY-MM-DD HH:mm:ss")
-            }
-            let change = Number(value?.payment_price_paid) - Number(total)
-            if (change < -1 || change > 1) {
-                Swal.fire('ยอดเงินไม่ตรงที่ต้องชำระ!!', '', 'warning')
-                // form.setFieldValue("payment_price_paid", null)
-            } else {
-                Swal.fire({
-                    title: GetIntlMessages("ยืนยันการชำระหรือไม่ ?"),
-                    // title: GetIntlMessages(isPartialPayment ? "ยืนยันการเพิ่มรายการชำระหรือไม่ ?" :"ยืนยันการชำระหรือไม่ ?" ),
-                    // text: "You won't be able to revert this!",
-                    icon: 'question',
-                    showCancelButton: true,
-                    confirmButtonColor: mainColor,
-                    confirmButtonText: GetIntlMessages("submit"),
-                    cancelButtonText: GetIntlMessages("cancel")
-                }).then(async ({ isConfirmed }) => {
-                    if (isConfirmed) {
-                        if (isFunction(callback)) {
-                            // console.log('model :>> ', model);
-                            callback(4, model, false)
+            console.log('total', Number(takeOutComma(total)))
+            console.log('value', Number(takeOutComma(value?.cash)))
+            if (Number(takeOutComma(value?.cash)) <= Number(takeOutComma(total))) {
+                const model = {
+                    bank_name_list_id: value.bank_name_list_id ?? null,
+                    // doc_date : moment(new Date()).format("YYYY-MM-DD"),
+                    payment_price_paid: value?.cash ?? "0.00",
+                    details: {
+                        remark: value.remark ?? null,
+                        received_payment_account: value.received_payment_account ?? null,
+                        bank_branch: value.bank_branch ?? null,
+                        cheque_number: value.cheque_number ?? null,
+                        cheque_date: moment(value.cheque_date).format("YYYY-MM-DD") ?? null,
+                        cheque_received_date: moment(value.cheque_received_date).format("YYYY-MM-DD") ?? null,
+                        cheque_id: value.cheque_id ?? null,
+                        check_amount: value.check_amount ?? "0.00",
+                        cheque_amount_remaining: value.cheque_amount_remaining ?? "0.00"
+                    },
+                    payment_paid_date: moment(value.payment_paid_date).format("YYYY-MM-DD HH:mm:ss")
+                }
+                let change = Number(value?.cash) - Number(total)
+                if ((change < -1 || change > 1) && !isPartialPayment) {
+                    Swal.fire('ยอดเงินไม่ตรงที่ต้องชำระ!!', '', 'warning')
+                } else {
+                    Swal.fire({
+                        title: GetIntlMessages(isPartialPayment ? "ยืนยันการเพิ่มรายการชำระหรือไม่ ?" : "ยืนยันการชำระหรือไม่ ?"),
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonColor: mainColor,
+                        confirmButtonText: GetIntlMessages("submit"),
+                        cancelButtonText: GetIntlMessages("cancel")
+                    }).then(async ({ isConfirmed }) => {
+                        if (isConfirmed) {
+                            if (isFunction(callback)) {
+                                // console.log('model :>> ', model);
+                                callback(4, model, isPartialPayment)
+                                handleCancel()
+                            }
                         }
-                    }
-                })
+                    })
+                }
+            } else {
+                Swal.fire('ยอดเงินเกินกว่าที่ต้องชำระ!!', '', 'warning')
             }
-
 
 
             // console.log('model', model)
@@ -151,11 +153,67 @@ const ComponentsPayWithCheque = ({ icon, textButton, initForm, total, callback, 
             cheque_number: data.check_no,
             cheque_date: moment(new Date(data.check_date), "YYYY-MM-DD"),
             cheque_received_date: moment(new Date(data.check_receive_date), "YYYY-MM-DD"),
-            payment_price_paid: data.check_amount,
+            cash: data.check_amount,
             check_amount: data.check_amount,
             cheque_amount_remaining: data.details.cheque_amount_remaining
 
         });
+    }
+
+    const handleChangeOrBlurCash = (value, type) => {
+        try {
+            const { cash, change } = form.getFieldValue()
+            // setCheckCash(cash)
+            function replaceAllComma(commaValue) {
+                if (commaValue && commaValue.length > 0) {
+                    return commaValue.replaceAll(",", "")
+                } else {
+                    return 0
+                }
+            }
+            const checkValue = value.match(new RegExp(/^(?!,$)[\d,.]+$/))
+
+            switch (type) {
+                case "change":
+                    if (checkValue === null) {
+                        change = null
+                    } else {
+                        if (value && value.length > 0) {
+                            const result = Number(replaceAllComma(NoRoundingNumber(value))) - Number(replaceAllComma(NoRoundingNumber(total)))
+                            change = RoundingNumber(result) === null ? "0.00" : RoundingNumber(result)
+                        } else {
+                            change = null
+                        }
+                    }
+                    break;
+                case "blur":
+                    if (value && value.length > 0) {
+                        let isNegativeNumber = false
+                        const newValue = Number(value.replaceAll(",", ""))
+                        if (Math.sign(newValue) == -1) isNegativeNumber = true
+
+                        if (isNegativeNumber == true) {
+                            cash = null
+                            change = null
+                            Swal.fire(GetIntlMessages("warning"), "จำนวนที่ท่านใส่เป็นจำนวนติดลบ !!", "warning")
+                        } else {
+                            cash = NoRoundingNumber(value)
+                        }
+                    } else {
+                        change = null
+                    }
+                    break;
+
+                default:
+                    break;
+            }
+            
+            form.setFieldsValue({ cash, change })
+
+        } catch (error) {
+            console.log('error :>> ', error);
+        }
+
     }
 
     // console.log('initForm.getFieldValue() :>> ', initForm.getFieldValue());
@@ -347,19 +405,15 @@ const ComponentsPayWithCheque = ({ icon, textButton, initForm, total, callback, 
                             <Col span={8}>
                                 <Form.Item
                                     // {...formItemLayout}
-                                    name='payment_price_paid'
+                                    name='cash'
                                     label={GetIntlMessages("จำนวนเงินที่ชำระ")}
                                     validateTrigger={['onChange', 'onBlur']}
                                     rules={[{ required: true, message: GetIntlMessages("please-fill-out") }]}
                                 >
-                                    <InputNumber
-                                        stringMode min={0}
-                                        precision={2}
-                                        style={{ width: "100%" }}
-                                        step="0.01"
-                                        formatter={(value) => !!value ? value.replace(/\B(?=(\d{3})+(?!\d))/g, ',') : ""}
-                                        parser={(value) => value.replace(/\$\s?|(,*)/g, '')}
-                                        max={form.getFieldValue().cheque_amount_remaining ?? form.getFieldValue().check_amount}
+                                    <Input style={{ textAlign: "end" }} addonAfter={`บาท`} onPressEnter={() => form.submit()} onChange={(e) => {
+                                        handleChangeOrBlurCash(e.target.value, "change")
+                                    }}
+                                        onBlur={(e) => handleChangeOrBlurCash(e.target.value, "blur")}
                                     />
                                 </Form.Item>
                             </Col>
@@ -383,7 +437,7 @@ const ComponentsPayWithCheque = ({ icon, textButton, initForm, total, callback, 
                             <Row>
                                 <Col xxl={{ span: 8, offset: 4 }} lg={{ span: 10, offset: 2 }} md={12} sm={24} xs={24}>
                                     <div className={`pay-box`}>
-                                        <Button type='primary' onClick={() => form.submit()} className={`pay-btn`}>รับชำระ</Button>
+                                        <Button type='primary' onClick={() => form.submit()} className={`pay-btn`}>{isPartialPayment ? `ยืนยัน` : `รับชำระ`}</Button>
                                     </div>
                                 </Col>
                                 <Col xxl={{ span: 8, offset: 4 }} lg={{ span: 10, offset: 2 }} md={12} sm={24} xs={24}>

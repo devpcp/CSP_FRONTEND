@@ -837,7 +837,8 @@ const ShopTaxInvoiceDocWholeSale = ({ docTypeId }) => {
                                         return "โอนเงินสด"
                                     case 4:
                                         return "เช็ค"
-
+                                    case 5:
+                                        return "ลูกหนี้"
                                     default:
                                         return "-"
                                 }
@@ -847,7 +848,7 @@ const ShopTaxInvoiceDocWholeSale = ({ docTypeId }) => {
                             if (filterPayment.length === 1) {
                                 return arr.map(e => RoundingNumber(e?.["details"]?.["actual_paid"] ?? e?.[key]) ?? null).filter(where => where !== null) ?? null
                             } else {
-                                return arr.map(e => e["payment_method"] === 1 ? `${RoundingNumber(e[key])} (เงินสด)` : e.payment_method === 2 ? `${RoundingNumber(e[key])} (เครดิต/เดบิต)` : `${RoundingNumber(e[key])} (โอนเงินสด)`)
+                                return arr.map(e => e["payment_method"] === 1 ? `${RoundingNumber(e[key])} (เงินสด)` : e.payment_method === 2 ? `${RoundingNumber(e[key])} (เครดิต/เดบิต)` : e.payment_method === 3 ? `${RoundingNumber(e[key])} (โอนเงินสด)` : e.payment_method === 4 ? `${RoundingNumber(e[key])} (เช็ค)` : e.payment_method === 5 ? `${RoundingNumber(e[key])} (ลูกหนี้)` : "ไม่ระบุ")
                             }
                         case "change":
                             if (filterPayment.length === 1) {

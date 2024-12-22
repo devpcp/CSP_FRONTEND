@@ -129,11 +129,17 @@ const ChequeData = ({ title = null, callBack }) => {
                 use: true,
                 render: (text, record) => {
                     if (isFunction(callBack)) {
-                        return (
-                            <Link href="#" onClick={() => callBack(record)}>
-                                {text}
-                            </Link>
-                        )
+                        if (record?.details?.cheque_use_status === false || record.check_status !== 1) {
+                            return (
+                                <Text>{text}</Text>
+                            )
+                        } else {
+                            return (
+                                <Link href="#" onClick={() => callBack(record)}>
+                                    {text}
+                                </Link>
+                            )
+                        }
                     } else {
                         return (
                             <Text>{text}</Text>

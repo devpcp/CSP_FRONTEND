@@ -10,12 +10,14 @@ import PayWithCash from './Components.Routes.Modal.PayWith.Cash';
 import PayWithCreaditCard from './Components.Routes.Modal.PayWith.CreaditCard';
 import API from '../../../../../util/Api'
 import { get, isArray, isFunction, isPlainObject, result } from 'lodash';
-import { CreditCardOutlined, PlusOutlined, DeleteOutlined } from '@ant-design/icons'
-import { RoundingNumber } from '../../../../shares/ConvertToCurrency';
+import { CreditCardOutlined, PlusOutlined, DeleteOutlined, BankOutlined, DollarOutlined } from '@ant-design/icons'
+import { RoundingNumber, takeOutComma } from '../../../../shares/ConvertToCurrency';
 import moment from 'moment';
 import Swal from 'sweetalert2';
+import PayWithCheque from './Components.Routes.Modal.PayWith.Cheque';
+import PayWithDebtor from './Components.Routes.Modal.PayWith.Debtor';
 
-const ComponentsPayWithPartialPayment = ({ icon, textButton, loading, total, callback, initForm, isPartialPayment = false }) => {
+const ComponentsPayWithPartialPayment = ({ icon, textButton, loading, total, callback, initForm, isPartialPayment = false, isShowDebtor = false }) => {
 
     const { locale, mainColor } = useSelector(({ settings }) => settings);
     const [formLocale, setFormLocale] = useState(locale.icon)
@@ -30,10 +32,11 @@ const ComponentsPayWithPartialPayment = ({ icon, textButton, loading, total, cal
         if (isPartialPayment) {
             payment_method_list = !!initForm.getFieldValue("payment_method_list") ? initForm.getFieldValue("payment_method_list").map((e) => {
                 total_payment_price_paid += Number(e.payment_price_paid)
+                e.showDeleteBtn = true
                 return { ...e, payment_method_name: e.payment_method === 1 ? "เงินสด" : e.payment_method === 2 ? "เครดิต/เดบิต" : "โอนเงินสด" }
             }) : []
         }
-
+        console.log("payment_method_list", payment_method_list)
         price_balance = RoundingNumber(Number(total) - Number(total_payment_price_paid)) ?? "0.00"
         form.setFieldsValue({ price_grand_total: total, total_payment_price_paid, price_balance, payment_method_list })
     }, [isModalVisible])
@@ -69,29 +72,20 @@ const ComponentsPayWithPartialPayment = ({ icon, textButton, loading, total, cal
                     render: (text, record, index) => <div style={{ textAlign: "end" }}>{RoundingNumber(record?.cash ?? record?.payment_price_paid) ?? "-"}</div>,
                 },
                 {
-                    title: GetIntlMessages("ธนาคาร"),
-                    dataIndex: "bank_name",
-                    key: "bank_name",
+                    title: GetIntlMessages("วันที่รับชำระ"),
+                    dataIndex: "payment_paid_date",
+                    key: "payment_paid_date",
                     width: "10%",
                     align: "center",
-                    render: (text, record, index) => get(text, `${locale.locale}`, "-"),
+                    render: (text, record, index) => moment(text).format("DD/MM/YYYY"),
                 },
-                // {
-                //     title: GetIntlMessages("เงินทอน"),
-                //     dataIndex: "change",
-                //     key: "change",
-                //     width: "10%",
-                //     align: "center",
-                //     render: (text, record, index) => <div style={{ textAlign: "end" }}>{RoundingNumber(text) ?? "-"}</div>,
-                // },
                 {
-                    title: GetIntlMessages("เลขบัตร"),
-                    // title: GetIntlMessages("เลขบัตร / เลขเอกสารอ้างอิง"),
-                    dataIndex: "card_4_end_code",
-                    key: "card_4_end_code",
+                    title: GetIntlMessages("เวลารับชำระ"),
+                    dataIndex: "payment_paid_date",
+                    key: "payment_paid_date",
                     width: "10%",
                     align: "center",
-                    render: (text, record, index) => text ?? "-",
+                    render: (text, record, index) => moment(text).format("HH:mm:ss"),
                 },
                 {
                     title: GetIntlMessages("หมายเหตุ"),
@@ -159,9 +153,10 @@ const ComponentsPayWithPartialPayment = ({ icon, textButton, loading, total, cal
 
     const onFinish = async (value) => {
         try {
-            // console.log('value', value)
+            console.log('value', value)
             const model = {
                 shopPaymentTransactions: value.payment_method_list.map((e) => {
+                    console.log("e", e)
                     switch (e.type) {
                         case 1:
                             return {
@@ -205,14 +200,44 @@ const ComponentsPayWithPartialPayment = ({ icon, textButton, loading, total, cal
                                 },
                                 payment_paid_date: moment(e.payment_paid_date).format("YYYY-MM-DD HH:mm:ss")
                             }
-
+                        case 4:
+                            return {
+                                id: e.id ?? null,
+                                payment_method: e.type,
+                                payment_price_paid: e.payment_price_paid,
+                                is_partial_payment: isPartialPayment,
+                                details: {
+                                    received_payment_account: e.received_payment_account ?? null,
+                                    bank_branch: e.bank_branch ?? null,
+                                    cheque_number: e.cheque_number ?? null,
+                                    cheque_date: moment(e.cheque_date).format("YYYY-MM-DD") ?? null,
+                                    cheque_received_date: moment(e.cheque_received_date).format("YYYY-MM-DD") ?? null,
+                                    cheque_id: e.cheque_id ?? null,
+                                    check_amount: e.check_amount ?? "0.00",
+                                    cheque_amount_remaining: e.cheque_amount_remaining ?? "0.00"
+                                },
+                                payment_paid_date: moment(e.payment_paid_date).format("YYYY-MM-DD HH:mm:ss")
+                            }
+                        case 5:
+                            return {
+                                id: e.id ?? null,
+                                payment_method: e.type,
+                                payment_price_paid: e.payment_price_paid,
+                                is_partial_payment: isPartialPayment,
+                                details: {
+                                    change: value.change,
+                                    actual_paid: value.cash,
+                                    remark: value.remark ?? null,
+                                },
+                                payment_paid_date: moment(e.payment_paid_date).format("YYYY-MM-DD HH:mm:ss")
+                            }
                         default:
                             break;
                     }
 
                 }),
             }
-            // console.log("model", model)
+            console.log("model", model)
             if (isArray(value.payment_method_list) && value.payment_method_list.length > 0) {
                 Swal.fire({
                     title: GetIntlMessages("ยืนยันการชำระเงินหรือไม่ ?"),
@@ -291,7 +316,27 @@ const ComponentsPayWithPartialPayment = ({ icon, textButton, loading, total, cal
                         payment_paid_date: moment(value.payment_paid_date).format("YYYY-MM-DD HH:mm:ss")
                     }
                     break;
-
+                case 4:
+                    model = {
+                        type,
+                        payment_method_name: "เช็ค",
+                        payment_price_paid: value.payment_price_paid,
+                        bank_name_list_id: value.bank_name_list_id,
+                        ...value.details,
+                        showDeleteBtn: true,
+                        payment_paid_date: moment(value.payment_paid_date).format("YYYY-MM-DD HH:mm:ss")
+                    }
+                    break;
+                case 5:
+                    model = {
+                        type,
+                        payment_method_name: "ลูกหนี้",
+                        payment_price_paid: value.payment_price_paid,
+                        ...value.details,
+                        showDeleteBtn: true,
+                        payment_paid_date: moment(value.payment_paid_date).format("YYYY-MM-DD HH:mm:ss")
+                    }
+                    break;
                 default:
                     break;
             }
@@ -389,19 +434,25 @@ const ComponentsPayWithPartialPayment = ({ icon, textButton, loading, total, cal
                     </Row>
 
                     <Divider style={{ backgroundColor: "#ffcc00" }} />
-
                     <Row gutter={[30, 10]} style={{ display: "felx", justifyContent: "center", marginBottom: "20px" }}>
                         <Col>
                             {/* <PayWithCash icon={`https://icon-library.com/images/cash-icon-png/cash-icon-png-27.jpg`} textButton={`เงินสด`} /> */}
-                            <PayWithCash icon={"/assets/images/icon/cash.svg"} textButton={`เงินสด`} callback={callbackPayment} total={total} isPartialPayment />
+                            <PayWithCash icon={"/assets/images/icon/cash.svg"} textButton={`เงินสด`} callback={callbackPayment} total={+takeOutComma(form.getFieldValue("price_balance"))} isPartialPayment />
                         </Col>
                         <Col>
                             {/* <PayWithCreaditCard icon={`data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAOEAAADhCAMAAAAJbSJIAAAAflBMVEX///8aGhoAAAAUFBQNDQ1lZWU6Ojrc3Nw3Nzc0NDTp6emJiYkYGBgHBwcQEBBYWFivr6/w8PBLS0swMDBTU1O/v7/29vZtbW3R0dHFxcUkJCR3d3fY2NiQkJDn5+egoKCpqamampp2dnZMTEzKyspoaGhCQkKUlJQhISG2trYttGzcAAAEhElEQVR4nO2d63aiMBRGIUHxQqB4oSrW2o51xvd/weGmgAaocAIs/PZPjs1imyuRk2oaAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAI/sP1Y26xf26mNP5reeBgVaer+wgq98uibxcx3Gu9YpgDPHbS5octG1SAmCm40Fe1uBMZw1VPT0fgsGirrXyPCdXUuybKNPpCMfe28iuLkKciacUZ9wxK37sE0DQ8eICxHLbZMvSgnbZTIEGk79QmZJFYoV3Y0RskoU2ax2EW+xId8168yq8HZxQ2VvtYvwRdMS1JLUgPBrl7Cwo1GUESwclOCyaES1F7VLGEetgC8Jb4qWZXyD49oFJIZTwnuiZQrDKmDYOTCsBIadQ2W4NPsK0XwYPDr1leT+Ghv2HRjCsP/AEIb9B4Yw7D8whGH/gSEM+w8MYdh/YPgLQ95XyAzHk34yJjLkk9oFqGaCPe8qYNg5MKwEhp0Dw0pg2DkwrASGnQPDSl7Z0DU3p/0hc2Fmnk5m/beRa6LKcD8fi+hlj93oEl3Y+Mv47Y/l96nB/T6PGsPNijEeZzsYLBRan5m47icINr00vOtnUGLoM/u2A2QF7dRz0gvRRfanvcaqwNCd3JJodCtMOTLFQ+KX0SjF4ynoDV1upCYsaI97WeKXxdrqjfSGu0yDFD/BCGpId1Stpgllv4XcMM3zCqvQ1bSFIRPUdbul7Tlqw1NOcK5pRyb1C6N/aRQqoDZcZAdNdihLTmwpC4XYcJOtMft8S8qRV+InkUQpxIa+uDPI1ekd7STaEBtOs22S7a9ZR0WVmF21atv5A59eSfB4C67LgrSGbrZNWsLNt9pHw2yuvC99hTn5Dr5lwX/JwuhdFtxdOzmtYU6I78q7YWD4lZazlX4yydtclwUv0iAbKTHM3Ul47avccJ6W8y5P6Y/H25F8To0TQ4uCngrDy73h318bOgX3Ga18CsarOLgqCLoqDHNNLRwqP8sNP9JyPqSftFgUnMuDIgr60iDXNRWGZm6k0b2CDnQzPKbluExSiVbSU2dMUk9WMp8e5MFr2bSGnpGdHILJwCw3zD5CmWfJiHgdivbjx5i4BSeSv7ytJojnw1yfCCcDq2Q+tFg+/9ud3eOVBUv/Mo0RG+bW2WH+tLyTxBij8qJpIDbMrWEsO3z8LWmkrTwEUz9b5Ea9sJkWzAJ6vDBvAWpDL1uJ9jgcXot6YktbNeTP+LkpMdymKZoSs5OhSuj3abLLGM69cNUsFWxw2shTKNhNnGfapQiHyx+JYmuCSnaEj5nlSbT0nN/vJ3JW/yCOZ1Gy520u0oVU1N1Oy+zKirN/NIeo/QpFv8xsV8HCybBtWzD2HV64BGsyEVwwggvTVk96UfbrmnuZjxZnx/+8bvwe3vzRObhwPNx/VC34hbQSGHYODCt5GcMBnxM1/LO+hn9e2/DP3Bv+uYnDP/vyBc4vHf4ZtC9wjvDwz4J+gfO8X+BMdm345+qHDP1/IwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIAh8R+s8WbNRmDw4QAAAABJRU5ErkJggg==`} textButton={`Credit Card`} /> */}
-                            <PayWithCreaditCard icon={"/assets/images/icon/credit-card.svg"} textButton={`เครดิต/เดบิต`} callback={callbackPayment} total={total} isPartialPayment />
+                            <PayWithCreaditCard icon={"/assets/images/icon/credit-card.svg"} textButton={`เครดิต/เดบิต`} callback={callbackPayment} total={+takeOutComma(form.getFieldValue("price_balance"))} isPartialPayment />
                         </Col>
                         <Col>
                             {/* <PayWithCashTransfer icon={`https://www.freeiconspng.com/thumbs/money-transfer-icon/dollar-exchange-money-transfer-icon-21.png`} textButton={`โอนเงินสด`} /> */}
-                            <PayWithCashTransfer icon={"/assets/images/icon/money-transfer.svg"} textButton={`โอนเงินสด`} callback={callbackPayment} total={total} isPartialPayment initForm={initForm} />
+                            <PayWithCashTransfer icon={"/assets/images/icon/money-transfer.svg"} textButton={`โอนเงินสด`} callback={callbackPayment} total={+takeOutComma(form.getFieldValue("price_balance"))} isPartialPayment initForm={initForm} />
+                        </Col>
+                        <Col>
+                            <PayWithCheque icon={<BankOutlined style={{ fontSize: "5.5rem" }} />} textButton={`เช็ค`} callback={callbackPayment} total={+takeOutComma(form.getFieldValue("price_balance"))} isPartialPayment initForm={initForm} />
+                        </Col>
+                        {/* <Col hidden={isShowDebtor}> */}
+                        <Col hidden={true}>
+                            <PayWithDebtor icon={<DollarOutlined style={{ fontSize: "5.5rem" }} />} textButton={`ลูกหนี้`} callback={callbackPayment} total={+takeOutComma(form.getFieldValue("price_balance"))} isPartialPayment initForm={initForm} />
                         </Col>
                     </Row>
 
