@@ -1,4 +1,4 @@
-import { FileAddOutlined, FileImageOutlined } from '@ant-design/icons'
+import { FileAddOutlined, FileImageOutlined, DownOutlined } from '@ant-design/icons'
 import { Button, Col, Form, message, Row, Tabs, Dropdown, Space, Menu, Modal } from 'antd'
 import { get, isArray, isEmpty, isPlainObject } from 'lodash'
 import moment from 'moment'
@@ -33,7 +33,6 @@ const ProductReturnReceiptDoc = ({ docTypeId }) => {
     const [disabledWhenTaxInvoiceDocActive, setDisabledWhenTaxInvoiceDocActive] = useState(false)
     const [idEdit, setIsIdEdit] = useState(null);
 
-    
     const getStatusCarLoading = useCallback(
         (valStatus) => {
             setCarPreLoading(valStatus)
@@ -621,7 +620,7 @@ const ProductReturnReceiptDoc = ({ docTypeId }) => {
 
     }
 
-    const onFinish = async (values) => {
+    const onFinish = async (values, type) => {
         try {
             // console.log('values :>> ', values);
             setLoading(true)
@@ -831,7 +830,12 @@ const ProductReturnReceiptDoc = ({ docTypeId }) => {
                 },
             }
 
+            if (configModal.modeKey === 1) {
+                delete model.ShopInventory_Put
+            }
             console.log('model :>> ', model);
+            console.log("configModal", configModal.modeKey)
+
             let res
 
             if (configModal.mode === "add") {
@@ -855,8 +859,21 @@ const ProductReturnReceiptDoc = ({ docTypeId }) => {
                             updateDebtCreditNote.details.is_create_debt_credit_note_doc = "pick"
 
                             let res = await API.put(`/shopInventoryTransaction/put/${id}`, updateDebtCreditNote)
+                        } else {
+                            Modal.error({
+                                title: 'เกิดข้อผิดพลาด',
+                                content: `เกิดข้อผิดพลาด : ${returnModel.res}`,
+                                centered: true,
+                                footer: null,
+                            });
                         }
                     } catch (error) {
+                        Modal.error({
+                            title: 'เกิดข้อผิดพลาด',
+                            content: `เกิดข้อผิดพลาด : ${error}`,
+                            centered: true,
+                            footer: null,
+                        });
                         console.log("createdebtdoc error", error)
                     }
                 }
@@ -872,8 +889,21 @@ const ProductReturnReceiptDoc = ({ docTypeId }) => {
                             updateDebtCreditNote.details.is_create_debt_credit_note_doc = "pick"
 
                             let res = await API.put(`/shopInventoryTransaction/put/${id}`, updateDebtCreditNote)
+                        } else {
+                            Modal.error({
+                                title: 'เกิดข้อผิดพลาด',
+                                content: `เกิดข้อผิดพลาด : ${returnModel.res}`,
+                                centered: true,
+                                footer: null,
+                            });
                         }
                     } catch (error) {
+                        Modal.error({
+                            title: 'เกิดข้อผิดพลาด',
+                            content: `เกิดข้อผิดพลาด : ${error}`,
+                            centered: true,
+                            footer: null,
+                        });
                         console.log("createdebtdoc error", error)
                     }
                 }
@@ -1096,6 +1126,29 @@ const ProductReturnReceiptDoc = ({ docTypeId }) => {
 
     const MatchRound = (value) => (Math.round(+value * 100) / 100).toFixed(2)
 
+    const menuOnFinish = () => {
+        try {
+
+            const items = [
+                {
+                    key: '1',
+                    label: 'บันทึกเฉพาะหัวบิลท้ายบิล',
+                    onClick: () => handleOk(1),
+                },
+            ]
+            if (configModal.mode !== "edit") items = []
+            return (
+                <Menu
+                    loading={loading || carPreLoading}
+                    items={items}
+                />
+            )
+
+        } catch (error) {
+
+        }
+    }
+
     return (
         <>
             <SearchInput configSearch={configSearch} configModal={configModal} loading={loading} onAdd={() => addEditViewModal("add", null)} value={modelSearch} />
@@ -1117,11 +1170,18 @@ const ProductReturnReceiptDoc = ({ docTypeId }) => {
                                             <Button loading={loading} style={{ width: "100%" }} onClick={() => handleCancel()}>{configModal.mode === "view" ? GetIntlMessages("ปิด") : GetIntlMessages("cancel")}</Button>
                                         </Col>
                                         <Col xxl={4} lg={6} md={12} xs={24} hidden={configModal.mode === "view" || disabledWhenDeliveryDocActive || disabledWhenTaxInvoiceDocActive} >
-                                            <Button loading={loading} onClick={() => handleOk()} style={{ width: "100%" }} type='primary'>{GetIntlMessages("บันทึก")}</Button>
+                                            {
+                                                configModal.mode === "edit" ?
+                                                    <Dropdown.Button type='primary' overlay={() => menuOnFinish()} icon={<DownOutlined />} onClick={() => handleOk(0)} style={{ width: "100%" }} loading={loading || carPreLoading}>
+                                                        บันทึก
+                                                    </Dropdown.Button>
+                                                    :
+                                                    <Button loading={loading || carPreLoading} onClick={() => handleOk(0)} style={{ width: "100%" }} type='primary'>{GetIntlMessages("บันทึก")}</Button>
+                                            }
                                         </Col>
-                                        <Col hidden={configModal.mode === "add"}>
+                                        {/* <Col hidden={configModal.mode === "add"}>
                                             <PrintOut textButton={"พิมพ์"} documentId={form.getFieldValue().id} style={{ width: "100%", display: "flex", justifyContent: "center", alignItems: "center", overflow: "hidden" }} customPriceUse={true} docTypeId={docTypeId} />
-                                        </Col>
+                                        </Col> */}
                                     </>
                                 </Row>
                             </>
@@ -1185,6 +1245,15 @@ const ProductReturnReceiptDoc = ({ docTypeId }) => {
                     </Form.Item>
                 </Form>
             </ModalFullScreen>
+            <style>
+                {
+                    `
+                    .ant-btn-compact-item.ant-btn.ant-btn-compact-first-item:not(.ant-btn-compact-last-item):not(.ant-btn-compact-item-rtl) {
+                        width : 100%
+                    }
+                    `
+                }
+            </style>
         </>
     )
 }

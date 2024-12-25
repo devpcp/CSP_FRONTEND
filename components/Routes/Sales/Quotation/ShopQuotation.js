@@ -39,6 +39,9 @@ const ShopQuotation = ({ docTypeId, menuId }) => {
 
     const { TabPane } = Tabs
 
+    const [isIdEditData, setIsIdEditData] = useState({});
+
+
     /**
     * ค่าเริ่มต้นของ
     *  - configTable = Config ตาราง
@@ -537,8 +540,11 @@ const ShopQuotation = ({ docTypeId, menuId }) => {
     const setFormValueData = (data) => {
         try {
             if (isPlainObject(data)) {
-                const { details, ShopVehicleCustomer, tax_type_id, ShopQuotationLists, doc_type_id, doc_date, code_id, id } = data
-
+                const { details, ShopVehicleCustomer, tax_type_id, ShopQuotationLists, doc_type_id, doc_date, code_id, id, ShopPersonalCustomer, ShopBusinessCustomer } = data
+                console
+                let customer_data = details?.customer_type === "person" ? ShopPersonalCustomer : ShopBusinessCustomer
+                console.log("cus", customer_data)
+                setIsIdEditData(customer_data)
                 const _model = {
                     id,
                     code_id,
@@ -593,7 +599,11 @@ const ShopQuotation = ({ docTypeId, menuId }) => {
                     _model.customer_list = [data?.ShopPersonalCustomer].map(e => {
                         const newData = { ...e, customer_name: {} }
                         locale.list_json.forEach(x => {
-                            newData.customer_name[x] = e.customer_name ? `${e.customer_name.first_name[x] ?? "-"} ${e.customer_name.last_name[x] ?? "-"}` : ""
+                            let customer_full_name = _model.customer_type === "person" ? `${e?.customer_name?.first_name[locale.locale] ?? "-"} ${e?.customer_name?.last_name[locale.locale] ?? ""}` : `${e?.customer_name[locale.locale] ?? "-"}`;
+                            let customer_branch = _model.customer_type === "person" ? "" : e?.other_details?.branch ? e?.other_details?.branch === "office" ? " (สำนักงานใหญ่)" : " (" + e?.other_details?.branch_code + " " + e?.other_details?.branch_name + ")" : ""
+                            let customer_code = e.master_customer_code_id
+                            newData.customer_code = customer_code
+                            newData.customer_full_name = customer_full_name + customer_branch
                             return newData
                         })
                         return newData
@@ -601,7 +611,18 @@ const ShopQuotation = ({ docTypeId, menuId }) => {
                     _model.customer_phone_list = Object.entries(data?.ShopPersonalCustomer?.mobile_no).map(e => { return { value: e[1] } })
                 } else {
                     _model.customer_id = data?.bus_customer_id ?? null
-                    _model.customer_list = [data?.ShopBusinessCustomer]
+                    _model.customer_list = [data?.ShopBusinessCustomer].map(e => {
+                        const newData = { ...e, customer_name: {} }
+                        locale.list_json.forEach(x => {
+                            let customer_full_name = _model.customer_type === "person" ? `${e?.customer_name?.first_name[locale.locale] ?? "-"} ${e?.customer_name?.last_name[locale.locale] ?? ""}` : `${e?.customer_name[locale.locale] ?? "-"}`;
+                            let customer_branch = _model.customer_type === "person" ? "" : e?.other_details?.branch ? e?.other_details?.branch === "office" ? " (สำนักงานใหญ่)" : " (" + e?.other_details?.branch_code + " " + e?.other_details?.branch_name + ")" : ""
+                            let customer_code = e.master_customer_code_id
+                            newData.customer_code = customer_code
+                            newData.customer_full_name = customer_full_name + customer_branch
+                            return newData
+                        })
+                        return newData
+                    })
                     _model.customer_phone_list = Object.entries(data?.ShopBusinessCustomer?.mobile_no).map(e => { return { value: e[1] } })
                 }
 
@@ -612,7 +633,7 @@ const ShopQuotation = ({ docTypeId, menuId }) => {
 
             calculateResult()
         } catch (error) {
-            // console.log('error setFormValueData :>> ', error);
+            console.log('error setFormValueData :>> ', error);
         }
     }
 
@@ -944,9 +965,6 @@ const ShopQuotation = ({ docTypeId, menuId }) => {
                                             <TabPane tab={GetIntlMessages("ลูกค้า")} key="2">
                                                 <Tab2Customer mode={configModal.mode} onFinish={onFinish} onFinishFailed={onFinishFailed} form={form} />
                                             </TabPane>
-                                            {/* <TabPane tab={GetIntlMessages("เอกสาร")} key="3">
-                                                <Tab3Document mode={configModal.mode} onFinish={onFinish} onFinishFailed={onFinishFailed} form={form} />
-                                            </TabPane> */}
                                             <TabPane tab={GetIntlMessages("รถยนต์")} key="4">
                                                 <Tab4Vehicle mode={configModal.mode} onFinish={onFinish} onFinishFailed={onFinishFailed} form={form} />
                                             </TabPane>

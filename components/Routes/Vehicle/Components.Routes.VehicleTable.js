@@ -9,6 +9,7 @@ import {
   Divider,
   Space,
   DatePicker,
+  Typography
 } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import API from "../../../util/Api";
@@ -16,7 +17,7 @@ import { useSelector } from "react-redux";
 import SearchInput from "../../../components/shares/SearchInput";
 import TableList from "../../../components/shares/TableList";
 import SortingData from "../../../components/shares/SortingData";
-import { get, isPlainObject, isArray, debounce } from "lodash";
+import { get, isPlainObject, isArray, debounce, isFunction } from "lodash";
 import isUUID from "is-uuid";
 import GetIntlMessages from "../../../util/GetIntlMessages";
 import ModalBusinessCustomers from "../../../components/Routes/Modal/Components.Select.Modal.BusinessCustomers";
@@ -26,12 +27,14 @@ import moment, { isMoment } from "moment";
 import Swal from "sweetalert2";
 import { useRouter } from "next/router";
 
+const { Text, Link } = Typography;
+
 export const validateNumberandEn = "^[a-zA-Z0-9_.-]*$";
 export const validateNumber = "^[0-9]*$";
 export const dateFormat = "DD/MM/YYYY";
 
 
-const ComponentRoutesVehicleTable = ({ cus_id, cus_type, cus_data }) => {
+const ComponentRoutesVehicleTable = ({ cus_id, cus_type, cus_data, title = null, callBack }) => {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [loadingGetCustomer, setLoadingGetCustomer] = useState(false);
@@ -102,57 +105,26 @@ const ComponentRoutesVehicleTable = ({ cus_id, cus_type, cus_data }) => {
           return index + 1;
         },
       },
-      // {
-      //   title: () => GetIntlMessages("Code"),
-      //   dataIndex: "code_id",
-      //   key: "code_id",
-      //   width: 150,
-      //   align: "center",
-      //   render: (text, record) => (text ? text : "-"),
-      //   sorter: (a, b, c) => { },
-      //   sortOrder: configSort.sort == "code_id" ? configSort.order : false,
-      //   onHeaderCell: (obj) => {
-      //     return {
-      //       onClick: () => {
-      //         getDataSearch({
-      //           page: configTable.page,
-      //           search: modelSearch.search,
-      //           sort: "code_id",
-      //           order: configSort.order !== "descend" ? "desc" : "asc",
-      //         });
-      //         setConfigSort({
-      //           sort: "code_id",
-      //           order: obj.sortOrder === "ascend" ? "descend" : "ascend",
-      //         });
-      //       },
-      //     };
-      //   },
-      // },
-      // {
-      //   title: () => GetIntlMessages("mobile-no"),
-      //   dataIndex: "mobile_no",
-      //   key: "mobile_no",
-      //   width: 150,
-      //   align: "center",
-      //   render: (text, record) => {
-      //     try {
-      //       if (isPlainObject(record.ShopPersonalCustomer)) {
-      //         // const sMobile = record.ShopPersonalCustomer.mobile_no.mobile_no_1;
-      //         // let sNum = "-";
-      //         // if (sMobile.length == 10) {
-      //         //     sNum = `${sMobile.substring(0, 3)}-${sMobile.substring(3, 6)}-${sMobile.substring(6, sMobile.length)}`;
-      //         // } else {
-      //         //     sNum = sMobile;
-      //         // }
-      //         return record.ShopPersonalCustomer.mobile_no.mobile_no_1;
-      //       } else {
-      //         return "-";
-      //       }
-      //     } catch (error) {
-      //       return "-";
-      //     }
-      //   },
-      // },
+      {
+        title: () => GetIntlMessages("registration"),
+        dataIndex: "details",
+        key: "details",
+        width: 150,
+        align: "center",
+        render: (text, record) => {
+          if (isFunction(callBack)) {
+            return (
+              <Link href="#" onClick={() => callBack(record)}>
+                {text["registration"]}
+              </Link>
+            )
+          } else {
+            return (
+              <Text>{text["registration"]}</Text>
+            )
+          }
+        },
+      },
       {
         title: () => GetIntlMessages("customer"),
         dataIndex: "custome",
@@ -175,15 +147,6 @@ const ComponentRoutesVehicleTable = ({ cus_id, cus_type, cus_data }) => {
             return "-";
           }
         },
-      },
-      {
-        title: () => GetIntlMessages("registration"),
-        dataIndex: "details",
-        key: "details",
-        width: 150,
-        align: "center",
-        render: (text, record) =>
-          isPlainObject(text) ? text["registration"] : "-",
       },
       {
         title: () => GetIntlMessages("province"),
@@ -288,7 +251,7 @@ const ComponentRoutesVehicleTable = ({ cus_id, cus_type, cus_data }) => {
     setConfigTable(init.configTable)
     setConfigSort(init.configSort)
     setModelSearch(init.modelSearch)
-
+    console.log("cus_id", cus_id)
     getDataSearch({
       page: configTable.page,
       search: modelSearch.search,

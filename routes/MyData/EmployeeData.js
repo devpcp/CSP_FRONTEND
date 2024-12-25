@@ -249,12 +249,22 @@ const EmployeeData = ({ title = null, callBack, filter_department_id = null }) =
                 if (page === 1) setLoading(false)
             } else {
                 // console.log(`res.data`, res.data)
-                message.error("มีบางอย่างผิดพลาดกรุณาติดต่อเจ้าหน้าที่ !!!")
+                Modal.error({
+                    title: 'เกิดข้อผิดพลาด',
+                    content: `เกิดข้อผิดพลาด : ${res.data}`,
+                    centered: true,
+                    footer: null,
+                });
                 if (page === 1) setLoading(false)
             }
         } catch (error) {
             console.log('error :>> ', error);
-            message.error("มีบางอย่างผิดพลาดกรุณาติดต่อเจ้าหน้าที่ !!!")
+            Modal.error({
+                title: 'เกิดข้อผิดพลาด',
+                content: `เกิดข้อผิดพลาด : ${error}`,
+                centered: true,
+                footer: null,
+            });
             if (page === 1) setLoading(false)
         }
     }
@@ -483,12 +493,22 @@ const EmployeeData = ({ title = null, callBack, filter_department_id = null }) =
                     search: modelSearch.search,
                 })
             } else {
-                message.error('มีบางอย่างผิดพลาด !!');
+                Modal.error({
+                    title: 'เกิดข้อผิดพลาด',
+                    content: `เกิดข้อผิดพลาด : ${res.data}`,
+                    centered: true,
+                    footer: null,
+                });
+
             }
 
         } catch (error) {
-            message.error('มีบางอย่างผิดพลาด !!');
-            console.log('error :>> ', error);
+            Modal.error({
+                title: 'เกิดข้อผิดพลาด',
+                content: `เกิดข้อผิดพลาด : ${error}`,
+                centered: true,
+                footer: null,
+            });
         }
     }
 

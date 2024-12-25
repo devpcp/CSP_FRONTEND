@@ -323,7 +323,7 @@ const FormTransportDoc = ({ mode, calculateResult, disabledWhenDeliveryDocActive
                                     filterOption={false}
                                     autoFocus
                                     notFoundContent={loadingEasySearchEmployee ? "กำลังค้นหาข้อมูล...กรุณารอสักครู่..." : "ไม่พบข้อมูล"}
-                                    placeholder="กรุณาพิมพ์อย่าง 1 ตัวเพื่อค้นหา"
+                                    placeholder="กรุณาพิมพ์อย่างน้อย 1 ตัวเพื่อค้นหา"
                                     style={{ width: "100%" }}
                                     // disabled
                                     open={open}
@@ -371,7 +371,7 @@ const FormTransportDoc = ({ mode, calculateResult, disabledWhenDeliveryDocActive
                                     filterOption={false}
                                     autoFocus
                                     notFoundContent={loadingEasySearchEmployee ? "กำลังค้นหาข้อมูล...กรุณารอสักครู่..." : "ไม่พบข้อมูล"}
-                                    placeholder="กรุณาพิมพ์อย่าง 1 ตัวเพื่อค้นหา"
+                                    placeholder="กรุณาพิมพ์อย่างน้อย 1 ตัวเพื่อค้นหา"
                                     style={{ width: "100%" }}
                                     // disabled
                                     open={open}

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux';
-import { Input, Select, Form, Row, Col, Button, Divider, Space, AutoComplete, DatePicker, InputNumber } from 'antd';
+import { Input, Select, Form, Row, Col, Button, Divider, Space, AutoComplete, DatePicker, InputNumber, Modal } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import { get, isArray, isFunction, isPlainObject, debounce } from 'lodash';
 import API from '../../../../../util/Api'
@@ -9,6 +9,10 @@ import ModalPersonalCustomers from '../../../Modal/Components.Select.Modal.Perso
 import ModalBothCustomerAndCar from '../../../Modal/Components.Add.Modal.BothCustomersAndCar'
 import GetIntlMessages from '../../../../../util/GetIntlMessages';
 import RegexMultiPattern from '../../../../shares/RegexMultiPattern';
+import VehicleRegistrationData from '../../../../../routes/MyData/VehicleRegistrationData'
+import BusinessCustomersData from '../../../../../routes/MyData/BusinessCustomersData'
+import PersonalCustomersData from '../../../../../routes/MyData/PersonalCustomersData'
+import VehicleTableData from '../../../../../components/Routes/Vehicle/Components.Routes.VehicleTable';
 
 const FormQuotation = ({ docTypeId, menuId, onFinish, onFinishFailed, mode, handleCancel, calculateResult, configModal }) => {
     const form = Form.useFormInstance();
@@ -22,6 +26,11 @@ const FormQuotation = ({ docTypeId, menuId, onFinish, onFinishFailed, mode, hand
     const [customerPhoneList, setCustomerPhoneList] = useState([]) //หมายเลขโทรศัพท์
     const [userList, setUserList] = useState([]) // ผู้ทำเอกสาร
     const [documentTypesList, setDocumentTypesList] = useState([]) //ประเภทเอกสาร
+    const [isCustomerDataModalVisible, setIsCustomerDataModalVisible] = useState(false);
+    const [isVehicleRegistrationDataModalVisible, setIsVehicleRegistrationDataModalVisible] = useState(false);
+
+    const [isIdEditData, setIsIdEditData] = useState({});
+    const [idEdit, setIsIdEdit] = useState(null);
 
     useEffect(() => {
         init()
@@ -34,11 +43,15 @@ const FormQuotation = ({ docTypeId, menuId, onFinish, onFinishFailed, mode, hand
         } catch (error) {
 
         }
+        const { customer_id, customer_list } = form.getFieldValue()
 
+        setIsIdEdit(customer_id)
+        setIsIdEditData(customer_list[0])
     }, [mode, configModal])
 
     const init = async () => {
         try {
+
             const [value1] = await Promise.all([getUser()])
             if (isArray(documentTypes)) setDocumentTypesList(() => documentTypes);
             if (isArray(value1.data)) {
@@ -104,18 +117,7 @@ const FormQuotation = ({ docTypeId, menuId, onFinish, onFinishFailed, mode, hand
                 } else {
                     setCustomerPhoneList([])
                 }
-                // if (isArray(mobileNoList)) {
-                //     const arr = mobileNoList.map(e => {
-                //         return {
-                //             value: e.mobile_no
-                //         }
-                //     })
-                //     setCustomerPhoneList(arr)
-                // } else {
-                //     setCustomerPhoneList([])
-                // }
             }
-            // if (item.id) await onChangeCustomer(item.id)
             form.setFieldsValue({
                 customer_id: item.id,
                 customer_list,
@@ -166,14 +168,7 @@ const FormQuotation = ({ docTypeId, menuId, onFinish, onFinishFailed, mode, hand
                 const data = whereIdArray(easySearchList, value);
                 form.setFieldsValue({ customer_type: data.customer_type })
                 const res = await Promise.all([onChangeCustomerType(data.customer_type), onChangeCustomer(data.customer_id)]);
-                //   const res = await Promise.all([onChangeCustomerType(data.customer_type), onChangeCustomer(data.customer_id), onChangeVehicles(data.id)]);
 
-
-                // model.customer_type = data.customer_type;  /* ประเภทลูกค้า */
-                // model.customer_id = data.customer_id; /* ชื่อลูกค้า */
-                // model.customer_phone = data.mobile_no; /* หมายเลขโทรศัพท์ */
-                // model.vehicles_customers_id = data.id; /* ทะเบียนรถ */
-                // console.log('res :>> ', res);
                 if (res[1]) {
                     model.customer_type = data.customer_type;  /* ประเภทลูกค้า */
                     model.customer_id = data.customer_id; /* ชื่อลูกค้า */
@@ -213,9 +208,12 @@ const FormQuotation = ({ docTypeId, menuId, onFinish, onFinishFailed, mode, hand
     }
 
     const debounceOnSearch = debounce((value, type) => onSearchCustomer(value, type), 600)
+    const [loadingEasySearch, setLoadingEasySearch] = useState(false)
+
 
     const onSearchCustomer = async (value, type) => {
         try {
+            setLoadingEasySearch(true)
             const { customer_type, customer_list } = form.getFieldValue();
             if (type === "onSearch") {
                 if (!!customer_type && customer_type === "person") {
@@ -224,7 +222,11 @@ const FormQuotation = ({ docTypeId, menuId, onFinish, onFinishFailed, mode, hand
                     const new_data = data.map(e => {
                         const newData = { ...e, customer_name: {} }
                         locale.list_json.forEach(x => {
-                            newData.customer_name[x] = e.customer_name ? `${e.customer_name.first_name[x] ?? "-"} ${e.customer_name.last_name[x] ?? "-"}` : ""
+                            let customer_full_name = customer_type === "person" ? `${e?.customer_name?.first_name[locale.locale] ?? "-"} ${e?.customer_name?.last_name[locale.locale] ?? ""}` : `${e?.customer_name[locale.locale] ?? "-"}`;
+                            let customer_branch = customer_type === "person" ? "" : e?.other_details?.branch ? e?.other_details?.branch === "office" ? " (สำนักงานใหญ่)" : " (" + e?.other_details?.branch_code + " " + e?.other_details?.branch_name + ")" : ""
+                            let customer_code = e.master_customer_code_id
+                            newData.customer_code = customer_code
+                            newData.customer_full_name = customer_full_name + customer_branch
                             return newData
                         })
                         return newData
@@ -233,20 +235,40 @@ const FormQuotation = ({ docTypeId, menuId, onFinish, onFinishFailed, mode, hand
                     customer_list = [...new_data] ?? []
                 } else {
                     const { data } = await getCustomerBusiness(value)
-                    setCustomerLists(() => data)
-                    customer_list = [...data] ?? []
+                    const new_data = data.map(e => {
+                        const newData = { ...e, customer_name: {} }
+                        locale.list_json.forEach(x => {
+                            let customer_full_name = customer_type === "person" ? `${e?.customer_name?.first_name[locale.locale] ?? "-"} ${e?.customer_name?.last_name[locale.locale] ?? ""}` : `${e?.customer_name[locale.locale] ?? "-"}`;
+                            let customer_branch = customer_type === "person" ? "" : e?.other_details?.branch ? e?.other_details?.branch === "office" ? " (สำนักงานใหญ่)" : " (" + e?.other_details?.branch_code + " " + e?.other_details?.branch_name + ")" : ""
+                            let customer_code = e.master_customer_code_id
+                            newData.customer_code = customer_code
+                            newData.customer_full_name = customer_full_name + customer_branch
+                            return newData
+                        })
+                        return newData
+                    })
+                    setCustomerLists(() => new_data)
+                    customer_list = [...new_data] ?? []
                 }
             }
 
             form.setFieldsValue({ customer_list })
         } catch (error) {
-
+            Modal.error({
+                title: 'เกิดข้อผิดพลาด',
+                content: `เกิดข้อผิดพลาด : ${error}`,
+                centered: true,
+                footer: null,
+            });
+            console.log("error")
         }
+        setLoadingEasySearch(false)
     }
 
     const onChangeCustomer = async (value, isFirst) => {
         try {
-            // console.log('value', value)
+            setIsIdEdit(value)
+            console.log('value', value)
             /*reset some fields when change customer*/
             form.setFieldsValue({ shop_vehicle_list: [], vehicles_customers_id: null, customer_phone: null })
             setCustomerPhoneList(() => [])
@@ -269,6 +291,7 @@ const FormQuotation = ({ docTypeId, menuId, onFinish, onFinishFailed, mode, hand
                     let data
                     if (type === "person") {
                         data = await getCustomerPersonById(customerId)
+                        setIsIdEditData(data)
                         // console.log('data checkCustomerType :>> ', data);
                         const new_data = [data].map(e => {
                             const newData = { ...e, customer_name: {} }
@@ -284,6 +307,7 @@ const FormQuotation = ({ docTypeId, menuId, onFinish, onFinishFailed, mode, hand
 
                     } else {
                         data = await getCustomerBusinessById(customerId)
+                        setIsIdEditData(data)
                         return [data] ?? []
                     }
                 } catch (error) {
@@ -326,6 +350,8 @@ const FormQuotation = ({ docTypeId, menuId, onFinish, onFinishFailed, mode, hand
 
     const onChangeAndClearVehicles = async (value, type) => {
         try {
+            console.log("value", value)
+            console.log("type", type)
             const { shop_vehicle_list, vehicles_customers_id, customer_type, customer_id } = form.getFieldValue()
             switch (type) {
                 case "onSelect":
@@ -343,9 +369,11 @@ const FormQuotation = ({ docTypeId, menuId, onFinish, onFinishFailed, mode, hand
                 default:
                     break;
             }
+            console.log("shop_vehicle_list", shop_vehicle_list)
+            console.log("vehicles_customers_id", vehicles_customers_id)
             form.setFieldsValue({ shop_vehicle_list, vehicles_customers_id })
         } catch (error) {
-            // console.log('error :>> ', error);
+            console.log('error :>> ', error);
         }
     }
 
@@ -372,7 +400,7 @@ const FormQuotation = ({ docTypeId, menuId, onFinish, onFinishFailed, mode, hand
     /*GET Data*/
     /* get Master shopPersonalCustomers */
     const getCustomerPerson = async (value) => {
-        const { data } = await API.get(`/shopPersonalCustomers/all?search=${value}&limit=50&page=1`);
+        const { data } = await API.get(`/shopPersonalCustomers/all?search=${value}&limit=10&page=1`);
         return data.status == "success" ? data.data : []
     }
     /* get Master shopPersonalCustomers by id */
@@ -387,7 +415,7 @@ const FormQuotation = ({ docTypeId, menuId, onFinish, onFinishFailed, mode, hand
 
     /* get Master shopBusinessCustomers */
     const getCustomerBusiness = async (value) => {
-        const { data } = await API.get(`/shopBusinessCustomers/all?search=${value}&limit=50&page=1`);
+        const { data } = await API.get(`/shopBusinessCustomers/all?search=${value}&limit=10&page=1`);
         return data.status == "success" ? data.data : []
     }
     /* get Master shopBusinessCustomers by id */
@@ -421,57 +449,79 @@ const FormQuotation = ({ docTypeId, menuId, onFinish, onFinishFailed, mode, hand
     }
     /*End GET Data*/
 
+    const callBackPickVehicleRegistration = async (data) => {
+        try {
+            console.log('val :>> ', data);
+            await onChangeAndClearVehicles(data.id, "onSelect")
+            form.setFieldsValue({ vehicles_customers_id: data.id })
+            handleCancelVehicleRegistrationDataModal()
+        } catch (error) {
+            console.log("error callBackPickVehicleRegistration ", error)
+        }
+    }
+
+    const handleOpenVehicleRegistrationDataModal = () => {
+        try {
+            setIsVehicleRegistrationDataModalVisible(true)
+        } catch (error) {
+
+        }
+    }
+    const handleCancelVehicleRegistrationDataModal = () => {
+        try {
+            setIsVehicleRegistrationDataModalVisible(false)
+        } catch (error) {
+
+        }
+    }
+
+    const callBackPickCustomer = async (data) => {
+        try {
+            const { customer_type } = form.getFieldsValue()
+            console.log("data", data)
+            let customer_id = data.id
+
+            onChangeCustomer(customer_id)
+            let customer_full_name = customer_type === "person" ? `${data?.customer_name?.first_name[locale.locale] ?? "-"} ${data?.customer_name?.last_name[locale.locale] ?? ""}` : `${data?.customer_name[locale.locale] ?? "-"}`;
+            let customer_branch = customer_type === "person" ? "" : data?.other_details?.branch ? data?.other_details?.branch === "office" ? " (สำนักงานใหญ่)" : " (" + data?.other_details?.branch_code + " " + data?.other_details?.branch_name + ")" : ""
+            let customer_code = data.master_customer_code_id
+            data.customer_code = customer_code
+            data.customer_full_name = customer_full_name + customer_branch
+
+            form.setFieldsValue({ customer_list: [data], customer_id })
+            handleCancelCustomerDataModal()
+        } catch (error) {
+            console.log("callBackPickCustomer", error)
+        }
+    }
+
+    const handleOpenCustomerDataModal = () => {
+        try {
+            setIsCustomerDataModalVisible(true)
+        } catch (error) {
+
+        }
+    }
+    const handleCancelCustomerDataModal = () => {
+        try {
+            setIsCustomerDataModalVisible(false)
+        } catch (error) {
+
+        }
+    }
+
     return (
         <>
-            {/* <Form
-                form={form}
-                className="pt-3"
-                onFinish={onFinish}
-                onFinishFailed={onFinishFailed}
-                labelCol={{ span: 24 }}
-                wrapperCol={{ span: 20 }}
-                layout={"vertical"}
-            > */}
-            <Row gutter={[30, 6]}>
+            {/* <Button onClick={() => { console.log("isIdEditData", isIdEditData); console.log("idEdit", idEdit) }}>ss</Button> */}
+            <Row gutter={[30, 6]} style={{ rowGap: 0 }}>
                 <Col lg={8} md={12} sm={24} xs={24} hidden>
                     <Form.Item name="customer_list" />
                 </Col>
                 <Col lg={8} md={12} sm={24} xs={24} hidden>
                     <Form.Item name="shop_vehicle_list" />
                 </Col>
-                {/* {(mode === "add") ? //ใบสั่งซ่อม
-                        <>
-                            <Col style={{ display: "flex", alignItems: "center" }} lg={16} md={24} sm={24} xs={24}>
-                                <span style={{ paddingRight: "10px" }}>ค้นหา</span>
-                                <Form.Item
-                                    noStyle
-                                    name="search_status_1"
-                                    label="ค้นหา"
-                                >
-                                    <Select
-                                        showSearch
-                                        showArrow={false}
-                                        onSearch={(value) => debounceEasySearch(value)}
-                                        onChange={(value) => selectEasySearch(value)}
-                                        filterOption={false}
-                                        notFoundContent={null}
-                                        style={{ width: "100%" }}
-                                        disabled={mode != "add"}
-                                    >
-                                        {easySearchList.map(e => <Select.Option value={e.id} key={`easy-search-${e.id}`}>{e.value_name}</Select.Option>)}
 
-                                    </Select>
-                                </Form.Item>
-                            </Col>
-                            <Col style={{ display: "flex", alignItems: "center" }} lg={8} md={24} sm={24} xs={24} >
-                                <ModalBothCustomerAndCar textButton={"เพิ่มลูกค้า"} docTypeId={docTypeId} />
-                            </Col>
-                        </>
-
-                        : null //type == 1
-                    } */}
                 <Col lg={8} md={12} sm={24} xs={24}>
-                    {/* <span style={{ paddingRight: "10px" }}>ค้นหา</span> */}
                     <Form.Item
                         // noStyle
                         name="customer_type"
@@ -488,41 +538,39 @@ const FormQuotation = ({ docTypeId, menuId, onFinish, onFinishFailed, mode, hand
                     </Form.Item>
                 </Col>
                 <Col lg={8} md={12} sm={24} xs={24}>
-                    {/* <span style={{ paddingRight: "10px" }}>ค้นหา</span> */}
-                    <Form.Item
-                        // noStyle
-                        name="customer_id"
-                        label="ชื่อลูกค้า"
-                        rules={[{ required: true, message: "กรุณาเลือกข้อมูล !!" }]}
-                        // extra={GetIntlMessages("พิมพ์อย่างน้อย 1 ตัวอักษร เพื่อค้นหาลูกค้า")}
-                    >
-                        <Select style={{ width: "100%" }}
-                            showSearch
-                            filterOption={(input, option) => option.children.toLowerCase().includes(input.toLowerCase())}
-                            disabled={mode === "view"}
-                            // onChange={onChangeCustomer}
-                            onSearch={(value) => debounceOnSearch(value, "onSearch")}
-                            onSelect={(value) => onChangeCustomer(value, "selectCustomer")}
-                            dropdownRender={menu =>
-                                checkValueCustomerType() ? (
-                                    <>
-                                        {menu}
-                                        <Divider style={{ margin: '8px 0' }} />
-                                        <Space align="center" style={{ padding: '0 8px 4px' }}>
-                                            {
-                                                checkValueCustomerType() === "business" ?
-                                                    <ModalBusinessCustomers textButton={GetIntlMessages(`เพิ่มข้อมูล`)} icon={<PlusOutlined />} callback={callbackModalCustomers} /> :
-                                                    <ModalPersonalCustomers textButton={GetIntlMessages(`เพิ่มข้อมูล`)} icon={<PlusOutlined />} callback={callbackModalCustomers} />
-                                            }
-                                        </Space>
-                                    </>
-                                ) : null}
-                        >
-                            {/* {Form.useWatch("customer_list", form).map((e) => <Select.Option value={e?.id}>{e?.customer_name[locale.locale] ?? "-"}</Select.Option>)} */}
-                            {getArrListValue("customer_list").map((e) => <Select.Option value={e?.id}>{e?.customer_name[locale.locale] ?? "-"}</Select.Option>)}
-                            {/* {customerList.map((e) => <Select.Option value={e.id}>{e.customer_name[locale.locale]}</Select.Option>)} */}
-                        </Select>
-                    </Form.Item>
+                    <Row gutter={8}>
+                        <Col span={mode === "view" ? 24 : 20}>
+                            <Form.Item
+                                name="customer_id"
+                                label="ชื่อลูกค้า"
+                                rules={[{ required: true, message: "กรุณาเลือกข้อมูล !!" }]}
+                            >
+                                <Select
+                                    notFoundContent={loadingEasySearch ? "กำลังค้นหาข้อมูล...กรุณารอสักครู่..." : "ไม่พบข้อมูล"}
+                                    placeholder="กรุณาพิมพ์อย่างน้อย 1 ตัวเพื่อค้นหา"
+                                    style={{ width: "100%" }}
+                                    showSearch
+                                    filterOption={(input, option) => option.children.toLowerCase().includes(input.toLowerCase())}
+                                    disabled={mode === "view"}
+                                    onSearch={(value) => debounceOnSearch(value, "onSearch")}
+                                    onSelect={(value) => onChangeCustomer(value, "selectCustomer")}
+                                >
+                                    {getArrListValue("customer_list").map((e) => <Select.Option value={e?.id}>{`${e.customer_code}  ->  ${e.customer_full_name}`}</Select.Option>)}
+                                </Select>
+                            </Form.Item>
+                        </Col>
+                        <Col span={mode === "view" ? 0 : 4} style={{ justifyContent: "end" }}>
+                            <Form.Item label={" "}>
+                                <Button
+                                    type='primary'
+                                    style={{ width: "100%", borderRadius: "10px" }}
+                                    onClick={() => handleOpenCustomerDataModal()}
+                                >
+                                    เลือก
+                                </Button>
+                            </Form.Item>
+                        </Col>
+                    </Row>
                 </Col>
 
 
@@ -534,49 +582,52 @@ const FormQuotation = ({ docTypeId, menuId, onFinish, onFinishFailed, mode, hand
                         rules={[{ pattern: /^[0-9,-]+$/, message: GetIntlMessages("ตัวเลขเท่านั้น") }]}
                     >
                         <AutoComplete
-                            // disabled={mode == "view" || mode == "edit" || type == 2 || type == 3}
                             maxLength={10}
                             disabled={mode === "view" || !form.getFieldsValue().customer_id}
                             options={customerPhoneList}
                             style={{ width: "100%" }}
                             value="mobile_no"
                             placeholder={`เลือกข้อมูลหรือเพิ่มข้อมูลใหม่`}
-                        // filterOption={(inputValue, option) => {
-                        //     if (isPlainObject(option)) {
-                        //         if (isFunction(option.value)) {
-                        //             return inputValue ? option.value.search(inputValue) != -1 : null
-                        //         }
-                        //         // if (isPlainObject(option.value)) {
-                        //         //     if (isFunction(option.value.search)) return option.value.search(inputValue) != -1
-                        //         // }
-                        //     }
-                        // }}
+
                         />
 
                     </Form.Item>
                 </Col>
                 <Col lg={8} md={12} sm={12} xs={24}>
-                    <Form.Item
-                        name="vehicles_customers_id"
-                        label="ทะเบียนรถ"
-                    // rules={[{ required: !(mode != "add"), message: "กรุณาเลือกข้อมูล !!" }]}
-                    >
-                        <Select
-                            // disabled
-                            disabled={mode === "view" || !form.getFieldsValue().customer_id}
-                            showSearch
-                            filterOption={(input, option) =>
-                                option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
-                            }
-                            style={{ width: "100%" }}
-                            onSelect={(value) => onChangeAndClearVehicles(value, "onSelect")}
-                            onClear={(value) => onChangeAndClearVehicles(value, "onClear")}
-                            allowClear
-                        >
-                            {getArrListValue("shop_vehicle_list").map((e) => <Select.Option value={e?.id}>{get(e, `details.registration`, "-")}</Select.Option>)}
-                            {/* {shopVehicleList.map(e => <Select.Option value={e.id}>{get(e, `details.registration`, "-")}</Select.Option>)} */}
-                        </Select>
-                    </Form.Item>
+                    <Row gutter={8}>
+                        <Col span={mode === "view" ? 24 : 20}>
+                            <Form.Item
+                                name="vehicles_customers_id"
+                                label="ทะเบียนรถ"
+                            >
+                                <Select
+                                    disabled={mode === "view" || !form.getFieldsValue().customer_id}
+                                    showSearch
+                                    filterOption={(input, option) =>
+                                        option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                                    }
+                                    style={{ width: "100%" }}
+                                    onSelect={(value) => onChangeAndClearVehicles(value, "onSelect")}
+                                    onClear={(value) => onChangeAndClearVehicles(value, "onClear")}
+                                    allowClear
+                                >
+                                    {getArrListValue("shop_vehicle_list").map((e) => <Select.Option value={e?.id}>{get(e, `details.registration`, "-")}</Select.Option>)}
+                                </Select>
+                            </Form.Item>
+                        </Col>
+                        <Col span={mode === "view" ? 0 : 4} style={{ justifyContent: "end" }}>
+                            <Form.Item label={" "}>
+                                <Button
+                                    type='primary'
+                                    style={{ width: "100%", borderRadius: "10px" }}
+                                    onClick={() => handleOpenVehicleRegistrationDataModal()}
+                                    disabled={mode === "view" || !form.getFieldsValue().customer_id}
+                                >
+                                    เลือก
+                                </Button>
+                            </Form.Item>
+                        </Col>
+                    </Row>
                 </Col>
 
                 <Col lg={8} md={12} sm={12} xs={24}>
@@ -586,7 +637,6 @@ const FormQuotation = ({ docTypeId, menuId, onFinish, onFinishFailed, mode, hand
                     >
                         <Select style={{ width: "100%" }} showArrow={false} disabled>
                             {getArrListValue("shop_vehicle_list").map((e) => <Select.Option value={e?.id}>{get(e, `details.province_name`, "-")}</Select.Option>)}
-                            {/* {shopVehicleList.map(e => <Select.Option value={e.id}>{get(e, `details.province_name`, "-")}</Select.Option>)} */}
                         </Select>
                     </Form.Item>
                 </Col>
@@ -598,7 +648,6 @@ const FormQuotation = ({ docTypeId, menuId, onFinish, onFinishFailed, mode, hand
                     >
                         <Select style={{ width: "100%" }} showArrow={false} disabled>
                             {getArrListValue("shop_vehicle_list").map((e) => <Select.Option value={e?.id}>{get(e, `VehicleBrand.brand_name.${locale.locale}`, "-")}</Select.Option>)}
-                            {/* {shopVehicleList.map(e => <Select.Option value={e.id}>{get(e, `VehicleBrand.brand_name.${locale.locale}`, "-")}</Select.Option>)} */}
                         </Select>
                     </Form.Item>
                 </Col>
@@ -656,6 +705,7 @@ const FormQuotation = ({ docTypeId, menuId, onFinish, onFinishFailed, mode, hand
                     <Form.Item
                         name="doc_type_id"
                         label="ประเภทเอกสาร"
+                        hidden
                     >
                         <Select style={{ width: "100%" }} disabled showArrow={false}>
                             {documentTypesList.map((e) => <Select.Option key={`doc-type-${e.id}`} value={e.id}>{e.type_name[locale.locale] ?? "-"}</Select.Option>)}
@@ -680,6 +730,35 @@ const FormQuotation = ({ docTypeId, menuId, onFinish, onFinishFailed, mode, hand
                     </Form.Item>
                 </Col>
             </Row>
+            <Modal
+                maskClosable={false}
+                open={isVehicleRegistrationDataModalVisible}
+                onCancel={handleCancelVehicleRegistrationDataModal}
+                width="90vw"
+                style={{ top: 5 }}
+                footer={(
+                    <>
+                        <Button onClick={() => handleCancelVehicleRegistrationDataModal()}>{GetIntlMessages("กลับ")}</Button>
+                    </>
+                )}
+            >
+                <VehicleTableData cus_id={idEdit} cus_type={"person"} cus_data={isIdEditData} title="จัดการข้อมูลรถ" callBack={callBackPickVehicleRegistration} />
+                {/* <VehicleRegistrationData title="จัดการข้อมูลรถ" callBack={callBackPickVehicleRegistration} customerId={form.getFieldValue().customer_id} /> */}
+            </Modal>
+            <Modal
+                maskClosable={false}
+                open={isCustomerDataModalVisible}
+                onCancel={handleCancelCustomerDataModal}
+                width="90vw"
+                style={{ top: 5 }}
+                footer={(
+                    <>
+                        <Button onClick={() => handleCancelCustomerDataModal()}>{GetIntlMessages("กลับ")}</Button>
+                    </>
+                )}
+            >
+                {form.getFieldValue().customer_type === "person" ? <PersonalCustomersData title="จัดการข้อมูลลูกค้าบุคคลธรรมดา" callBack={callBackPickCustomer} /> : <BusinessCustomersData title="จัดการข้อมูลลูกค้าธุรกิจ" callBack={callBackPickCustomer} />}
+            </Modal>
             {/* </Form> */}
         </>
     )

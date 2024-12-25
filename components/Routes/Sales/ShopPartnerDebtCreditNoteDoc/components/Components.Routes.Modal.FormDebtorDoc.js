@@ -327,7 +327,7 @@ const FormTemporaryDeliveryOrderDoc = ({ mode, calculateResult, disabledWhenDeli
                                     showArrow={false}
                                     filterOption={false}
                                     notFoundContent={loadingEasySearch ? "กำลังค้นหาข้อมูล...กรุณารอสักครู่..." : "ไม่พบข้อมูล"}
-                                    placeholder="กรุณาพิมพ์อย่าง 1 ตัวเพื่อค้นหา"
+                                    placeholder="กรุณาพิมพ์อย่างน้อย 1 ตัวเพื่อค้นหา"
                                     style={{ width: "98%" }}
                                     disabled={mode === "view"}
                                     loading={loadingEasySearch}

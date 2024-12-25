@@ -103,7 +103,7 @@ const FormTranferInventoryDoc = ({ mode, calculateResult, callBack }) => {
                             showArrow={false}
                             optionFilterProp="children"
                             notFoundContent={"ไม่พบข้อมูล"}
-                            placeholder="กรุณาพิมพ์อย่าง 1 ตัวเพื่อค้นหา"
+                            placeholder="กรุณาพิมพ์อย่างน้อย 1 ตัวเพื่อค้นหา"
                             style={{ width: "100%" }}
                             disabled={mode === "view"}
                         >

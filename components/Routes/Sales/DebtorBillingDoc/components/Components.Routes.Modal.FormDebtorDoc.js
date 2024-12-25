@@ -270,7 +270,7 @@ const FormTemporaryDeliveryOrderDoc = ({ mode, calculateResult, disabledWhenDeli
                                     filterOption={false}
                                     autoFocus
                                     notFoundContent={loadingEasySearch ? "กำลังค้นหาข้อมูล...กรุณารอสักครู่..." : "ไม่พบข้อมูล"}
-                                    placeholder="กรุณาพิมพ์อย่าง 1 ตัวเพื่อค้นหา"
+                                    placeholder="กรุณาพิมพ์อย่างน้อย 1 ตัวเพื่อค้นหา"
                                     style={{ width: "100%" }}
                                     // disabled
                                     open={open}
@@ -279,19 +279,6 @@ const FormTemporaryDeliveryOrderDoc = ({ mode, calculateResult, disabledWhenDeli
                                     loading={loadingEasySearch}
                                     onSearch={(value) => debounceEasySearch(value, "search")}
                                     onSelect={(value) => handleEasySearch(value, "select")}
-                                // dropdownRender={menu => (
-                                //     <>
-                                //         {menu}
-                                //         <Divider style={{ margin: '8px 0' }} />
-                                //         <Space align="center" style={{ padding: '0 8px 4px' }}>
-                                //             {
-                                //                 checkValueCustomerType() === "business" ?
-                                //                     <ModalBusinessCustomers controlOpen={controlOpen} textButton={GetIntlMessages(`เพิ่มข้อมูลลูกค้าธุรกิจ`)} icon={<PlusOutlined />} callback={callbackCustomers} /> :
-                                //                     <ModalPersonalCustomers controlOpen={controlOpen} textButton={GetIntlMessages(`เพิ่มข้อมูลลูกค้าบุคคลธรรมดา`)} icon={<PlusOutlined />} callback={callbackCustomers} />
-                                //             }
-                                //         </Space>
-                                //     </>
-                                // )}
                                 >
                                     {getArrValue("customer_list").map(e => <Select.Option value={e.id} key={`customer-id-${e.id}`}>{e.customer_full_name}</Select.Option>)}
                                 </Select>
