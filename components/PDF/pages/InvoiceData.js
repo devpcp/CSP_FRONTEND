@@ -20,7 +20,138 @@ const InvoiceData = {
       desc: "Luxury Ultra thin Wrist Watch",
       qty: 1,
       rate: 300.99
-    }
+    },
+    {
+      sno: 1,
+      desc: "FinePix Pro2 3D Camera",
+      qty: 2,
+      rate: 1600.0
+    },
+    {
+      sno: 2,
+      desc: "Luxury Ultra thin Wrist Watch",
+      qty: 1,
+      rate: 300.99
+    },
+    {
+      sno: 1,
+      desc: "FinePix Pro2 3D Camera",
+      qty: 2,
+      rate: 1600.0
+    },
+    {
+      sno: 2,
+      desc: "Luxury Ultra thin Wrist Watch",
+      qty: 1,
+      rate: 300.99
+    },
+    {
+      sno: 1,
+      desc: "FinePix Pro2 3D Camera",
+      qty: 2,
+      rate: 1600.0
+    },
+    {
+      sno: 2,
+      desc: "Luxury Ultra thin Wrist Watch",
+      qty: 1,
+      rate: 300.99
+    },
+    {
+      sno: 1,
+      desc: "FinePix Pro2 3D Camera",
+      qty: 2,
+      rate: 1600.0
+    },
+    {
+      sno: 2,
+      desc: "Luxury Ultra thin Wrist Watch",
+      qty: 1,
+      rate: 300.99
+    },
+    {
+      sno: 1,
+      desc: "FinePix Pro2 3D Camera",
+      qty: 2,
+      rate: 1600.0
+    },
+    {
+      sno: 2,
+      desc: "Luxury Ultra thin Wrist Watch",
+      qty: 1,
+      rate: 300.99
+    },{
+      sno: 1,
+      desc: "FinePix Pro2 3D Camera",
+      qty: 2,
+      rate: 1600.0
+    },
+    {
+      sno: 2,
+      desc: "Luxury Ultra thin Wrist Watch",
+      qty: 1,
+      rate: 300.99
+    },
+    {
+      sno: 1,
+      desc: "FinePix Pro2 3D Camera",
+      qty: 2,
+      rate: 1600.0
+    },
+    {
+      sno: 2,
+      desc: "Luxury Ultra thin Wrist Watch",
+      qty: 1,
+      rate: 300.99
+    },
+    {
+      sno: 1,
+      desc: "FinePix Pro2 3D Camera",
+      qty: 2,
+      rate: 1600.0
+    },
+    {
+      sno: 2,
+      desc: "Luxury Ultra thin Wrist Watch",
+      qty: 1,
+      rate: 300.99
+    },
+    {
+      sno: 1,
+      desc: "FinePix Pro2 3D Camera",
+      qty: 2,
+      rate: 1600.0
+    },
+    {
+      sno: 2,
+      desc: "Luxury Ultra thin Wrist Watch",
+      qty: 1,
+      rate: 300.99
+    },
+    {
+      sno: 1,
+      desc: "FinePix Pro2 3D Camera",
+      qty: 2,
+      rate: 1600.0
+    },
+    {
+      sno: 2,
+      desc: "Luxury Ultra thin Wrist Watch",
+      qty: 1,
+      rate: 300.99
+    },
+    {
+      sno: 1,
+      desc: "FinePix Pro2 3D Camera",
+      qty: 2,
+      rate: 1600.0
+    },
+    {
+      sno: 2,
+      desc: "Luxury Ultra thin Wrist Watch",
+      qty: 1,
+      rate: 300.99
+    },
   ]
 };
 

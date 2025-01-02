@@ -309,8 +309,76 @@ const PDFView = () => {
                 "price_discount_2": "0.00",
                 "price_discount_3": "0.00",
                 "price_grand_total": "25,200.00"
+            },
+            {
+                "seq_number": 21,
+                "product_name": "OT 265/65R17 SA1000",
+                "dot_mfd": "2724",
+                "amount": "10",
+                "price_unit": "2,520.00",
+                "price_discount": "0.00",
+                "price_discount_2": "0.00",
+                "price_discount_3": "0.00",
+                "price_grand_total": "25,200.00"
+            },
+            {
+                "seq_number": 22,
+                "product_name": "OT 265/65R17 SA1000",
+                "dot_mfd": "2724",
+                "amount": "10",
+                "price_unit": "2,520.00",
+                "price_discount": "0.00",
+                "price_discount_2": "0.00",
+                "price_discount_3": "0.00",
+                "price_grand_total": "25,200.00"
+            },
+            {
+                "seq_number": 23,
+                "product_name": "OT 265/65R17 SA1000",
+                "dot_mfd": "2724",
+                "amount": "10",
+                "price_unit": "2,520.00",
+                "price_discount": "0.00",
+                "price_discount_2": "0.00",
+                "price_discount_3": "0.00",
+                "price_grand_total": "25,200.00"
+            },
+            {
+                "seq_number": 24,
+                "product_name": "OT 265/65R17 SA1000",
+                "dot_mfd": "2724",
+                "amount": "10",
+                "price_unit": "2,520.00",
+                "price_discount": "0.00",
+                "price_discount_2": "0.00",
+                "price_discount_3": "0.00",
+                "price_grand_total": "25,200.00"
+            },
+            {
+                "seq_number": 25,
+                "product_name": "OT 265/65R17 SA1000",
+                "dot_mfd": "2724",
+                "amount": "10",
+                "price_unit": "2,520.00",
+                "price_discount": "0.00",
+                "price_discount_2": "0.00",
+                "price_discount_3": "0.00",
+                "price_grand_total": "25,200.00"
+            },
+            {
+                "seq_number": 26,
+                "product_name": "OT 265/65R17 SA1000",
+                "dot_mfd": "2724",
+                "amount": "10",
+                "price_unit": "2,520.00",
+                "price_discount": "0.00",
+                "price_discount_2": "0.00",
+                "price_discount_3": "0.00",
+                "price_grand_total": "25,200.00"
             }
         ]
+
+
         let newDocData = {
             customerData: {
                 customer_name: `${customer_full_name}${customer_branch}`,
@@ -327,13 +395,15 @@ const PDFView = () => {
                 sales_man: sales_man,
                 warehouse: shop_local_name,
                 doc_time: doc_time,
-                product_list: pp,
-                // remark: model?.details?.remark,
-                remark: "ส่งขนส่ง Kerry",
+                product_list: product_list,
+                // product_list: pp,
+                remark: model?.details?.remark,
+                // remark: "ส่งขนส่ง Kerry",
                 price_sub_total: MatchRoundComma(model?.price_sub_total),
                 price_discount_total: MatchRoundComma(model?.price_discount_total),
                 price_grand_total: MatchRoundComma(model?.price_grand_total),
                 thai_bath_text: ThaiBahtText(+MatchRound(model?.price_grand_total ?? 0))
+
             },
             shopData: {
                 shop_name: `${shop_name}${shop_branch}`,
@@ -341,6 +411,34 @@ const PDFView = () => {
                 shop_logo: `${process.env.NEXT_PUBLIC_DIRECTORY}/assets/shops/${userData?.UsersProfile?.ShopsProfile?.id}/${userData?.UsersProfile?.ShopsProfile?.id}.jpeg`,
             },
         }
+        let page_size = 20
+        let cal_page = Math.ceil(newDocData?.documentData?.product_list.length / page_size)
+        let page_total = []
+
+        for (let i = 1; i <= cal_page; i++) {
+            page_total.push(i)
+        }
+
+        newDocData.page_total = page_total
+        let item_per_pages = []
+        newDocData.page_total.map((e, i) => {
+            item_per_pages.push(
+                {
+                    pages: i + 1,
+                    items: []
+                }
+            )
+            newDocData.documentData.product_list.map((e2, i2) => {
+                if (item_per_pages[i].items.length < page_size) {
+                    if (!e2.add) {
+                        item_per_pages[i].items.push(e2)
+                        e2.add = true
+                    }
+                }
+            })
+        })
+
+        newDocData.item_per_pages = item_per_pages
         console.log("newDocData", newDocData)
         setDocData(newDocData)
     }, [pages])
@@ -396,7 +494,7 @@ const PDFView = () => {
     }
 
     return (
-        // <></>
+        // <></>s
         <>
             {docData ?
                 <PDFViewer style={{ display: "block", height: "100vh", width: "100vw", border: "none" }}>
@@ -406,7 +504,6 @@ const PDFView = () => {
                 <></>
             }
         </>
-
     );
 };
 

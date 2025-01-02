@@ -404,22 +404,6 @@ const TemporaryDeliveryOrderDoc = ({ docTypeId, title = null, callBack, }) => {
             //         )
             //     },
             // },
-            // {
-            //     title: () => GetIntlMessages(`เลขที่${configPage("table-status-2")}`),
-            //     dataIndex: 'details',
-            //     key: 'details',
-            //     width: 180,
-            //     align: "center",
-            //     render: (text, record) => get(text, `ShopDocumentCode.TRN.code_id` ?? "-", "-")
-            // },
-            // {
-            //     title: () => GetIntlMessages(`เลขที่${configPage("table-status-3")}`),
-            //     dataIndex: 'details',
-            //     key: 'details',
-            //     width: 180,
-            //     align: "center",
-            //     render: (text, record) => get(text, `ShopDocumentCode.INV.code_id` ?? "-", "-")
-            // },
             {
                 title: () => GetIntlMessages("ใบส่งสินค้า/ใบแจ้งหนี้"),
                 dataIndex: 'code_id',

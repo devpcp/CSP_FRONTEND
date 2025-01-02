@@ -383,45 +383,6 @@ const ShopTemporaryDeliveryOrderDocWholeSale = ({ docTypeId, title = null, callB
                     return index + 1
                 },
             },
-            // {
-            //     title: () => (<>{GetIntlMessages("พิมพ์")}  <Popover trigger="click" content={<PopOverSettingPrint />} title="ตั้งค่าการพิมพ์"><Button type='primary' icon={<SettingOutlined />}></Button></Popover></>),
-            //     dataIndex: 'details',
-            //     key: 'details',
-            //     width: 120,
-            //     align: "center",
-            //     render: (text, record) => {
-            //         console.log("authUser", authUser)
-            //         let query = {
-            //             pages: "test",
-            //             documentId: record?.id,
-            //             docTypeId: docTypeId,
-            //             docTypeAPIName: "shopTemporaryDeliveryOrderDoc",
-            //             shopId: authUser?.UsersProfile?.ShopsProfile?.id
-            //         }
-
-            //         return (
-            //             <Button onClick={() => window.open(`/pdfview?${new URLSearchParams(query).toString()}`)}>
-            //                 ปริ้น
-            //             </Button>
-            //         )
-            //     },
-            // },
-            // {
-            //     title: () => GetIntlMessages(`เลขที่${configPage("table-status-2")}`),
-            //     dataIndex: 'details',
-            //     key: 'details',
-            //     width: 180,
-            //     align: "center",
-            //     render: (text, record) => get(text, `ShopDocumentCode.TRN.code_id` ?? "-", "-")
-            // },
-            // {
-            //     title: () => GetIntlMessages(`เลขที่${configPage("table-status-3")}`),
-            //     dataIndex: 'details',
-            //     key: 'details',
-            //     width: 180,
-            //     align: "center",
-            //     render: (text, record) => get(text, `ShopDocumentCode.INV.code_id` ?? "-", "-")
-            // },
             {
                 title: () => GetIntlMessages("ใบส่งสินค้า/ใบแจ้งหนี้"),
                 dataIndex: 'code_id',
@@ -649,9 +610,34 @@ const ShopTemporaryDeliveryOrderDocWholeSale = ({ docTypeId, title = null, callB
                 key: 'details',
                 width: 120,
                 align: "center",
+                use: authUser?.UsersProfile?.ShopsProfile?.id !== "5cc9b918-ece2-4be2-b824-f7e636f44c41",
                 render: (text, record) => {
                     return (
                         <PrintOut customPriceUse={1} customFootSign={(authUser?.UsersProfile?.ShopsProfile?.id === "db945efe-17c8-4c43-a437-31204fe3b8af") ? { left: `ผู้รับสินค้า`, right: `ผู้ส่งสินค้า` } : null} textButton={"พิมพ์"} printOutHeadTitle={(authUser?.UsersProfile?.ShopsProfile?.id === "1a523ad4-682e-4db2-af49-d54f176a84ad") ? `ใบส่งสินค้า` : (authUser?.UsersProfile?.ShopsProfile?.id === "db945efe-17c8-4c43-a437-31204fe3b8af") ? "ใบส่งสินค้าชั่วคราว" : "ใบส่งสินค้า/ใบแจ้งหนี้"} documentId={record?.id} style={{ width: "100%", display: "flex", justifyContent: "center", alignItems: "center" }} docTypeId={docTypeId} settingPrint={settingPrint} />
+                    )
+                },
+            },
+            {
+                title: () => (<>{GetIntlMessages("พิมพ์")}  <Popover trigger="click" content={<PopOverSettingPrint />} title="ตั้งค่าการพิมพ์"><Button type='primary' icon={<SettingOutlined />}></Button></Popover></>),
+                dataIndex: 'details',
+                key: 'details',
+                width: 120,
+                align: "center",
+                use: authUser?.UsersProfile?.ShopsProfile?.id === "5cc9b918-ece2-4be2-b824-f7e636f44c41",
+                render: (text, record) => {
+                    console.log("authUser", authUser)
+                    let query = {
+                        pages: "test",
+                        documentId: record?.id,
+                        docTypeId: docTypeId,
+                        docTypeAPIName: "shopTemporaryDeliveryOrderDoc",
+                        shopId: authUser?.UsersProfile?.ShopsProfile?.id
+                    }
+
+                    return (
+                        <Button onClick={() => window.open(`/pdfview?${new URLSearchParams(query).toString()}`)} type='primary' style={{ width: "100%" }}>
+                            พิมพ์
+                        </Button>
                     )
                 },
             },

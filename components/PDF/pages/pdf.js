@@ -237,111 +237,114 @@ const MyDocument = ({ docData }) => {
 
   return (
     <Document>
-      <Page size="A4" style={styles.page} wrap={"true"}>
-        <View style={styles.rowHeader}>
-          <View style={styles.Col10}>
-          </View>
-          <View style={styles.Col60}>
-            <Text style={styles.focusPoint}>{docData?.customerData?.customer_name}</Text>
-            <Text>{docData?.customerData?.customer_address}</Text>
-            <Text>{docData?.customerData?.customer_address_2}</Text>
-            <Text>{docData?.customerData?.customer_address_3}</Text>
-            <Text>{docData?.customerData?.customer_mobile}</Text>
-            <Text>{docData?.customerData?.customer_tax_id}</Text>
-          </View>
-          <View style={styles.Col13}>
-            <View style={styles.invoiceDateContainer}>
+      {docData.item_per_pages?.map((el => (
+        <Page size="A4" style={styles.page} wrap={"true"}>
+          <View style={styles.rowHeader}>
+            <View style={styles.Col10}>
+            </View>
+            <View style={styles.Col60}>
+              <Text style={styles.focusPoint}>{docData?.customerData?.customer_name}</Text>
+              <Text>{docData?.customerData?.customer_address}</Text>
+              <Text>{docData?.customerData?.customer_address_2}</Text>
+              <Text>{docData?.customerData?.customer_address_3}</Text>
+              <Text>{docData?.customerData?.customer_mobile}</Text>
+              <Text>{docData?.customerData?.customer_tax_id}</Text>
+            </View>
+            <View style={styles.Col13}>
+              <View style={styles.invoiceDateContainer}>
+              </View>
+            </View>
+            <View style={styles.Col15}>
+              <View style={styles.invoiceDateContainer}>
+                <Text style={styles.focusPoint}>{docData?.documentData?.code_id}</Text>
+              </View>
+              <View style={styles.invoiceDateContainer}>
+                <Text>{docData?.documentData?.doc_date}</Text>
+              </View>
+              <View style={styles.invoiceDateContainer}>
+                <Text>{docData?.documentData?.due_date}</Text>
+              </View>
+              <View style={styles.invoiceDateContainer}>
+                <Text>{docData?.documentData?.sales_man}</Text>
+              </View>
+              <View style={styles.invoiceDateContainer}>
+                <Text>{docData?.documentData?.warehouse}</Text>
+              </View>
+              <View style={styles.invoiceDateContainer}>
+                <Text>{docData?.documentData?.doc_time}</Text>
+              </View>
             </View>
           </View>
-          <View style={styles.Col15}>
-            <View style={styles.invoiceDateContainer}>
-              <Text style={styles.focusPoint}>{docData?.documentData?.code_id}</Text>
-            </View>
-            <View style={styles.invoiceDateContainer}>
-              <Text>{docData?.documentData?.doc_date}</Text>
-            </View>
-            <View style={styles.invoiceDateContainer}>
-              <Text>{docData?.documentData?.due_date}</Text>
-            </View>
-            <View style={styles.invoiceDateContainer}>
-              <Text>{docData?.documentData?.sales_man}</Text>
-            </View>
-            <View style={styles.invoiceDateContainer}>
-              <Text>{docData?.documentData?.warehouse}</Text>
-            </View>
-            <View style={styles.invoiceDateContainer}>
-              <Text>{docData?.documentData?.doc_time}</Text>
-            </View>
-          </View>
-        </View>
 
-        <View style={styles.table.area}>
-          {docData?.documentData?.product_list.map((e) => (
-            <View style={styles.rowTable}>
-              <View style={styles.table.seqNumber}>
-                <Text>{e?.seq_number}</Text>
+          <View style={styles.table.area}>
+            {el.items?.map((e) => (
+              <View style={styles.rowTable}>
+                <View style={styles.table.seqNumber}>
+                  <Text>{e?.seq_number}</Text>
+                </View>
+                <View style={styles.table.productName}>
+                  <Text>{e?.product_name}</Text>
+                </View>
+                <View style={styles.table.dot}>
+                  <Text>{e?.dot_mfd}</Text>
+                </View>
+                <View style={styles.table.amount}>
+                  <Text>{e?.amount}</Text>
+                </View>
+                <View style={styles.table.priceUnit}>
+                  <Text>{e?.price_unit}</Text>
+                </View>
+                <View style={styles.table.priceDiscount}>
+                  <Text>{e?.price_discount === "0.00" ? "0" : e?.price_discount}</Text>
+                </View>
+                <View style={styles.table.priceDiscount2}>
+                  <Text>{e?.price_discount_2 === "0.00" ? "0" : e?.price_discount_2}</Text>
+                </View>
+                <View style={styles.table.priceDiscount3}>
+                  <Text>{e?.price_discount_3 === "0.00" ? "0" : e?.price_discount_3}</Text>
+                </View>
+                <View style={styles.table.priceGrandTotal}>
+                  <Text>{e?.price_grand_total}</Text>
+                </View>
               </View>
-              <View style={styles.table.productName}>
-                <Text>{e?.product_name}</Text>
-              </View>
-              <View style={styles.table.dot}>
-                <Text>{e?.dot_mfd}</Text>
-              </View>
-              <View style={styles.table.amount}>
-                <Text>{e?.amount}</Text>
-              </View>
-              <View style={styles.table.priceUnit}>
-                <Text>{e?.price_unit}</Text>
-              </View>
-              <View style={styles.table.priceDiscount}>
-                <Text>{e?.price_discount === "0.00" ? "0" : e?.price_discount}</Text>
-              </View>
-              <View style={styles.table.priceDiscount2}>
-                <Text>{e?.price_discount_2 === "0.00" ? "0" : e?.price_discount_2}</Text>
-              </View>
-              <View style={styles.table.priceDiscount3}>
-                <Text>{e?.price_discount_3 === "0.00" ? "0" : e?.price_discount_3}</Text>
-              </View>
-              <View style={styles.table.priceGrandTotal}>
-                <Text>{e?.price_grand_total}</Text>
-              </View>
-            </View>
-          ))}
-        </View>
+            ))}
+          </View>
 
-        <View style={styles.rowFooter}>
-          <View style={styles.Col10}>
-          </View>
-          <View style={styles.Col40}>
-            <Text style={{ paddingTop: "-10px" }}>{docData?.documentData?.remark}</Text>
-          </View>
-          <View style={styles.Col25}>
-          </View>
-          <View style={styles.Col25}>
-            <View style={styles.footer.price}>
-              <Text>{docData?.documentData?.price_sub_total}</Text>
+          <View style={styles.rowFooter}>
+            <View style={styles.Col10}>
             </View>
-            <View style={styles.footer.price}>
-              <Text>{docData?.documentData?.price_discount_total}</Text>
+            <View style={styles.Col40}>
+              <Text style={{ paddingTop: "-10px" }}>{docData?.documentData?.remark}</Text>
+            </View>
+            <View style={styles.Col25}>
+            </View>
+            <View style={styles.Col25}>
+              <View style={styles.footer.price}>
+                <Text>{docData?.documentData?.price_sub_total}</Text>
+              </View>
+              <View style={styles.footer.price}>
+                <Text>{docData?.documentData?.price_discount_total}</Text>
+              </View>
             </View>
           </View>
-        </View>
 
-        <View style={styles.row}>
-          <View style={styles.Col10}>
-          </View>
-          <View style={styles.Col40}>
-            <Text>{docData?.documentData?.thai_bath_text}</Text>
-          </View>
-          <View style={styles.Col25}>
-          </View>
-          <View style={styles.Col25}>
-            <View style={styles.footer.price}>
-              <Text style={styles.focusPoint}>{docData?.documentData?.price_grand_total}</Text>
+          <View style={styles.row}>
+            <View style={styles.Col10}>
+            </View>
+            <View style={styles.Col40}>
+              <Text>{docData?.documentData?.thai_bath_text}</Text>
+            </View>
+            <View style={styles.Col25}>
+            </View>
+            <View style={styles.Col25}>
+              <View style={styles.footer.price}>
+                <Text style={styles.focusPoint}>{docData?.documentData?.price_grand_total}</Text>
+              </View>
             </View>
           </View>
-        </View>
-      </Page>
+        </Page>
+      )))}
+
     </Document>
   );
 }
