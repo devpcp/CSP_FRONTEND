@@ -635,7 +635,7 @@ const ShopTemporaryDeliveryOrderDocWholeSale = ({ docTypeId, title = null, callB
                     }
 
                     return (
-                        <Button onClick={() => window.open(`/pdfview?${new URLSearchParams(query).toString()}`)} type='primary' style={{ width: "100%" }}>
+                        <Button onClick={() => window.open(`/pdfview/?${new URLSearchParams(query).toString()}`)} type='primary' style={{ width: "100%" }}>
                             พิมพ์
                         </Button>
                     )
