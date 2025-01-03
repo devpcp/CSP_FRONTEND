@@ -246,7 +246,7 @@ const ProductReturnReceiptDoc = ({ docTypeId }) => {
                 dataIndex: 'details',
                 key: 'details',
                 width: 150,
-                render: (text, record) => !!text ? <div style={{ textAlign: "center" }}>{text?.temporary_delivery_order_doc_code ?? "-"}</div> : "-",
+                render: (text, record) => !!text ? <div style={{ textAlign: "center" }}>{text?.tax_invoice_doc_code ?? "-"}</div> : "-",
             },
             {
                 title: () => GetIntlMessages("ใบลดหนี้ลูกหนี้"),
