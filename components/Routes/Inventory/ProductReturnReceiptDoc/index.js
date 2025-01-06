@@ -301,6 +301,7 @@ const ProductReturnReceiptDoc = ({ docTypeId }) => {
                         ...e
                     }
                 });
+                console.log("data",data)
                 setColumnsTable(_status)
                 setListSearchDataTable(() => data)
                 // setTotal(totalCount);
@@ -1060,7 +1061,6 @@ const ProductReturnReceiptDoc = ({ docTypeId }) => {
                 },
                 shopCustomerDebtCreditNoteLists: !!product_list && product_list.length > 0 ?
                     product_list.map((e, index) => {
-                        // console.log('e :>> ', e);
                         const _model = {
                             id: e?.id ?? null,
                             seq_number: index + 1,
@@ -1179,9 +1179,6 @@ const ProductReturnReceiptDoc = ({ docTypeId }) => {
                                                     <Button loading={loading || carPreLoading} onClick={() => handleOk(0)} style={{ width: "100%" }} type='primary'>{GetIntlMessages("บันทึก")}</Button>
                                             }
                                         </Col>
-                                        {/* <Col hidden={configModal.mode === "add"}>
-                                            <PrintOut textButton={"พิมพ์"} documentId={form.getFieldValue().id} style={{ width: "100%", display: "flex", justifyContent: "center", alignItems: "center", overflow: "hidden" }} customPriceUse={true} docTypeId={docTypeId} />
-                                        </Col> */}
                                     </>
                                 </Row>
                             </>

@@ -46,6 +46,7 @@ const ComponentsRoutesModalFormProductReturnReceiptDoc = ({ mode, calculateResul
             });
         }
         setActiveKeyTab("2")
+
         form.setFieldsValue({
             customer_id: data?.bus_customer_id === null ? data?.per_customer_id : data?.bus_customer_id,
             customer_type: data?.bus_customer_id === null ? "personal" : "business",
@@ -58,6 +59,16 @@ const ComponentsRoutesModalFormProductReturnReceiptDoc = ({ mode, calculateResul
             tax_invoice_doc_date: moment(data?.ShopServiceOrderDoc?.ShopTaxInvoiceDocs[0]?.inv_doc_date),
             tax_type_id: data?.tax_type_id,
         });
+
+        if (data?.ShopServiceOrderDoc?.ShopTaxInvoiceDocs[0]?.id) {
+            form.setFieldsValue({
+                is_create_debt_credit_note_doc: "yes"
+            });
+        } else {
+            form.setFieldsValue({
+                is_create_debt_credit_note_doc: "yes_no_vat"
+            });
+        }
     }
 
     const handleCancelTemporaryDeliveryOrderDocModal = () => {
@@ -348,7 +359,7 @@ const ComponentsRoutesModalFormProductReturnReceiptDoc = ({ mode, calculateResul
                             optionFilterProp="children"
                             defaultValue={true}
                         >
-                            <Select.Option value={"yes"} key={1}>
+                            <Select.Option value={"yes"} key={1} disabled={!form.getFieldValue().tax_invoice_doc_code}>
                                 สร้างใบลดหนี้
                             </Select.Option>
                             <Select.Option value={"yes_no_vat"} key={1}>

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
-import { Button, message, Input, Modal, Form, Upload, DatePicker, TimePicker, Row, Col, Typography } from 'antd';
-import { UploadOutlined, } from '@ant-design/icons';
+import { Button, message, Input, Modal, Form, Upload, DatePicker, TimePicker, Row, Col, Typography, Dropdown, Menu } from 'antd';
+import { UploadOutlined, DownOutlined } from '@ant-design/icons';
 import API from '../../util/Api'
 import moment from 'moment';
 import { Cookies } from "react-cookie";
@@ -440,6 +440,7 @@ const ImportDocuments = ({ view_doc_id, select_shop_ids, title = null, callBack,
         mode: "add",
         maxHeight: 600,
         overflowX: "auto",
+        modeKey: null,
     })
     /**
      * ค่าเริ่มต้นของ
@@ -867,9 +868,15 @@ const ImportDocuments = ({ view_doc_id, select_shop_ids, title = null, callBack,
         }
     }
 
-    const handleOkModal = () => {
-        formModal.submit()
-        // formIncomeProduct.submit()
+    const handleOkModal = (modeKey) => {
+        try {
+            setLoading(() => true)
+            setConfigModal({ ...configModal, modeKey })
+            formModal.submit()
+            setLoading(() => false)
+        } catch (error) {
+            console.log('error handleOk:>> ', error);
+        }
     }
 
     const handleCancelModal = () => {
@@ -1073,6 +1080,7 @@ const ImportDocuments = ({ view_doc_id, select_shop_ids, title = null, callBack,
             console.log('warehouseModel', warehouseModel)
             // console.log("_modell", warehouseModel.product_list)
             // console.log("product_list_check", product_list_check)
+          
 
             if (log.length == 0) {
                 let res
@@ -1089,6 +1097,9 @@ const ImportDocuments = ({ view_doc_id, select_shop_ids, title = null, callBack,
                     if (!isEqual(product_list_check, warehouseModel.product_list)) {
                         _model.ShopInventory_Put = warehouseModel
                     }
+                    if (configModal.modeKey === 1) {
+                        delete model.ShopInventory_Put
+                    }
                     res = await API.put(`/shopInventoryTransaction/put/${idEdit}`, _model)
                 }
 
@@ -1101,7 +1112,13 @@ const ImportDocuments = ({ view_doc_id, select_shop_ids, title = null, callBack,
                     })
 
                 } else {
-                    message.error('มีบางอย่างผิดพลาดกรุณาติดต่อเจ้าหน้าที่');
+                    Modal.error({
+                        title: 'เกิดข้อผิดพลาด',
+                        content: `เกิดข้อผิดพลาด : ${res.data.data}`,
+                        centered: true,
+                        footer: null,
+                    });
+                    // message.error('มีบางอย่างผิดพลาดกรุณาติดต่อเจ้าหน้าที่');
                 }
             } else {
                 message.error('จำนวนในชั้นว่างไม่ตรงกับจำนวนทั้งหมด')
@@ -1267,6 +1284,30 @@ const ImportDocuments = ({ view_doc_id, select_shop_ids, title = null, callBack,
 
     const MatchRound = (value) => (Math.round(+value * 100) / 100).toFixed(2)
 
+
+    const menuOnFinish = () => {
+        try {
+
+            const items = [
+                {
+                    key: '1',
+                    label: 'บันทึกเฉพาะหัวบิลท้ายบิล',
+                    onClick: () => handleOkModal(1),
+                },
+            ]
+            if (configModal.mode !== "edit") items = []
+            return (
+                <Menu
+                    loading={loading || carPreLoading}
+                    items={items}
+                />
+            )
+
+        } catch (error) {
+
+        }
+    }
+
     return (
         <>
             <>
@@ -1368,8 +1409,18 @@ const ImportDocuments = ({ view_doc_id, select_shop_ids, title = null, callBack,
                             <Col hidden={configModal.mode === "add"}>
                                 <PrintOut documentId={formModal.getFieldValue().id} loading={loading} docTypeId={docTypeId} />
                             </Col>
-                            <Col hidden={configModal.mode === "view"}>
+                            {/* <Col hidden={configModal.mode === "view"}>
                                 <Button loading={loading} disabled={configModal.mode == "view"} type='primary' onClick={() => handleOkModal(0)} style={{ width: 100 }}>บันทึก</Button>
+                            </Col> */}
+                            <Col hidden={configModal.mode === "view"} >
+                                {
+                                    configModal.mode === "edit" ?
+                                        <Dropdown.Button type='primary' overlay={() => menuOnFinish()} icon={<DownOutlined />} onClick={() => handleOkModal(0)} style={{ width: "100%" }} loading={loading || carPreLoading}>
+                                            บันทึก
+                                        </Dropdown.Button>
+                                        :
+                                        <Button loading={loading} disabled={configModal.mode == "view"} type='primary' onClick={() => handleOkModal(0)} style={{ width: 100 }}>บันทึก</Button>
+                                }
                             </Col>
                             {/* <Col hidden={configModal.mode === "add"}> */}
                             <Col hidden={configModal.mode === "add"}>
