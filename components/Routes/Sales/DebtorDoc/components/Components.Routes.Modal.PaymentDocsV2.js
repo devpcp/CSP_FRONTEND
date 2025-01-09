@@ -43,7 +43,7 @@ const PaymentDocsV2 = ({ docId, title, loading, handleCancelDebtDoc, initForm, c
             payment_list.map((e) => {
                 paid_list += +e.payment_price_paid
             })
-            let price_balance = +total - +paid_list 
+            let price_balance = +total - +paid_list
             form.setFieldsValue({ price_balance })
         } catch (error) {
             console.log("error", error)
@@ -71,7 +71,7 @@ const PaymentDocsV2 = ({ docId, title, loading, handleCancelDebtDoc, initForm, c
                     key: '',
                     width: "5%",
                     align: "center",
-                    render: (text, record) => get(record, `ShopServiceOrderDoc.code_id`, record?.code_id ?? record?.ShopCustomerDebtCreditNoteDoc?.code_id ?? record?.ShopCustomerDebtDebitNoteDoc?.code_id)
+                    render: (text, record) => rederCodeId(record)
                 },
                 {
                     title: () => GetIntlMessages("จำนวนเงิน"),
@@ -91,11 +91,12 @@ const PaymentDocsV2 = ({ docId, title, loading, handleCancelDebtDoc, initForm, c
                 },
                 {
                     title: () => GetIntlMessages("ยอดชำระ"),
-                    dataIndex: 'debt_price_paid_total',
-                    key: 'debt_price_paid_total',
+                    dataIndex: '',
+                    key: '',
                     width: "10%",
                     align: "center",
-                    render: (text, record) => RoundingNumber(text) ?? "-"
+                    render: (text, record) => <div style={{ textAlign: "end" }}>{extractDataDocSaleType(record, 'debt_price_paid_total')}</div>
+                    // render: (text, record) => RoundingNumber(text) ?? "-"
                 },
             )
             setColumns(() => [..._column])
@@ -177,12 +178,31 @@ const PaymentDocsV2 = ({ docId, title, loading, handleCancelDebtDoc, initForm, c
         }
     }
 
+    const rederCodeId = (record) => {
+        let code_id
+        if (record?.ShopTemporaryDeliveryOrderDoc) {
+            code_id = record?.ShopTemporaryDeliveryOrderDoc?.code_id
+        }
+        if (record?.ShopCustomerDebtCreditNoteDoc) {
+            code_id = record?.ShopCustomerDebtCreditNoteDoc?.code_id
+        }
+        if (record?.ShopCustomerDebtDebitNoteDoc) {
+            code_id = record?.ShopCustomerDebtDebitNoteDoc?.code_id
+        }
+        if (record?.ShopCustomerDebtCreditNoteDocT2) {
+            code_id = record?.ShopCustomerDebtCreditNoteDocT2?.code_id
+        }
+        return code_id
+    }
+
     const extractDataDocSaleType = (record, type) => {
         try {
             // console.log('record :>> ', record);
             if (record.ShopCustomerDebtCreditNoteDoc) {
                 return RoundingNumber(Number(record.price_grand_total)) ?? '-'
             } else if (record.ShopCustomerDebtDebitNoteDoc) {
+                return RoundingNumber(Number(record.price_grand_total)) ?? '-'
+            } else if (record.ShopCustomerDebtCreditNoteDocT2) {
                 return RoundingNumber(Number(record.price_grand_total)) ?? '-'
             } else {
                 return RoundingNumber(Number(get(record, `ShopServiceOrderDoc.${type}`, 0))) ?? RoundingNumber(Number(record[type])) ?? "-"
@@ -673,7 +693,7 @@ const PaymentDocsV2 = ({ docId, title, loading, handleCancelDebtDoc, initForm, c
                                     scroll={{ x: 400 }}
                                     locale={{ emptyText: "ไม่มีข้อมูล..กรุณาเพิ่มรายาการ" }}
                                 />
-
+                                {/* 
                                 <Table
                                     // id="table-list"
                                     className="mt-4"
@@ -692,7 +712,7 @@ const PaymentDocsV2 = ({ docId, title, loading, handleCancelDebtDoc, initForm, c
                                     pagination={false}
                                     scroll={{ x: 400 }}
                                     locale={{ emptyText: "ไม่มีข้อมูล..กดเพิ่มรายการ" }}
-                                />
+                                /> */}
                             </Col>
 
                             <Col lg={12} md={24} xs={24}>
@@ -831,7 +851,7 @@ const PaymentDocsV2 = ({ docId, title, loading, handleCancelDebtDoc, initForm, c
                                     </div>
                                 </div>
 
-                                <div className="pt-3 pb-2">
+                                {/* <div className="pt-3 pb-2">
                                     <div className="border-bottom pb-2">
                                         <h1>จัดการเอกสาร/โปรโมชั่น</h1>
                                     </div>
@@ -843,13 +863,10 @@ const PaymentDocsV2 = ({ docId, title, loading, handleCancelDebtDoc, initForm, c
                                                 disabled
                                             />
                                         </div>
-                                        {/* <div className="pr-5">
-                                        <DepositReceipt textButton={"หักเงินมัดจำ"} disabled />
-                                     </div> */}
                                     </div>
-                                </div>
+                                </div> */}
 
-                                <div className="pt-3 pb-2">
+                                {/* <div className="pt-3 pb-2">
                                     <div className="border-bottom pb-2">
                                         <h1>รายการส่วนลด</h1>
                                     </div>
@@ -862,7 +879,7 @@ const PaymentDocsV2 = ({ docId, title, loading, handleCancelDebtDoc, initForm, c
                                             />
                                         </div>
                                     </div>
-                                </div>
+                                </div> */}
                             </Col>
                         </Row>
                     </Form>

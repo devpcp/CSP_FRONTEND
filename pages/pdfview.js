@@ -58,6 +58,9 @@ const PDFView = () => {
                             price_discount_2: MatchRoundComma(e?.details.price_discount_2),
                             price_discount_3: MatchRoundComma(e?.details.price_discount_3),
                             price_grand_total: MatchRoundComma(e?.price_grand_total),
+                            price_discount_percent: MatchRoundComma(e?.price_discount_percent),
+                            price_discount_percent_2: MatchRoundComma(e?.details?.price_discount_percent_2),
+                            price_discount_percent_3: MatchRoundComma(e?.details?.price_discount_percent_3),
                         })
                     }
                 })
@@ -494,7 +497,7 @@ const PDFView = () => {
     }
 
     return (
-        // <></>s
+        // <></>
         <>
             {docData ?
                 <PDFViewer style={{ display: "block", height: "100vh", width: "100vw", border: "none" }}>

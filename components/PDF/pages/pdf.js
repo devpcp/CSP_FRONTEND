@@ -295,13 +295,13 @@ const MyDocument = ({ docData }) => {
                   <Text>{e?.price_unit}</Text>
                 </View>
                 <View style={styles.table.priceDiscount}>
-                  <Text>{e?.price_discount === "0.00" ? "0" : e?.price_discount}</Text>
+                  <Text>{e?.price_discount_percent === "0.00" ? "0" : e?.price_discount_percent}</Text>
                 </View>
                 <View style={styles.table.priceDiscount2}>
-                  <Text>{e?.price_discount_2 === "0.00" ? "0" : e?.price_discount_2}</Text>
+                  <Text>{e?.price_discount_percent_2 === "0.00" ? "0" : e?.price_discount_percent_2}</Text>
                 </View>
                 <View style={styles.table.priceDiscount3}>
-                  <Text>{e?.price_discount_3 === "0.00" ? "0" : e?.price_discount_3}</Text>
+                  <Text>{e?.price_discount_percent_3 === "0.00" ? "0" : e?.price_discount_percent_3}</Text>
                 </View>
                 <View style={styles.table.priceGrandTotal}>
                   <Text>{e?.price_grand_total}</Text>

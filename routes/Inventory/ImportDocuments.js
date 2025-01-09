@@ -1098,7 +1098,7 @@ const ImportDocuments = ({ view_doc_id, select_shop_ids, title = null, callBack,
                         _model.ShopInventory_Put = warehouseModel
                     }
                     if (configModal.modeKey === 1) {
-                        delete model.ShopInventory_Put
+                        delete _model.ShopInventory_Put
                     }
                     res = await API.put(`/shopInventoryTransaction/put/${idEdit}`, _model)
                 }
