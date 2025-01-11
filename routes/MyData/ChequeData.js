@@ -157,6 +157,15 @@ const ChequeData = ({ title = null, callBack }) => {
                 render: (text, record) => text ? moment(text).format("DD/MM/YYYY") : "-",
             },
             {
+                title: () => GetIntlMessages("วันที่เงินเข้าธนาคาร"),
+                dataIndex: 'check_receive_date',
+                key: 'check_receive_date',
+                width: 100,
+                align: "center",
+                use: true,
+                render: (text, record) => text ? moment(text).format("DD/MM/YYYY") : "-",
+            },
+            {
                 title: () => GetIntlMessages("จำนวนเงินหน้าเช็ค"),
                 dataIndex: 'check_amount',
                 key: 'check_amount',
@@ -204,7 +213,7 @@ const ChequeData = ({ title = null, callBack }) => {
                 align: "center",
                 use: isFunction(callBack) ?? false,
                 render: (text, record) => (
-                    <Button onClick={() => callBack(record)} disabled={record?.details?.cheque_use_status === false || record.check_status !== 1}>เลือก</Button>
+                    <Button onClick={() => callBack(record)} disabled={record?.details?.cheque_use_status === false || record.check_status === 2}>เลือก</Button>
                 ),
             },
 
@@ -993,7 +1002,7 @@ const ChequeData = ({ title = null, callBack }) => {
                                             </Form.Item>
                                             <Form.Item
                                                 name='check_receive_date'
-                                                label={GetIntlMessages("วันที่รับเช็ค")}
+                                                label={GetIntlMessages("วันที่เงินเข้าธนาคาร")}
                                                 validateTrigger={['onChange', 'onBlur']}
                                                 rules={[{ required: true, message: GetIntlMessages("please-fill-out") }]}
                                             >
