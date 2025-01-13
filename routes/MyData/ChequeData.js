@@ -55,10 +55,10 @@ const ChequeData = ({ title = null, callBack }) => {
             order: "ascend",
             column: {
                 created_by: false,
-                created_date: false,
+                created_date: true,
                 updated_by: false,
-                updated_date: false,
-                status: false
+                updated_date: true,
+                status: true
             }
         },
         configSort: {
@@ -67,7 +67,7 @@ const ChequeData = ({ title = null, callBack }) => {
         },
         modelSearch: {
             search: "",
-            status: "default",
+            status: "active",
         },
     }
 
@@ -251,6 +251,11 @@ const ChequeData = ({ title = null, callBack }) => {
             const res = await API.get(url)
             if (res.data.status === "success") {
                 const { currentCount, currentPage, pages, totalCount, data } = res.data.data;
+                data.map((e) => {
+                    if (e.details.cheque_amount_remaining !== e.check_amount) {
+                        e.disabled_change_status = true
+                    }
+                })
                 setListSearchDataTable(data)
                 // setTotal(totalCount);
                 setConfigTable({ ...configTable, page: page, total: totalCount, limit: limit })
