@@ -342,7 +342,6 @@ const PaymentDocsV2 = ({ docId, title, loading, handleCancelDebtDoc, initForm, c
             }
 
             if (res.data.status === "success") {
-                console.log("res.data.data", res.data.data.filter(x => x.payment_method === 4))
                 if (type === 0) {
                     try {
                         Promise.all(

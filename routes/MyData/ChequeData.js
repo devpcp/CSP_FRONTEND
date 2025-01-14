@@ -367,7 +367,7 @@ const ChequeData = ({ title = null, callBack }) => {
                     }
                     _model.upload_shop_cheque_list = isPlainObject(_model.details) ? _model.details?.upload_shop_cheque_list ?? [] : []
                     _model.upload_remove_list = []
-
+                    setCheckedChequeUseStatusIsuse(_model.cheque_use_status)
                     // const urlImg = await CheckImage({
                     //     directory: "shopCheckCustomer",
                     //     name: id,
@@ -1061,7 +1061,7 @@ const ChequeData = ({ title = null, callBack }) => {
                                                         validateTrigger={['onChange', 'onBlur']}
                                                     >
                                                         <InputNumber
-                                                            disabled
+                                                            // disabled
                                                             stringMode min={0} precision={2} style={{ width: "100%" }} step="1"
                                                             formatter={(value) => !!value ? value.replace(/\B(?=(\d{3})+(?!\d))/g, ',') : ""}
                                                             parser={(value) => value.replace(/\$\s?|(,*)/g, '')}
@@ -1080,7 +1080,7 @@ const ChequeData = ({ title = null, callBack }) => {
                                                         }
                                                         validateTrigger={['onChange', 'onBlur']}
                                                     >
-                                                        <Switch disabled={configModal.mode == "view"} checked={checkedChequeUseStatusIsuse} onChange={(bool) => setCheckedChequeUseStatusIsuse(bool)} checkedChildren="ใช้งาน" unCheckedChildren="ยกเลิก" />
+                                                        <Switch disabled={configModal.mode == "view"} checked={checkedChequeUseStatusIsuse} onChange={(bool) => setCheckedChequeUseStatusIsuse(bool)} checkedChildren="ใช้งานได้" unCheckedChildren="ใช้งานไม่ได้" />
 
                                                     </Form.Item>
                                                 </Col>

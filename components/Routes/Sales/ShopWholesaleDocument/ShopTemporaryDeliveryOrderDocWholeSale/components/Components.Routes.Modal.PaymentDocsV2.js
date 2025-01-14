@@ -374,7 +374,7 @@ const PaymentDocsV2 = ({ docId, title, loading, handleCancelTemDoc, initForm, ca
                 default:
                     break;
             }
-            
+
             res = { data: { status: "success" } }
             if (type !== 0) {
                 res = await API.post(`/shopPaymentTransaction/add`, model)
@@ -383,7 +383,31 @@ const PaymentDocsV2 = ({ docId, title, loading, handleCancelTemDoc, initForm, ca
             }
 
             if (res.data.status === "success") {
+                if (type === 0) {
+                    try {
+                        Promise.all(
+                            res.data.data.filter(x => x.payment_method === 4).map(async (model) => {
+                                console.log("model", model)
+                                let resUpdateCheque
+                                const { data } = await API.get(`/shopCheckCustomer/byid/${model.details.cheque_id}`)
+                                console.log("data", data)
+                                if (data.status == "success") {
+                                    let dataApi = data.data[0]
 
+                                    let calRemaining = +model.details.cheque_amount_remaining - +model.payment_price_paid
+                                    let modelUpdateCheque = {}
+                                    modelUpdateCheque.details = dataApi.details
+                                    modelUpdateCheque.details.cheque_amount_remaining = MatchRound(calRemaining)
+                                    modelUpdateCheque.details.cheque_use_status = calRemaining <= 0 ? false : true
+
+                                    resUpdateCheque = await API.put(`/shopCheckCustomer/put/${model.details.cheque_id}`, modelUpdateCheque)
+                                }
+                            })
+                        )
+                    } catch (error) {
+                        console.log("update Chque error : ", error)
+                    }
+                }
                 if (type === 4) {
                     try {
                         let resUpdateCheque
