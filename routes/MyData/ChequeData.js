@@ -158,8 +158,8 @@ const ChequeData = ({ title = null, callBack }) => {
             },
             {
                 title: () => GetIntlMessages("วันที่เงินเข้าธนาคาร"),
-                dataIndex: 'check_receive_date',
-                key: 'check_receive_date',
+                dataIndex: 'pay_in',
+                key: 'pay_in',
                 width: 100,
                 align: "center",
                 use: true,
@@ -355,6 +355,7 @@ const ChequeData = ({ title = null, callBack }) => {
                     _model.check_no = _model.check_no ?? null
                     _model.check_date = moment(new Date(_model.check_date), "YYYY-MM-DD") ?? null
                     _model.check_receive_date = moment(new Date(_model.check_receive_date), "YYYY-MM-DD") ?? null
+                    _model.pay_in = _model.pay_in ? moment(_model.pay_in).format("YYYY-MM-DD") ?? null : null
                     _model.check_status = _model.check_status ?? null
 
                     if (_.isPlainObject(_model.details)) {
@@ -481,6 +482,7 @@ const ChequeData = ({ title = null, callBack }) => {
                 check_no: value.check_no ?? null,
                 check_date: moment(value.check_date).format("YYYY-MM-DD") ?? null,
                 check_receive_date: moment(value.check_receive_date).format("YYYY-MM-DD") ?? null,
+                pay_in: moment(value.pay_in).format("YYYY-MM-DD") ?? null,
                 check_status: value.check_status ?? null,
                 details: {
                     note: value.note ?? null,
@@ -954,6 +956,7 @@ const ChequeData = ({ title = null, callBack }) => {
                                             <Form.Item
                                                 name='check_branch'
                                                 label={GetIntlMessages("สาขา")}
+                                                rules={[{ required: true, message: GetIntlMessages("please-fill-out") }]}
                                             >
                                                 <Input placeholder="กรอกข้อมูล" disabled={configModal.mode == "view"} />
                                             </Form.Item>
@@ -1007,7 +1010,7 @@ const ChequeData = ({ title = null, callBack }) => {
                                             </Form.Item>
                                             <Form.Item
                                                 name='check_receive_date'
-                                                label={GetIntlMessages("วันที่เงินเข้าธนาคาร")}
+                                                label={GetIntlMessages("วันที่รับเช็ค")}
                                                 validateTrigger={['onChange', 'onBlur']}
                                                 rules={[{ required: true, message: GetIntlMessages("please-fill-out") }]}
                                             >
@@ -1031,6 +1034,14 @@ const ChequeData = ({ title = null, callBack }) => {
                                                         { value: 2, label: 'ขึ้นเงินไม่สำเร็จ' },
                                                     ]}
                                                 />
+                                            </Form.Item>
+                                            <Form.Item
+                                                name='pay_in'
+                                                label={GetIntlMessages("วันที่เงินเข้าธนาคาร")}
+                                                validateTrigger={['onChange', 'onBlur']}
+                                                rules={[{ required: false, message: GetIntlMessages("please-fill-out") }]}
+                                            >
+                                                <DatePicker format={"DD/MM/YYYY"} style={{ width: "100%" }} disabled={configModal.mode == "view"} />
                                             </Form.Item>
                                             <Form.Item
                                                 label={GetIntlMessages("หมายเหตุ")}

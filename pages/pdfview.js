@@ -50,7 +50,7 @@ const PDFView = () => {
                     } else {
                         product_list.push({
                             seq_number: e?.seq_number,
-                            product_name: e?.details.meta_data.ShopProduct.Product.product_name[locale.locale],
+                            product_name: e?.details?.change_name_status ? e?.details?.changed_name : e?.details.meta_data.ShopProduct.Product.product_name[locale.locale],
                             dot_mfd: e?.dot_mfd,
                             amount: e?.amount,
                             price_unit: MatchRoundComma(e?.price_unit),
