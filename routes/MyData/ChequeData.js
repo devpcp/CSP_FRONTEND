@@ -202,6 +202,10 @@ const ChequeData = ({ title = null, callBack }) => {
                             return (
                                 <span style={{ color: "red", fontSize: 16 }}>ขึ้นเงินไม่สำเร็จ</span>
                             )
+                        case 3:
+                            return (
+                                <span style={{ color: "red", fontSize: 16 }}>รับเช็ค</span>
+                            )
                     }
                 },
             },
@@ -1029,9 +1033,11 @@ const ChequeData = ({ title = null, callBack }) => {
                                                     disabled={configModal.mode == "view"}
                                                     style={{ width: "100%" }}
                                                     options={[
+                                                        { value: 3, label: 'รับเช็ค' },
                                                         { value: 0, label: 'รอเครียร์เช็ค' },
                                                         { value: 1, label: 'ขึ้นเงินสำเร็จ' },
                                                         { value: 2, label: 'ขึ้นเงินไม่สำเร็จ' },
+
                                                     ]}
                                                 />
                                             </Form.Item>
