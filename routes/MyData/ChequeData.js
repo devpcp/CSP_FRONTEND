@@ -204,7 +204,7 @@ const ChequeData = ({ title = null, callBack }) => {
                             )
                         case 3:
                             return (
-                                <span style={{ color: "red", fontSize: 16 }}>รับเช็ค</span>
+                                <span style={{ color: "#005aff", fontSize: 16 }}>รับเช็ค</span>
                             )
                     }
                 },
