@@ -192,7 +192,7 @@ const ChequeData = ({ title = null, callBack }) => {
                     switch (text) {
                         case 0:
                             return (
-                                <span style={{ color: "orange", fontSize: 16 }}>รอเครียร์เช็ค</span>
+                                <span style={{ color: "orange", fontSize: 16 }}>รอเคลียริ่ง</span>
                             )
                         case 1:
                             return (
