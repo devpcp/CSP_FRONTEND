@@ -85,7 +85,7 @@ const ComponentsRoutesModalFormRepairOrder = ({ mode, calculateResult, disabledW
             const new_data = value1.map(e => {
                 const newData = { ...e, name: {} }
                 locale.list_json.forEach(x => {
-                    newData.name[x] = `${e.UsersProfile.fname[x] ?? "-"} ${e.UsersProfile.lname[x] ?? "-"}` ?? ""
+                    newData.name[x] = `${e?.UsersProfile.fname[x] ?? "-"} ${e?.UsersProfile.lname[x] ?? "-"}` ?? ""
                     return newData
                 })
                 return newData
@@ -98,9 +98,9 @@ const ComponentsRoutesModalFormRepairOrder = ({ mode, calculateResult, disabledW
                     const { shop_id } = authUser.UsersProfile;
                     if (fname && lname) {
                         newDataValue2.push({
-                            id: e.id,
+                            id: e?.id,
                             name: `${fname} ${lname}`,
-                            groups: e.Groups
+                            groups: e?.Groups
                         })
                     }
                 }
@@ -110,7 +110,7 @@ const ComponentsRoutesModalFormRepairOrder = ({ mode, calculateResult, disabledW
             const new_data3 = value3.map(e => {
                 const newData = { ...e, name: {} }
                 locale.list_json.forEach(x => {
-                    newData.name[x] = `${e.UsersProfile.fname[x] ?? "-"} ${e.UsersProfile.lname[x] ?? "-"}` ?? ""
+                    newData.name[x] = `${e?.UsersProfile.fname[x] ?? "-"} ${e?.UsersProfile.lname[x] ?? "-"}` ?? ""
                     return newData
                 })
                 return newData
@@ -172,14 +172,14 @@ const ComponentsRoutesModalFormRepairOrder = ({ mode, calculateResult, disabledW
                         if (data.status === "success") {
                             const newData = data.data.data.map(e => {
                                 console.log("eee", e)
-                                const isPersonal = isPlainObject(e.ShopPersonalCustomer) ? true : false;
+                                const isPersonal = isPlainObject(e?.ShopPersonalCustomer) ? true : false;
                                 const name = isPersonal ?
-                                    `${e.ShopPersonalCustomer.customer_name.first_name[locale.locale] ?? "-"} ${e.ShopPersonalCustomer.customer_name.last_name[locale.locale] ?? ""}` :
-                                    `${e.ShopBusinessCustomer.customer_name[locale.locale] ?? "-"}`;
-                                const branch = !isPersonal ? `${e.ShopBusinessCustomer.other_details.branch === "office" ? "(สำนักงานใหญ่)" : `(${e.ShopBusinessCustomer.other_details.branch_code}  ${e.ShopBusinessCustomer.other_details.branch_name}`})` : ''
+                                    `${e?.ShopPersonalCustomer.customer_name.first_name[locale.locale] ?? "-"} ${e?.ShopPersonalCustomer.customer_name.last_name[locale.locale] ?? ""}` :
+                                    `${e?.ShopBusinessCustomer.customer_name[locale.locale] ?? "-"}`;
+                                const branch = !isPersonal ? `${e?.ShopBusinessCustomer.other_details.branch === "office" ? "(สำนักงานใหญ่)" : `(${e?.ShopBusinessCustomer.other_details.branch_code}  ${e?.ShopBusinessCustomer.other_details.branch_name}`})` : ''
                                 const mobile_no = Object.entries(e[isPersonal ? `ShopPersonalCustomer` : `ShopBusinessCustomer`].mobile_no).map((x) => x[1]);
-                                const vehicles_registration = `${isPlainObject(e.details) ? e.details.registration : "-"}`;
-                                const province_name = `${isPlainObject(e.details) ? e.details.province_name : "-"}`;
+                                const vehicles_registration = `${isPlainObject(e?.details) ? e?.details.registration : "-"}`;
+                                const province_name = `${isPlainObject(e?.details) ? e?.details.province_name : "-"}`;
                                 const customer_code = e[isPersonal ? `ShopPersonalCustomer` : `ShopBusinessCustomer`].master_customer_code_id
                                 return {
                                     ...e,
@@ -226,7 +226,7 @@ const ComponentsRoutesModalFormRepairOrder = ({ mode, calculateResult, disabledW
                     })
 
                     address = find[isPersonal ? `ShopPersonalCustomer` : `ShopBusinessCustomer`]?.address?.[locale.locale] ?? "-"
-                    tags = isPersonal ? findCar?.ShopPersonalCustomer?.tags ?? [].map((e) => (e.id)) ?? [] : findCar?.ShopBusinessCustomer?.tags ?? [].map((e) => (e.id)) ?? []
+                    tags = isPersonal ? findCar?.ShopPersonalCustomer?.tags ?? [].map((e) => (e?.id)) ?? [] : findCar?.ShopBusinessCustomer?.tags ?? [].map((e) => (e?.id)) ?? []
                     tags_obj = isPersonal ? findCar?.ShopPersonalCustomer?.tags ?? [] : findCar?.ShopBusinessCustomer?.tags ?? []
 
 
@@ -314,7 +314,7 @@ const ComponentsRoutesModalFormRepairOrder = ({ mode, calculateResult, disabledW
                 previous_mileage: data?.details?.mileage === "" || data?.details?.mileage === null ? 0 : data?.details?.mileage,
                 current_mileage: data?.details?.mileage === "" || data?.details?.mileage === null ? data?.details?.mileage_first : "",
                 address: customer_type === "person" ? data?.ShopPersonalCustomer?.address ? data?.ShopPersonalCustomer?.address[locale.locale] : null : data?.ShopBusinessCustomer?.address ? data?.ShopBusinessCustomer?.address[locale.locale] : null,
-                tags: customer_type === "person" ? data?.ShopPersonalCustomer?.tags ?? [].map((e) => (e.id)) ?? [] : data?.ShopBusinessCustomer?.tags ?? [].map((e) => (e.id)) ?? [],
+                tags: customer_type === "person" ? data?.ShopPersonalCustomer?.tags ?? [].map((e) => (e?.id)) ?? [] : data?.ShopBusinessCustomer?.tags ?? [].map((e) => (e?.id)) ?? [],
                 tags_obj: customer_type === "person" ? data?.ShopPersonalCustomer?.tags ?? [] : data?.ShopBusinessCustomer?.tags ?? [],
                 sales_man: customer_list[0]?.other_details?.employee_sales_man_id ? [customer_list[0]?.other_details?.employee_sales_man_id] : [],
                 credit_limit,
@@ -353,22 +353,22 @@ const ComponentsRoutesModalFormRepairOrder = ({ mode, calculateResult, disabledW
             let array = [{ ...data }]
             const newData = array.map(e => {
                 const customer_full_name = customer_type === "person" ?
-                    `${e.customer_name.first_name[locale.locale] ?? "-"} ${e.customer_name.last_name[locale.locale] ?? ""}` :
-                    `${e.customer_name[locale.locale] ?? "-"}`;
+                    `${e?.customer_name.first_name[locale.locale] ?? "-"} ${e?.customer_name.last_name[locale.locale] ?? ""}` :
+                    `${e?.customer_name[locale.locale] ?? "-"}`;
 
                 return {
                     ...e,
                     customer_type,
                     customer_name: customer_full_name,
-                    customer_id: e.id,
-                    customer_code: e.master_customer_code_id,
-                    customer_branch: e.other_details.branch === "office" ? "(สำนักงานใหญ่)" : "(" + e.other_details.branch_code + " " + e.other_details.branch_name + ")",
+                    customer_id: e?.id,
+                    customer_code: e?.master_customer_code_id,
+                    customer_branch: e?.other_details.branch === "office" ? "(สำนักงานใหญ่)" : "(" + e?.other_details.branch_code + " " + e?.other_details.branch_name + ")",
                 }
             })
 
             const customer_phone_list = Object.entries(data.mobile_no).map((x) => x[1]).filter(where => where !== null);
             let address = `${data?.address?.[locale.locale] ?? ""} ${data?.Province?.[`prov_name_${locale.locale}`] ?? ""} ${data?.District?.[`name_${locale.locale}`] ?? ""} ${data?.SubDistrict?.[`name_${locale.locale}`] ?? ""} ${data?.SubDistrict?.zip_code ?? ""}`
-            let tags = data?.tags.map((e) => (e.id)) ?? []
+            let tags = data?.tags.map((e) => (e?.id)) ?? []
             let tags_obj = data?.tags ?? []
             let credit_term = data?.other_details?.credit_term ? data?.other_details?.credit_term : null
             let credit_limit = data?.other_details?.credit_limit ? (+data?.other_details?.credit_limit).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "0.00"
@@ -448,7 +448,7 @@ const ComponentsRoutesModalFormRepairOrder = ({ mode, calculateResult, disabledW
                                     loading={loadingEasySearch}
                                     placeholder={GetIntlMessages("ค้นหาข้อมูลจากชื่อลูกค้า ทะเบียน รหัสลูกค้า เบอร์โทรศัพท์")}
                                 >
-                                    {getArrValue("easy_search_list").map(e => <Select.Option value={e.id} key={`easy-search-${e?.id}`}>{e.value_name}</Select.Option>)}
+                                    {getArrValue("easy_search_list").map(e => <Select.Option value={e?.id} key={`easy-search-${e?.id}`}>{e?.value_name}</Select.Option>)}
 
                                 </Select>
                             </Form.Item>
@@ -491,7 +491,7 @@ const ComponentsRoutesModalFormRepairOrder = ({ mode, calculateResult, disabledW
                                     disabled
                                     loading={loadingEasySearch}
                                 >
-                                    {getArrValue("customer_list").map(e => <Select.Option value={e.id} key={`customer-id-${e.id}`}>{e.customer_name}</Select.Option>)}
+                                    {getArrValue("customer_list").map(e => <Select.Option value={e?.id} key={`customer-id-${e?.id}`}>{e?.customer_name}</Select.Option>)}
                                 </Select>
                             </Form.Item>
                         </Col>
@@ -522,7 +522,7 @@ const ComponentsRoutesModalFormRepairOrder = ({ mode, calculateResult, disabledW
                             disabled
                             loading={loadingEasySearch}
                         >
-                            {getArrValue("customer_phone_list").map((e, index) => <Select.Option value={e.id} key={`customer-phone-${index}`}>{e}</Select.Option>)}
+                            {getArrValue("customer_phone_list").map((e, index) => <Select.Option value={e?.id} key={`customer-phone-${index}`}>{e}</Select.Option>)}
                         </Select>
                     </Form.Item>
                 </Col>
@@ -653,7 +653,7 @@ const ComponentsRoutesModalFormRepairOrder = ({ mode, calculateResult, disabledW
                             mode="multiple"
                             placeholder="เลือกข้อมูล"
                         >
-                            {repairManList.map((e, index) => <Select.Option value={e.id} key={`repair-man-${e.id}`}>{e?.name[locale.locale] ?? "-"}</Select.Option>)}
+                            {repairManList.map((e, index) => <Select.Option value={e?.id} key={`repair-man-${e?.id}`}>{e?.name[locale.locale] ?? "-"}</Select.Option>)}
                         </Select>
                     </Form.Item>
                 </Col>
@@ -675,7 +675,7 @@ const ComponentsRoutesModalFormRepairOrder = ({ mode, calculateResult, disabledW
                             mode="multiple"
                             placeholder="เลือกข้อมูล"
                         >
-                            {salesManList.map((e, index) => <Select.Option value={e.id} key={`sales-man-${e.id}`}>{e?.name[locale.locale] + (e?.UsersProfile?.details?.nickname ? ` (${e?.UsersProfile?.details?.nickname})` : "") ?? "-"}</Select.Option>)}
+                            {salesManList.map((e, index) => <Select.Option value={e?.id} key={`sales-man-${e?.id}`}>{e?.name[locale.locale] + (e?.UsersProfile?.details?.nickname ? ` (${e?.UsersProfile?.details?.nickname})` : "") ?? "-"}</Select.Option>)}
                         </Select>
                     </Form.Item>
                 </Col>
@@ -738,7 +738,7 @@ const ComponentsRoutesModalFormRepairOrder = ({ mode, calculateResult, disabledW
                             loading={loadingEasySearch}
                         >
 
-                            {userList.map((e, index) => <Select.Option value={e.id} key={`user-list-${index}`}>{e.name}</Select.Option>)}
+                            {userList.map((e, index) => <Select.Option value={e?.id} key={`user-list-${index}`}>{e?.name}</Select.Option>)}
                         </Select>
                     </Form.Item>
                 </Col>
@@ -792,8 +792,8 @@ const ComponentsRoutesModalFormRepairOrder = ({ mode, calculateResult, disabledW
                             disabled
                             loading={loadingEasySearch}
                         >
-                            {documentTypes.map((e, index) => <Select.Option value={e.id} key={`doc-type-${e.id}`}>{e?.type_name[locale.locale]}</Select.Option>)}
-                            {/* {getArrValue("vehicles_customers_list").map((e, index) => <Select.Option value={e.id} key={`customer-phone-${index}`}>{e}</Select.Option>)} */}
+                            {documentTypes.map((e, index) => <Select.Option value={e?.id} key={`doc-type-${e?.id}`}>{e?.type_name[locale.locale]}</Select.Option>)}
+                            {/* {getArrValue("vehicles_customers_list").map((e, index) => <Select.Option value={e?.id} key={`customer-phone-${index}`}>{e}</Select.Option>)} */}
                         </Select>
                     </Form.Item>
                 </Col>
@@ -812,7 +812,7 @@ const ComponentsRoutesModalFormRepairOrder = ({ mode, calculateResult, disabledW
                             onSelect={() => calculateResult()}
                             onChange={(e) => console.log("tax_type", e)}
                         >
-                            {taxTypes.map((e, index) => <Select.Option value={e.id} key={`tax-type-${e.id}`}>{e?.type_name[locale.locale]}</Select.Option>)}
+                            {taxTypes.map((e, index) => <Select.Option value={e?.id} key={`tax-type-${e?.id}`}>{e?.type_name[locale.locale]}</Select.Option>)}
                         </Select>
                     </Form.Item>
                 </Col>
@@ -829,7 +829,7 @@ const ComponentsRoutesModalFormRepairOrder = ({ mode, calculateResult, disabledW
                             disabled
                             loading={loadingEasySearch}
                         >
-                            {taxTypes.map((e, index) => <Select.Option value={e.id} key={`tax-type-${e.id}`}>{get(e, `detail.tax_rate_percent`, "-")}</Select.Option>)}
+                            {taxTypes.map((e, index) => <Select.Option value={e?.id} key={`tax-type-${e?.id}`}>{get(e, `detail.tax_rate_percent`, "-")}</Select.Option>)}
                         </Select>
                     </Form.Item>
                 </Col>
