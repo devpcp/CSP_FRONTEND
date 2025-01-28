@@ -503,19 +503,19 @@ const ComponentsRoutesModalAddDocumentDebtLists = ({ textButton, style, docTypeI
     const [isModalVisible, setIsModalVisible] = useState(false)
     const handleAdd = () => {
         try {
-            const { partner_id, partner_name } = form.getFieldValue()
+            const { partner_id, partner_name_search } = form.getFieldValue()
             if (!partner_id) {
                 Swal.fire('กรุณาเลือกลูกค้าก่อนเพิ่มรายการ !!', '', 'warning')
             } else {
                 setIsModalVisible(true)
                 setModelSearch({
-                    search: partner_name,
+                    search: partner_name_search,
                     doc_sales_type: 1,
                     select_date: [],
                 })
                 getDataSearch({
                     page: configTable.page,
-                    search: partner_name ?? modelSearch.search,
+                    search: partner_name_search ?? modelSearch.search,
                 })
             }
         } catch (error) {

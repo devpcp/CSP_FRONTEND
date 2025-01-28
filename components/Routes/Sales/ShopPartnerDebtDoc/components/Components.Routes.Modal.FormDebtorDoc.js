@@ -48,6 +48,7 @@ const FormTemporaryDeliveryOrderDoc = ({ mode, calculateResult, disabledWhenDeli
             partner_id: data?.id,
             code_id: data?.code_id,
             partner_name: data?.partner_name?.[locale.locale] + " " + partner_branch,
+            partner_name_search: data?.partner_name?.[locale.locale],
             partner_credit_debt_unpaid_balance: data?.other_details?.debt_amount ?? "0.00",
             partner_credit_debt_current_balance: data?.other_details?.debt_amount ? (Number(data?.other_details?.credit_limit) - Number(data?.other_details?.debt_amount)) ?? "0.00" : "0.00",
             partner_credit_debt_payment_period: data?.other_details?.credit_term ?? "0",

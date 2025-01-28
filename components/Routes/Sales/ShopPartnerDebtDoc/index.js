@@ -1308,7 +1308,7 @@ const DebtorDoc = ({ docTypeId }) => {
                                 </div>
                             </div>
                     }
-
+                    <Form.Item name="partner_name_search" />
                 </Form>
             </ModalFullScreen>
         </>
